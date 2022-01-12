@@ -17,9 +17,9 @@
 
     public static class AuthenticationInjector
     {
-        public static IServiceCollection AddBearerAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBearerAuthentication(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey)
         {
-            if (configuration.GetSection(AuthConstants.BearerConfigurationKey).Get<BearerConfiguration>() is not BearerConfiguration bearerConfiguration)
+            if (configuration.GetSection(customConfigurationKey ?? AuthConstants.BearerConfigurationKey).Get<BearerConfiguration>() is not BearerConfiguration bearerConfiguration)
             {
                 throw new ArgumentNullException(nameof(BearerConfiguration), "Bearer Configuration must be set on json setting");
             }

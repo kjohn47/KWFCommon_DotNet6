@@ -14,10 +14,10 @@
 
     public static class KwfAuthExtensions
     {
-        public static IServiceCollection AddKwfAuth(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddKwfAuth(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddBearerAuthentication(configuration);
+            services.AddBearerAuthentication(configuration, customConfigurationKey);
             services.AddKwfAuthorization();
             services.AddSingleton<IUserContextAccessor, UserContextAccessor>();
 

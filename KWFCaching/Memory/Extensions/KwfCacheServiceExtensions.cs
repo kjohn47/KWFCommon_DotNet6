@@ -11,9 +11,9 @@
 
     public static class KwfCacheServiceExtensions
     {
-        public static IServiceCollection AddKwfCacheOnMemory(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddKwfCacheOnMemory(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
-            KwfCacheConfiguration cacheSettings = configuration.GetSection(Constants.CacheConfigurationKey).Get<KwfCacheConfiguration>() ?? new KwfCacheConfiguration();
+            KwfCacheConfiguration cacheSettings = configuration.GetSection(customConfigurationKey ?? Constants.CacheConfigurationKey).Get<KwfCacheConfiguration>() ?? new KwfCacheConfiguration();
             return AddKwfCacheOnMemory(services, cacheSettings);
         }
 

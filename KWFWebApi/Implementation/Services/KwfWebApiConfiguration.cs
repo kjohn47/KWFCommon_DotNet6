@@ -18,6 +18,10 @@
     public static class KwfWebApiConfiguration
     {
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            bool enableAuthentication,
             IEnumerable<KwfLoggerProviderBuilder>? loggerProviders,
             Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]>? addApplicationServices,
             params IEndpointConfiguration[]? endpointConfigurations)
@@ -42,7 +46,11 @@
                         }
                     },
                     loggerProviders,
-                    isDev)
+                    enableAuthentication,
+                    isDev,
+                    customAppConfigurationKey,
+                    customBearerConfigurationKey,
+                    customLoggingConfigurationKey)
                 .UseKwfConfiguration((app) =>
                     {
                         if (applicationServices is not null)
@@ -70,18 +78,25 @@
                             }
                         }
                     },
-                    isDev)
+                    enableAuthentication,
+                    isDev,
+                    customLoggingConfigurationKey)
                 .Run();
         }
 
         private static WebApplication BuildKwfServices(this WebApplicationBuilder applicationBuilder,
             Action<IServiceCollection, JsonSerializerOptions> applicationServices,
             IEnumerable<KwfLoggerProviderBuilder>? loggerProviders,
-            bool isDev)
+            bool enableAuthentication,
+            bool isDev,
+            string? customAppConfigurationKey = null,
+            string? customBearerConfigurationKey = null,
+            string? customLoggingConfigurationKey = null)
         {
-            applicationBuilder.Services.AddLogging(applicationBuilder.Configuration, loggerProviders, isDev);
+            applicationBuilder.Services.AddLogging(applicationBuilder.Configuration, loggerProviders, isDev, customLoggingConfigurationKey);
             applicationBuilder.AddKWFCommon(
-                (s, cfg) => s.AddKwfAuth(cfg),
+                customAppConfigurationKey,
+                (s, cfg) => { if (enableAuthentication) s.AddKwfAuth(cfg, customBearerConfigurationKey); },
                 (s, cfg, jsonOpt, isDev) => applicationServices(s, jsonOpt),
                 isDev);
 
@@ -91,12 +106,14 @@
         private static WebApplication UseKwfConfiguration(this WebApplication app,
             Action<IApplicationBuilder> configureApplicationServices,
             Action<IEndpointRouteBuilder, JsonSerializerOptions> configureEndpoints,
-            bool isDev)
+            bool enableAuthentication,
+            bool isDev,
+            string? customLoggingConfigurationKey = null)
         {
             app.UseKWFCommon(
-                a => a.UseKwfAuth(),
+                a => { if (enableAuthentication) a.UseKwfAuth(); },
                 (a, cfg, jsonCfg, dev) => {
-                    a.UseLogging(cfg, dev);
+                    a.UseLogging(cfg, dev, customLoggingConfigurationKey);
                     configureApplicationServices(a);
                 },
                 (a, cfg, jsonOpt) => configureEndpoints(a, jsonOpt),

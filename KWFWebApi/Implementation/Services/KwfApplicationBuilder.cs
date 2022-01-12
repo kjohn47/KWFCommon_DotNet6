@@ -13,13 +13,26 @@
     public sealed class KwfApplicationBuilder : IKwfApplicationBuilder
     {
         private readonly WebApplicationBuilder _applicationBuilder;
+        private readonly string? _customAppConfigurationKey;
+        private readonly string? _customBearerConfigurationKey;
+        private readonly string? _customLoggingConfigurationKey;
+        private readonly bool _enableAuthentication;
         private Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]>? _serviceFactories;
         private ICollection<IEndpointConfiguration>? _endpointConfigurations;
         private ICollection<KwfLoggerProviderBuilder>? _loggerProviders;
 
-        private KwfApplicationBuilder(WebApplicationBuilder applicationBuilder)
+        private KwfApplicationBuilder(
+            WebApplicationBuilder applicationBuilder, 
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            bool enableAuthentication)
         {
             _applicationBuilder = applicationBuilder;
+            _customAppConfigurationKey = customAppConfigurationKey;
+            _customBearerConfigurationKey = customBearerConfigurationKey;
+            _customLoggingConfigurationKey = customLoggingConfigurationKey;
+            _enableAuthentication = enableAuthentication;
         }
 
         public IKwfApplicationBuilder AddLoggerProvider(string providerName, Action<ILoggingBuilder, IConfiguration> providerConfigure)
@@ -77,12 +90,29 @@
 
         public void Run()
         {
-            _applicationBuilder.RunKwfApplication(_loggerProviders, _serviceFactories, _endpointConfigurations?.ToArray());
+            _applicationBuilder.RunKwfApplication(
+                _customAppConfigurationKey,
+                _customBearerConfigurationKey,
+                _customLoggingConfigurationKey,
+                _enableAuthentication,
+                _loggerProviders, 
+                _serviceFactories,
+                _endpointConfigurations?.ToArray());
         }
 
-        public static IKwfApplicationBuilder BuildKwfApplication(WebApplicationBuilder applicationBuilder)
+        public static IKwfApplicationBuilder BuildKwfApplication(
+            WebApplicationBuilder applicationBuilder,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            bool enableAuthentication = true)
         {
-            return new KwfApplicationBuilder(applicationBuilder);
+            return new KwfApplicationBuilder(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication);
         }
     }
 }

@@ -13,21 +13,31 @@
 
     public static class LoggingConfigurator
     {
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, bool isDev = false)
+        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
-            return AddLoggingInternal(services, configuration, null, isDev);
+            return AddLoggingInternal(services, configuration, null, false, customConfigurationKey);
         }
 
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev = false)
+        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, string? customConfigurationKey = null)
         {
-            return AddLoggingInternal(services, configuration, additionalProviders, isDev);
+            return AddLoggingInternal(services, configuration, additionalProviders, false, customConfigurationKey);
         }
 
-        private static IServiceCollection AddLoggingInternal(IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev)
+        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, bool isDev, string? customConfigurationKey = null)
         {
-            var config = configuration.GetSection(LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
+            return AddLoggingInternal(services, configuration, null, isDev, customConfigurationKey);
+        }
 
-            if (!isDev && !config.EnableApiLogs)
+        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev, string? customConfigurationKey = null)
+        {
+            return AddLoggingInternal(services, configuration, additionalProviders, isDev, customConfigurationKey);
+        }
+
+        private static IServiceCollection AddLoggingInternal(IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev, string? customConfigurationKey)
+        {
+            var config = configuration.GetSection(customConfigurationKey ?? LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
+
+            if (!isDev && !(config?.EnableApiLogs ?? false))
             {
                 services.AddLogging(l =>
                 {
@@ -41,7 +51,7 @@
             {
                 l.ClearProviders();
                 l.AddConfiguration(configuration.GetSection(ApiConstants.Logging_Key));
-                if (config.Providers is not null)
+                if (config?.Providers is not null)
                 {
                     if (config.Providers.Any(x => x.Equals(nameof(LoggingProviderEnum.Console)))) l.AddConsole();
                     if (config.Providers.Any(x => x.Equals(nameof(LoggingProviderEnum.Debug)))) l.AddDebug();
@@ -58,7 +68,7 @@
                 }
             });
 
-            if ((isDev || config.EnableApiLogs) && config.EnableHttpLogs)
+            if ((isDev || (config?.EnableApiLogs ?? false)) && (config?.EnableHttpLogs ?? false))
             {
                 services.AddHttpLogging(o =>
                 {
@@ -69,11 +79,21 @@
             return services;
         }
 
-        public static IApplicationBuilder UseLogging(this IApplicationBuilder app, IConfiguration configuration, bool isDev = false)
+        public static IApplicationBuilder UseLogging(this IApplicationBuilder app, IConfiguration configuration, bool isDev, string? customConfigurationKey = null)
         {
-            var config = configuration.GetSection(LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
+            return UseLoggingInternal(app, configuration, isDev, customConfigurationKey);
+        }
 
-            if (isDev || config.EnableHttpLogs)
+        public static IApplicationBuilder UseLogging(this IApplicationBuilder app, IConfiguration configuration, string? customConfigurationKey = null)
+        {
+            return UseLoggingInternal(app, configuration, false, customConfigurationKey);
+        }
+
+        public static IApplicationBuilder UseLoggingInternal(IApplicationBuilder app, IConfiguration configuration, bool isDev, string? customConfigurationKey)
+        {
+            var config = configuration.GetSection(customConfigurationKey ?? LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
+
+            if (isDev || (config?.EnableHttpLogs ?? false))
             {
                 app.UseHttpLogging();
             }

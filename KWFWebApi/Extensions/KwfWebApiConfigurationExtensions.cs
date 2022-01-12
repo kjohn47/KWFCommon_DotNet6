@@ -12,55 +12,266 @@
     public static class KwfWebApiConfigurationExtensions
     {
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+           bool enableAuthentication,
            IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
            params IEndpointConfiguration[] endpointConfigurations)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, loggerProviders, addApplicationServices, endpointConfigurations);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                loggerProviders,
+                addApplicationServices,
+                endpointConfigurations);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
             IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
             params IEndpointConfiguration[] endpointConfigurations)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, loggerProviders, null, endpointConfigurations);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                loggerProviders,
+                null,
+                endpointConfigurations);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
             IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
             Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, loggerProviders, addApplicationServices);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                loggerProviders,
+                addApplicationServices);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
             IEnumerable<KwfLoggerProviderBuilder> loggerProviders)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, loggerProviders, null);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                loggerProviders,
+                null);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
+            params IEndpointConfiguration[] endpointConfigurations)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                null,
+                addApplicationServices,
+                endpointConfigurations);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            params IEndpointConfiguration[] endpointConfigurations)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                null,
+                null,
+                endpointConfigurations);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                null,
+                addApplicationServices);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder, bool enableAuthentication)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                null,
+                null,
+                null,
+                enableAuthentication,
+                null,
+                null);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+           bool enableAuthentication,
+           string? customAppConfigurationKey,
+           string? customBearerConfigurationKey,
+           string? customLoggingConfigurationKey,
+           IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
            params IEndpointConfiguration[] endpointConfigurations)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, null, addApplicationServices, endpointConfigurations);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey, 
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                loggerProviders,
+                addApplicationServices, 
+                endpointConfigurations);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
             params IEndpointConfiguration[] endpointConfigurations)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, null, null, endpointConfigurations);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                loggerProviders,
+                null,
+                endpointConfigurations);
         }
 
         public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
             Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, null, addApplicationServices);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                loggerProviders, 
+                addApplicationServices);
         }
 
-        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder)
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            IEnumerable<KwfLoggerProviderBuilder> loggerProviders)
         {
-            KwfWebApiConfiguration.RunKwfApplication(applicationBuilder, null, null);
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                loggerProviders,
+                null);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+           Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
+           params IEndpointConfiguration[] endpointConfigurations)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                null,
+                addApplicationServices, 
+                endpointConfigurations);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            params IEndpointConfiguration[] endpointConfigurations)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                null, 
+                null,
+                endpointConfigurations);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey,
+            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                null, 
+                addApplicationServices);
+        }
+
+        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            string? customAppConfigurationKey,
+            string? customBearerConfigurationKey,
+            string? customLoggingConfigurationKey)
+        {
+            KwfWebApiConfiguration.RunKwfApplication(
+                applicationBuilder,
+                customAppConfigurationKey,
+                customBearerConfigurationKey,
+                customLoggingConfigurationKey,
+                enableAuthentication,
+                null, 
+                null);
         }
     }
 }

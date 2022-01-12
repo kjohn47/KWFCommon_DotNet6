@@ -17,6 +17,7 @@
     public static class AddDependencies
     {
         public static IServiceCollection AddKWFCommon(this WebApplicationBuilder applicationBuilder,
+            string? customConfigurationKey,
             Action<IServiceCollection, IConfiguration>? registerAuth,
             Action<IServiceCollection, IConfiguration, JsonSerializerOptions, bool>? registerApplicationServices,
             bool isDev)
@@ -24,7 +25,7 @@
             var services = applicationBuilder.Services;
             var configuration = applicationBuilder.Configuration;
 
-            if (configuration.GetSection(ApiConstants.AppConfiguration_Key).Get<AppConfiguration>() is not AppConfiguration appConfiguration)
+            if (configuration.GetSection(customConfigurationKey ?? ApiConstants.AppConfiguration_Key).Get<AppConfiguration>() is not AppConfiguration appConfiguration)
             {
                 throw new ArgumentNullException(nameof(AppConfiguration), "App configuration must be set on json setting");
             }

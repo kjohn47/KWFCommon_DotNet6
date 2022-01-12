@@ -2,7 +2,7 @@ using Sample.SampleApi;
 using KWFWebApi.Extensions;
 
 WebApplication.CreateBuilder(args)
-    // Build Web application with Kwf authentication, logs and common settings
+    // Build Web application with Kwf authentication, logs and common settings, you can pass custom keys for settings and enable/disable bearer authentication(enabled by default)
     .BuildKwfApplication()
 
     // you can add more than one provider for same name, name must be set on AppSettings LoggingConfiguration - Providers array
