@@ -2,6 +2,9 @@
 {
     using KWFAuthentication.Abstractions.Context;
 
+    using KWFCaching.Memory.Implementation;
+    using KWFCaching.Memory.Interfaces;
+
     using KWFCommon.Abstractions.CQRS;
     using KWFCommon.Implementation.CQRS;
     using KWFCommon.Implementation.Json;
@@ -19,28 +22,37 @@
     {
         private readonly WeatherForecastServices _service;
         private readonly IKWFLogger<WeatherForecastQueryHandler> _logger;
+        private readonly IKwfCacheOnMemory _cache;
 
         public WeatherForecastQueryHandler(
             WeatherForecastServices service, 
             ILoggerFactory loggerFactory, 
             IUserContextAccessor ctx,
+            IKwfCacheOnMemory cache,
             KWFJsonConfiguration jsonCfg)
         {
             _service = service;
             _logger = loggerFactory.CreateKwfLogger<WeatherForecastQueryHandler>();
+            _cache = cache;
+
             _logger.LogInformation(JsonSerializer.Serialize(ctx.GetContext(), jsonCfg.GetJsonSerializerOptions()));
         }
 
-        public Task<ICQRSResult<WeatherForecastQueryResponse>> HandleAsync(WeatherForecastQueryRequest request, CancellationToken? cancellationToken)
+        public async Task<ICQRSResult<WeatherForecastQueryResponse>> HandleAsync(WeatherForecastQueryRequest request, CancellationToken? cancellationToken)
         {
             var watch = new Stopwatch();
             watch.Start();
             try
             {
-                var waitMs = Random.Shared.Next(500, 2000);
-                var summaries = _service.GetSumaries();
+                var summaries = await _cache.GetOrInsertCachedItemAsync(
+                    "WEATHER_SUMARIES",
+                    () => _service.GetSumaries(),
+                    res => 
+                    {
+                        _logger.LogInformation(res.CacheMiss ? "Getting data from service" : "Getting data from cache");
 
-                Task.Delay(waitMs).Wait();
+                        return res.Result!;
+                    });
 
                 var forecast = Enumerable.Range(1, 5).Select(index =>
                    new WeatherForecast
@@ -50,12 +62,11 @@
                        summaries[Random.Shared.Next(summaries.Length)]
                    ));
 
-                return Task.FromResult<ICQRSResult<WeatherForecastQueryResponse>>(
-                    CQRSResult<WeatherForecastQueryResponse>
-                        .Success(new WeatherForecastQueryResponse
-                        {
-                            ForecastResults = forecast
-                        }));
+                return CQRSResult<WeatherForecastQueryResponse>
+                            .Success(new WeatherForecastQueryResponse
+                            {
+                                ForecastResults = forecast
+                            });
             }
             finally
             {

@@ -15,7 +15,7 @@ WebApplication.CreateBuilder(args)
     // add services (Dependency Injection)
     // configure services (IApplicationBuilder)
     .AddServiceConfiguration(builder =>
-        builder.AddServiceDefinition(new SampleServiceDefinitions(builder.Configuration, builder.IsDev)))
+        builder.AddServiceDefinition(new SampleServiceDefinitions(builder.Configuration)))
 
     // Add Endpoind definitions classes, they must implement IEndpointConfiguration
     // Method InitializeRoute - return builder.InitializeEndpoint("endpoint name"); -> this is obligatory and defines endpoint base url

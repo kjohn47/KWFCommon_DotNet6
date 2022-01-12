@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\KWFCaching\Memory\Memory.csproj" />
     <ProjectReference Include="..\..\KWFWebApi\Extensions\Extensions.csproj" />
   </ItemGroup>
 
