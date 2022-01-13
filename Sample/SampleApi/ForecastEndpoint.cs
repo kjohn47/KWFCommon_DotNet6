@@ -28,7 +28,7 @@
                 route.SetRoute("get-weather")
                      .DisableGlobalRoles()
                      .SetAction(handler =>
-            () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
 
             //Authenticated user in any role as set by global setting
             builder.AddGet<WeatherForecastQueryResponse>(route =>
