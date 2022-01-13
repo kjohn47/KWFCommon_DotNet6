@@ -1,8 +1,10 @@
 ﻿namespace Sample.SampleApi
 {
     using KWFWebApi.Abstractions.Endpoint;
+    using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Abstractions.Services;
 
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
 
     public class ForecastEndpoint : IEndpointConfiguration
@@ -21,7 +23,7 @@
             builder.AddGet<WeatherForecastQueryResponse>(route =>
                 route.SetRoute("get-weather/{id}")
                      .DisableGlobalRoles()
-                     .SetAction(handler =>
+                     .SetAction<int>(handler =>
                         (int id) => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest(id))));
 
             builder.AddGet<WeatherForecastQueryResponse>(route =>
@@ -34,7 +36,7 @@
             builder.AddGet<WeatherForecastQueryResponse>(route =>
                 route.SetRoute("get-weather-authenticated")
                      .SetAction(handler =>
-                     () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
 
             //User with at least one of the roles
             builder.AddGet<WeatherForecastQueryResponse>(route =>

@@ -72,7 +72,108 @@
             return this;
         }
 
-        public IKwfRouteBuilderResult SetAction(Func<IKwfEndpointHandler, Delegate> action)
+        public IKwfRouteBuilderResult SetAction(
+            Func<IKwfEndpointHandler, ResultDelegate> action)
+        {
+            return AddAction(action);
+        }
+        public IKwfRouteBuilderResult SetAction<T0>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>> action)
+        {
+            return AddAction(action);
+        }
+
+        private IKwfRouteBuilderResult AddAction(Func<IKwfEndpointHandler, Delegate> action)
         {
             Action = action(_handlers);
             return this;
