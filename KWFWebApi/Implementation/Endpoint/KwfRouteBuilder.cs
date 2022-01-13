@@ -6,7 +6,7 @@
 
     using System;
 
-    internal sealed class KwfRouteBuilder : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder
+    internal sealed class KwfRouteBuilder : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder, IKwfRouteBuilderResult
     {
         private readonly IKwfEndpointHandler _handlers;
 
@@ -72,9 +72,10 @@
             return this;
         }
 
-        public void SetAction(Func<IKwfEndpointHandler, Delegate> action)
+        public IKwfRouteBuilderResult SetAction(Func<IKwfEndpointHandler, Delegate> action)
         {
             Action = action(_handlers);
+            return this;
         }
 
         private KwfRouteBuilder AddSuccessHttpCodes(params int[] codes)

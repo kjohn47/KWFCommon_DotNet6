@@ -6,14 +6,17 @@
     using KWFCaching.Memory.Interfaces;
 
     using KWFCommon.Abstractions.CQRS;
+    using KWFCommon.Abstractions.Models;
     using KWFCommon.Implementation.CQRS;
     using KWFCommon.Implementation.Json;
+    using KWFCommon.Implementation.Models;
 
     using KWFWebApi.Abstractions.Logging;
     using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Extensions;
 
     using System.Diagnostics;
+    using System.Net;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
@@ -40,6 +43,17 @@
 
         public async Task<ICQRSResult<WeatherForecastQueryResponse>> HandleAsync(WeatherForecastQueryRequest request, CancellationToken? cancellationToken)
         {
+            if (request.Id is not null && (request.Id < 1 || request.Id > 5))
+            {
+                return CQRSResult<WeatherForecastQueryResponse>.Failure(
+                    new ErrorResult(
+                            "INVID",
+                            $"Invalid Id {request.Id}, range must be from 1 to 5",
+                            HttpStatusCode.BadRequest,
+                            ErrorTypeEnum.Validation
+                        ));
+            }
+
             var watch = new Stopwatch();
             watch.Start();
             try
@@ -65,7 +79,7 @@
                 return CQRSResult<WeatherForecastQueryResponse>
                             .Success(new WeatherForecastQueryResponse
                             {
-                                ForecastResults = forecast
+                                ForecastResults = request.Id is not null ? new[] { forecast.ElementAt(request.Id.Value - 1) } : forecast,
                             });
             }
             finally

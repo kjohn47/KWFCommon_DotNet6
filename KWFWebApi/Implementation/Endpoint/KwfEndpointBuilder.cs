@@ -38,7 +38,7 @@
 
         public string BaseUrl { get; private set; }
 
-        public IKwfEndpointBuilder AddGet<TResp>(Action<IKwfRouteBuilder> routeBuilder)
+        public IKwfEndpointBuilder AddGet<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
@@ -53,7 +53,7 @@
             return this;
         }
 
-        public IKwfEndpointBuilder AddPost<TResp>(Action<IKwfRouteBuilder> routeBuilder)
+        public IKwfEndpointBuilder AddPost<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
@@ -68,7 +68,7 @@
             return this;
         }
 
-        public IKwfEndpointBuilder AddPut<TResp>(Action<IKwfRouteBuilder> routeBuilder)
+        public IKwfEndpointBuilder AddPut<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
@@ -83,7 +83,7 @@
             return this;
         }
 
-        public IKwfEndpointBuilder AddDelete<TResp>(Action<IKwfRouteBuilder> routeBuilder)
+        public IKwfEndpointBuilder AddDelete<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
@@ -181,7 +181,7 @@
             return $"{BaseUrl}/{route}";
         }
 
-        private KwfRouteBuilder BuildRouteConfiguration(Action<IKwfRouteBuilder> routeBuilder)
+        private KwfRouteBuilder BuildRouteConfiguration(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = new KwfRouteBuilder(this);
             routeBuilder(configuration);

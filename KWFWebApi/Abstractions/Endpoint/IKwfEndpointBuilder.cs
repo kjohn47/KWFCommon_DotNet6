@@ -2,9 +2,9 @@
 {
     public interface IKwfEndpointBuilder
     {
-        IKwfEndpointBuilder AddGet<TResp>(Action<IKwfRouteBuilder> routeBuilder);
-        IKwfEndpointBuilder AddPost<TResp>(Action<IKwfRouteBuilder> routeBuilder);
-        IKwfEndpointBuilder AddPut<TResp>(Action<IKwfRouteBuilder> routeBuilder);
-        IKwfEndpointBuilder AddDelete<TResp>(Action<IKwfRouteBuilder> routeBuilder);
+        IKwfEndpointBuilder AddGet<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder);
+        IKwfEndpointBuilder AddPost<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder);
+        IKwfEndpointBuilder AddPut<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder);
+        IKwfEndpointBuilder AddDelete<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder);
     }
 }

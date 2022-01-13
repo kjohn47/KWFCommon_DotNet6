@@ -2,6 +2,6 @@
 {
     public interface IKwfRouteActionBuilder
     {
-        void SetAction(Func<IKwfEndpointHandler, Delegate> action);
+        IKwfRouteBuilderResult SetAction(Func<IKwfEndpointHandler, Delegate> action);
     }
 }
