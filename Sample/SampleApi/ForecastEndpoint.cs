@@ -33,17 +33,23 @@
                         () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
 
             //Authenticated user in any role as set by global setting
+            //get query handler from services using handler Get service method (this might be preferable if you need all 16 input parameters for querystring/route)
             builder.AddGet<WeatherForecastQueryResponse>(route =>
                 route.SetRoute("get-weather-authenticated")
                      .SetAction(handler =>
-                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                     {
+                         var query = handler.GetService<IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>>();
+                         return () => handler.HandleQueryAsync(new WeatherForecastQueryRequest(), query);
+                     }));
 
             //User with at least one of the roles
+            //get query as parameter on delegate request method
             builder.AddGet<WeatherForecastQueryResponse>(route =>
                 route.SetRoute("get-weather-in-role")
                      .SetPolicy("WeatherModerator", "HumanResources", "User")
-                     .SetAction(handler =>
-                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                     .SetAction<IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>>(handler =>
+                        (IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse> query) => 
+                            handler.HandleQueryAsync(new WeatherForecastQueryRequest(), query)));
         }
     }
 }

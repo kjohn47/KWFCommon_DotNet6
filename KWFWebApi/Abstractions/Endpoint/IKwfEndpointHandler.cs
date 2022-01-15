@@ -27,5 +27,7 @@
         Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, ICommandHandler<TRequest, TResponse> command, CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse;
+
+        T GetService<T>() where T : notnull;
     }
 }

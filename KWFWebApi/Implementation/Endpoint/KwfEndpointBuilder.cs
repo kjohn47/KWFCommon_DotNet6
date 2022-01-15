@@ -176,6 +176,12 @@
             return InitializeEndpoint(endpoint, Policies.GetPolicyName(globalAuthorizationPolicy));
         }
 
+        public T GetService<T>()
+            where T : notnull
+        {
+            return _appBuilder.ServiceProvider.GetRequiredService<T>();
+        }
+
         private string BuildRoute(string? route)
         {
             return $"{BaseUrl}/{route}";
@@ -192,12 +198,6 @@
             }
 
             return configuration;
-        }
-
-        private T GetService<T>()
-            where T : notnull
-        {
-            return _appBuilder.ServiceProvider.GetRequiredService<T>();
         }
 
         private IResult HandleCQRSResult<TResponse>(ICQRSResult<TResponse> result) 
