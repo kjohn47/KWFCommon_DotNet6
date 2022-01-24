@@ -93,7 +93,7 @@
         {
             var config = configuration.GetSection(customConfigurationKey ?? LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
 
-            if (isDev || (config?.EnableHttpLogs ?? false))
+            if ((isDev || (config?.EnableApiLogs ?? false)) && (config?.EnableHttpLogs ?? false))
             {
                 app.UseHttpLogging();
             }
