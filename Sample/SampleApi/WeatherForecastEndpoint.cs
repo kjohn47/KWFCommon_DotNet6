@@ -5,19 +5,9 @@
 
     using Microsoft.Extensions.Configuration;
 
-    public class WeatherForecastEndpoint : IEndpointConfiguration
+    public class WeatherForecastEndpoint : EndpointConfigurationBase
     {
-        public IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration)
-        {
-            return builder.InitializeEndpoint("weather-forecast");
-
-            //Initialize with global policy (this is overriden if endpoint has SetPolicy() defined on builder)
-            //return builder.InitializeEndpoint("forecast", true);
-            //return builder.InitializeEndpoint("forecast", PoliciesEnum.User);
-            //return builder.InitializeEndpoint("forecast", "WeatherModerator", "HumanResources", "User");
-        }
-
-        public void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
+        public override void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
         {
             //Any user
             builder.AddGet<WeatherForecastQueryResponse>(route =>

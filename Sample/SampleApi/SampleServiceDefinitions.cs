@@ -8,7 +8,6 @@
     public class SampleServiceDefinitions : IServiceDefinition
     {
         private readonly IConfiguration _configuration;
-
         public SampleServiceDefinitions(IConfiguration configuration)
         {
             _configuration = configuration;

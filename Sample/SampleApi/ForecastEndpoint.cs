@@ -4,18 +4,14 @@
     using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Abstractions.Services;
 
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
 
     public class ForecastEndpoint : IEndpointConfiguration
     {
-        public IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration)
-        {
-            //return builder.InitializeEndpoint("forecast");
-
-            //Initialize with global policy (this is overriden if endpoint has SetPolicy() defined on builder)
-            return builder.InitializeEndpoint("forecast", true);
-        }
+        //return builder.InitializeEndpoint("forecast");
+        //Initialize with global policy (this is overriden if endpoint has SetPolicy() defined on builder)
+        public IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration) =>
+            builder.InitializeEndpoint("forecast", true);
 
         public void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
         {

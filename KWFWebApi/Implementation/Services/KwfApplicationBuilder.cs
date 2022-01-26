@@ -9,6 +9,7 @@
 
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
 
     public sealed class KwfApplicationBuilder : IKwfApplicationBuilder
     {
@@ -88,6 +89,33 @@
             return this;
         }
 
+        public IKwfApplicationRun AddEndpointDefinitionFromAssemblies(params Type[] typeInAssembly)
+        {
+            if (typeInAssembly is null)
+            {
+                throw new ArgumentNullException(nameof(typeInAssembly));
+            }
+
+            var assemblies = typeInAssembly.Select(x => x.Assembly);
+
+            _endpointConfigurations = GetEndpointConfigurationsFromAssemblies(assemblies.ToArray());
+
+            return this;
+        }
+
+        public IKwfApplicationRun AddEndpointDefinitionFromAssembly<T>()
+        {
+            var assembly = typeof(T).Assembly;
+            
+            if (assembly is null)
+                throw new ArgumentNullException(nameof(assembly));
+
+            
+            _endpointConfigurations = GetEndpointConfigurationsFromAssemblies(assembly);
+
+            return this;
+        }
+
         public void Run()
         {
             _applicationBuilder.RunKwfApplication(
@@ -95,7 +123,7 @@
                 _customBearerConfigurationKey,
                 _customLoggingConfigurationKey,
                 _enableAuthentication,
-                _loggerProviders, 
+                _loggerProviders,
                 _serviceFactories,
                 _endpointConfigurations?.ToArray());
         }
@@ -113,6 +141,26 @@
                 customBearerConfigurationKey,
                 customLoggingConfigurationKey,
                 enableAuthentication);
+        }
+
+        private static ICollection<IEndpointConfiguration>? GetEndpointConfigurationsFromAssemblies(params Assembly[] assemblies)
+        {
+            var endpointConfigurations = new List<IEndpointConfiguration>();
+
+            foreach (var assembly in assemblies)
+            {
+                var endpointInstallerTypes = assembly.DefinedTypes.Where(a =>
+                                            typeof(IEndpointConfiguration).IsAssignableFrom(a) &&
+                                            !a.IsInterface &&
+                                            !a.IsAbstract);
+
+                var endpointInstallers = endpointInstallerTypes.Select(Activator.CreateInstance).Cast<IEndpointConfiguration>();
+
+                if (endpointInstallers is not null)
+                    endpointConfigurations.AddRange(endpointInstallers);
+            }
+
+            return endpointConfigurations.Any() ? endpointConfigurations : null;
         }
     }
 }
