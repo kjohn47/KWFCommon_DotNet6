@@ -38,6 +38,12 @@
 
         public string BaseUrl { get; private set; }
 
+        /// <summary>
+        /// Add MapGet
+        /// </summary>
+        /// <typeparam name="TResp">Type of Response</typeparam>
+        /// <param name="routeBuilder">The Route builder</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddGet<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
@@ -53,6 +59,12 @@
             return this;
         }
 
+        /// <summary>
+        /// Add MapPost
+        /// </summary>
+        /// <typeparam name="TResp">Type of Response</typeparam>
+        /// <param name="routeBuilder">The Route builder</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddPost<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
@@ -68,6 +80,12 @@
             return this;
         }
 
+        /// <summary>
+        /// Add MapPut
+        /// </summary>
+        /// <typeparam name="TResp">Type of Response</typeparam>
+        /// <param name="routeBuilder">The Route builder</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddPut<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
@@ -83,6 +101,12 @@
             return this;
         }
 
+        /// <summary>
+        /// Add MapDelete
+        /// </summary>
+        /// <typeparam name="TResp">Type of Response</typeparam>
+        /// <param name="routeBuilder">The Route builder</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddDelete<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
             var configuration = BuildRouteConfiguration(routeBuilder);
@@ -98,6 +122,14 @@
             return this;
         }
 
+        /// <summary>
+        /// Handle Query for fetching data, will get query handler from Service Collection with type IQueryHandler<TRequest, TResponse>
+        /// </summary>
+        /// <typeparam name="TRequest">Type of query request implementing IQueryRequest</typeparam>
+        /// <typeparam name="TResponse">Type of query response implementing IQueryResponse</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest
             where TResponse : IQueryResponse
@@ -105,6 +137,15 @@
             return HandleQueryAsync(request, GetService<IQueryHandler<TRequest, TResponse>>(), cancellationToken);
         }
 
+        /// <summary>
+        /// Handle Query for fetching data
+        /// </summary>
+        /// <typeparam name="TRequest">Type of query request implementing IQueryRequest</typeparam>
+        /// <typeparam name="TResponse">Type of query response implementing IQueryResponse</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="query">The Query Handler implementing IQueryHandler<TRequest, TResponse></param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public async Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, IQueryHandler<TRequest, TResponse> query, CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest
             where TResponse : IQueryResponse
@@ -112,11 +153,26 @@
             return HandleCQRSResult(await query.HandleAsync(request, cancellationToken));
         }
 
+        /// <summary>
+        /// Handle query that will return file binary, will get query handler from Service Collection with type IQueryHandler<TRequest, IFileQueryResponse>
+        /// </summary>
+        /// <typeparam name="TRequest">Type of query request implementing IQueryRequest</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
         {
             return HandleFileQueryAsync(request, GetService<IQueryHandler<TRequest, IFileQueryResponse>>(), cancellationToken);
         }
 
+        /// <summary>
+        /// Handle query that will return file binary
+        /// </summary>
+        /// <typeparam name="TRequest">Type of query request implementing IQueryRequest</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="query">The query handler implementing IQueryHandler<TRequest, IFileQueryResponse></param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public async Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, IQueryHandler<TRequest, IFileQueryResponse> query, CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
         {
             var result = await query.HandleAsync(request, cancellationToken);
@@ -132,6 +188,14 @@
                 (result.Response?.HasFileName?? false) ? result.Response?.FileName : Guid.NewGuid().ToString());
         }
 
+        /// <summary>
+        /// The command Handler to change/create data, will get command handler from Service Collection with type ICommandHandler<TRequest, TResponse>
+        /// </summary>
+        /// <typeparam name="TRequest">The Command Request type implementing ICommandRequest</typeparam>
+        /// <typeparam name="TResponse">The Command Response Type implementing ICommandResponse</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
@@ -139,6 +203,15 @@
             return HandleCommandAsync(request, GetService<ICommandHandler<TRequest, TResponse>>(), cancellationToken);
         }
 
+        /// <summary>
+        /// The command Handler to change/create data 
+        /// </summary>
+        /// <typeparam name="TRequest">The Command Request type implementing ICommandRequest</typeparam>
+        /// <typeparam name="TResponse">The Command Response Type implementing ICommandResponse</typeparam>
+        /// <param name="request">The Request</param>
+        /// <param name="command">The command Handler implementing ICommandHandler<TRequest, TResponse></param>
+        /// <param name="cancellationToken">The Cancellation Token(optional)</param>
+        /// <returns>IResult</returns>
         public async Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, ICommandHandler<TRequest, TResponse> command, CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
@@ -153,29 +226,57 @@
             return HandleCQRSResult(await command.ExecuteCommandAsync(request, cancellationToken));
         }
 
+        /// <summary>
+        /// Initialize endpoint global settings
+        /// </summary>
+        /// <param name="endpoint">The route pattern</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder InitializeEndpoint(string endpoint)
         {
             BaseUrl = endpoint.EndsWith('/') ? endpoint[0..^1] : endpoint;
             return this;
         }
 
+        /// <summary>
+        /// Initialize endpoint global settings
+        /// </summary>
+        /// <param name="endpoint">The route pattern</param>
+        /// <param name="requireAuthorization">The global Require authorized user flag</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder InitializeEndpoint(string endpoint, bool requireAuthorization)
         {
             if (requireAuthorization) _roles = Array.Empty<string>();
             return InitializeEndpoint(endpoint);
         }
 
+        /// <summary>
+        /// Initialize endpoint global settings
+        /// </summary>
+        /// <param name="endpoint">The route pattern</param>
+        /// <param name="globalAuthorizationPolicy">The global roles authorized for this endpoint</param>
+        /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder InitializeEndpoint(string endpoint, params string[] globalAuthorizationRoles)
         {
             _roles = globalAuthorizationRoles;
             return InitializeEndpoint(endpoint);
         }
 
+        /// <summary>
+        /// Initialize endpoint global settings
+        /// </summary>
+        /// <param name="endpoint">The route pattern</param>
+        /// <param name="globalAuthorizationPolicy">The Global Authorization Policy from PoliciesEnum</param>
+        /// <returns></returns>
         public IKwfEndpointBuilder InitializeEndpoint(string endpoint, PoliciesEnum globalAuthorizationPolicy)
         {
             return InitializeEndpoint(endpoint, Policies.GetPolicyName(globalAuthorizationPolicy));
         }
 
+        /// <summary>
+        /// Get Service of type T from Service Collection
+        /// </summary>
+        /// <typeparam name="T">The service Type</typeparam>
+        /// <returns>The Service</returns>
         public T GetService<T>()
             where T : notnull
         {
