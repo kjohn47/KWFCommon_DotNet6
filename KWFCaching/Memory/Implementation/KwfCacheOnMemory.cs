@@ -53,59 +53,59 @@
 
         public void RemoveCachedItem(string key)
         {
-            this.Remove(key);
-        }
-        public async Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler) where TResult : class
-        {
-            return await this.GetItemFromCacheAsync(key, fetchDataHandler, null, null);
+            Remove(key);
         }
 
-        public async Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler) where TResult : class
+        public Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler) where TResult : class
         {
-            return await this.GetItemFromCacheAsync(key, fetchDataHandler, null, settingsKey);
+            return GetItemFromCacheAsync(key, fetchDataHandler, null, null);
         }
 
-        public async Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler) where TResult : class
+        public Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler) where TResult : class
         {
-            return await this.GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, null, null);
+            return GetItemFromCacheAsync(key, fetchDataHandler, null, settingsKey);
         }
 
-        public async Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler) where TResult : class
+        public Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler) where TResult : class
         {
-            return await this.GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, null, settingsKey);
+            return GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, null, null);
         }
 
-        public async Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
+        public Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler) where TResult : class
         {
-            return await this.GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, null);
+            return GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, null, settingsKey);
         }
 
-        public async Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
+        public Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
         {
-            return await this.GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, settingsKey);
+            return GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, null);
         }
 
-        public async Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
+        public Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
         {
-            return await this.GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, fetchDataResultHandler, null);
+            return GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, settingsKey);
         }
 
-        public async Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
+        public Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
         {
-            return await this.GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, fetchDataResultHandler, settingsKey);
+            return GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, fetchDataResultHandler, null);
+        }
+
+        public Task<TResult> GetOrInsertCachedItemAsync<TResult>(string key, string settingsKey, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>> fetchDataResultHandler) where TResult : class
+        {
+            return GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, fetchDataResultHandler, settingsKey);
         }
 
         private async Task<TResult> GetHandledItemFromCacheAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<CachedResult<TResult>, TResult> resultHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>>? fetchDataResultHandler = null, string? settingsKey = null)
             where TResult : class
         {
-            var cachedValue = await this.GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, settingsKey);
-            return resultHandler(cachedValue);
+            return resultHandler(await GetItemFromCacheAsync(key, fetchDataHandler, fetchDataResultHandler, settingsKey));
         }
 
         private async Task<CachedResult<TResult>> GetItemFromCacheAsync<TResult>(string key, Func<Task<TResult>> fetchDataHandler, Func<TResult, IMemoryCacheHandlerResult<TResult>>? fetchDataResultHandler = null, string? settingsKey = null)
             where TResult : class
         {
-            CachedResult<TResult> cachedValue = this.GetAndValidateCacheValue<TResult>(key);
+            CachedResult<TResult> cachedValue = GetAndValidateCacheValue<TResult>(key);
             if (cachedValue.CacheMiss)
             {
                 var response = await fetchDataHandler();
@@ -120,7 +120,7 @@
                     response = handledResponse.Result;
                 }
 
-                cachedValue.Result = this.SetCacheValue(response, key, settingsKey);
+                cachedValue.Result = SetCacheValue(response, key, settingsKey);
             }
 
             return cachedValue;
@@ -129,7 +129,7 @@
         private CachedResult<TResult> GetAndValidateCacheValue<TResult>(string key)
             where TResult : class
         {
-            if (this.TryGetValue(key, out object value))
+            if (TryGetValue(key, out object value))
             {
                 if (value is not TResult parsedValue)
                 {

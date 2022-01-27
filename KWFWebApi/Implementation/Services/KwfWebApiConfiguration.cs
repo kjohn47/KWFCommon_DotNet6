@@ -14,6 +14,8 @@
     using KWFAuthentication.Extensions;
     using KWFWebApi.Abstractions.Services;
     using KWFWebApi.Implementation.Endpoint;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.AspNetCore.Http;
 
     public static class KwfWebApiConfiguration
     {
@@ -97,7 +99,10 @@
             applicationBuilder.AddKWFCommon(
                 customAppConfigurationKey,
                 (s, cfg) => { if (enableAuthentication) s.AddKwfAuth(cfg, customBearerConfigurationKey); },
-                (s, cfg, jsonOpt, isDev) => applicationServices(s, jsonOpt),
+                (s, cfg, jsonOpt, isDev) => {
+                        s.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                        applicationServices(s, jsonOpt);
+                    },
                 isDev);
 
             return applicationBuilder.Build();

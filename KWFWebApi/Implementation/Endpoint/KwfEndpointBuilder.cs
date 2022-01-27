@@ -28,12 +28,14 @@
         private readonly IEndpointRouteBuilder _appBuilder;
         private readonly JsonSerializerOptions _jsonSerializerOpt;
         private string[]? _roles;
+        private IHttpContextAccessor? _contextAccessor;
 
         private KwfEndpointBuilder(IEndpointRouteBuilder appBuilder, JsonSerializerOptions jsonSerializerOpt)
         {
             _appBuilder = appBuilder;
             _jsonSerializerOpt = jsonSerializerOpt;
             BaseUrl = string.Empty;
+            _contextAccessor = appBuilder.ServiceProvider.GetService<IHttpContextAccessor>();
         }
 
         public string BaseUrl { get; private set; }
@@ -280,7 +282,26 @@
         public T GetService<T>()
             where T : notnull
         {
-            return _appBuilder.ServiceProvider.GetRequiredService<T>();
+            var serviceProvier = _contextAccessor?.HttpContext?.RequestServices;
+
+            if (serviceProvier is null)
+            {
+                return default!;
+            }
+
+            return serviceProvier.GetRequiredService<T>();
+        }
+
+        public IServiceProvider GetServiceProvider()
+        {
+            var serviceProvier = _contextAccessor?.HttpContext?.RequestServices;
+
+            if (serviceProvier is null)
+            {
+                return _appBuilder.ServiceProvider;
+            }
+            
+            return serviceProvier;
         }
 
         private string BuildRoute(string? route)

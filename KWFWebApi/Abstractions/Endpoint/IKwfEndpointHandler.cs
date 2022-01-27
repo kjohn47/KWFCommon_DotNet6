@@ -86,5 +86,11 @@
         /// <typeparam name="T">The service Type</typeparam>
         /// <returns>The Service</returns>
         T GetService<T>() where T : notnull;
+
+        /// <summary>
+        /// Get Service provider collection
+        /// </summary>
+        /// <returns>IServiceProvider</returns>
+        IServiceProvider GetServiceProvider();
     }
 }
