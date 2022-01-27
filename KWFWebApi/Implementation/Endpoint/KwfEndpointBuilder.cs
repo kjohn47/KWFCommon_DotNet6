@@ -20,6 +20,7 @@
     using System.Linq;
     using System.Text;
     using System.Text.Json;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -51,8 +52,11 @@
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
             {
-                _appBuilder.MapGet(BuildRoute(configuration.Route), configuration.Action)
+                var route = BuildRoute(configuration.Route);
+                _appBuilder.MapGet(route, configuration.Action)
+                       .WithName(GetOperationId(route, "Get"))
                        .ConfigureKwfRoute<TResp>(
+                            BaseUrl,
                             configuration.SuccessHttpCodes,
                             configuration.ErrorHttpCodes,
                             configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
@@ -72,8 +76,11 @@
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
             {
-                _appBuilder.MapPost(BuildRoute(configuration.Route), configuration.Action)
+                var route = BuildRoute(configuration.Route);
+                _appBuilder.MapPost(route, configuration.Action)
+                       .WithName(GetOperationId(route, "Post"))
                        .ConfigureKwfRoute<TResp>(
+                            BaseUrl,
                             configuration.SuccessHttpCodes,
                             configuration.ErrorHttpCodes,
                             configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
@@ -93,8 +100,11 @@
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
             {
-                _appBuilder.MapPut(BuildRoute(configuration.Route), configuration.Action)
+                var route = BuildRoute(configuration.Route);
+                _appBuilder.MapPut(route, configuration.Action)
+                       .WithName(GetOperationId(route, "Put"))
                        .ConfigureKwfRoute<TResp>(
+                            BaseUrl,
                             configuration.SuccessHttpCodes,
                             configuration.ErrorHttpCodes,
                             configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
@@ -114,8 +124,11 @@
             var configuration = BuildRouteConfiguration(routeBuilder);
             if (configuration?.Action is not null)
             {
-                _appBuilder.MapDelete(BuildRoute(configuration.Route), configuration.Action)
+                var route = BuildRoute(configuration.Route);
+                _appBuilder.MapDelete(route, configuration.Action)
+                           .WithName(GetOperationId(route, "Delete"))
                            .ConfigureKwfRoute<TResp>(
+                                BaseUrl,
                                 configuration.SuccessHttpCodes,
                                 configuration.ErrorHttpCodes,
                                 configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
@@ -282,14 +295,7 @@
         public T GetService<T>()
             where T : notnull
         {
-            var serviceProvier = _contextAccessor?.HttpContext?.RequestServices;
-
-            if (serviceProvier is null)
-            {
-                return default!;
-            }
-
-            return serviceProvier.GetRequiredService<T>();
+            return GetServiceProvider().GetRequiredService<T>();
         }
 
         public IServiceProvider GetServiceProvider()
@@ -342,6 +348,23 @@
             where TResponse : ICQRSResponse
         {
             return Results.Json(result.Error.Value, _jsonSerializerOpt, RestConstants.JsonContentType, (int)result.Error.Value.HttpStatusCode);
+        }
+
+        private static string GetOperationId(string route, string method)
+        {
+            var split = route.Split(new[] { '.', '-', '[', ']', '{', '}', '/', '\\', '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(method);
+            foreach (var s in split)
+            {
+                stringBuilder.Append(s[0].ToString().ToUpperInvariant());
+                if (s.Length > 1)
+                {
+                    stringBuilder.Append(s[1..]);
+                }
+            }            
+
+            return stringBuilder.ToString();
         }
 
         public static IKwfEndpointInitialize CreateEndpointBuilder(IEndpointRouteBuilder builder, JsonSerializerOptions jsonSerializerOpt)
@@ -411,7 +434,7 @@
             foreach (var role in roles.Where(x => !x.Equals(Policies.Administrator)))
             {
                 rolesList.Append(role);
-                rolesList.AppendLine(",");
+                rolesList.Append(',');
             }
 
             rolesList.Append(Policies.Administrator);
@@ -423,9 +446,10 @@
                 });
         }
 
-        internal static RouteHandlerBuilder ConfigureKwfRoute<T>(this RouteHandlerBuilder builder, int[]? httpSuccessCodes, int[]? httpErrorCodes, params string[]? roles)
+        internal static RouteHandlerBuilder ConfigureKwfRoute<T>(this RouteHandlerBuilder builder, string baseUrl, int[]? httpSuccessCodes, int[]? httpErrorCodes, params string[]? roles)
         {
-            return builder.ProducesError(httpErrorCodes, roles is not null)
+            return builder.WithTags(baseUrl)
+                          .ProducesError(httpErrorCodes, roles is not null)
                           .ProducesSuccess<T>(httpSuccessCodes)
                           .RequireKwfAuthorization(roles);
         }

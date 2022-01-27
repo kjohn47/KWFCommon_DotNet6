@@ -30,13 +30,15 @@
 
             //Authenticated user in any role as set by global setting
             //get query handler from services using handler Get service method (this might be preferable if you need all 16 input parameters for querystring/route)
+            //Be sure to always call GetService inside delegate to use http context scoped services
             builder.AddGet<WeatherForecastQueryResponse>(route =>
                 route.SetRoute("get-weather-authenticated")
                      .SetAction(handler =>
-                     {
-                         var query = handler.GetService<IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>>();
-                         return () => handler.HandleQueryAsync(new WeatherForecastQueryRequest(), query);
-                     }));
+                        () => 
+                        {
+                            var query = handler.GetService<IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>>();
+                            return handler.HandleQueryAsync(new WeatherForecastQueryRequest(), query);
+                        }));
 
             //User with at least one of the roles
             //get query as parameter on delegate request method
