@@ -8,7 +8,6 @@
     using Microsoft.Extensions.Caching.StackExchangeRedis;
 
     using System;
-    using System.Text;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
@@ -17,26 +16,15 @@
     {
         private readonly IDictionary<string, CacheKeyEntry> _cachedKeySettings;
 
-        private readonly CacheTimeSettings _defaultCacheInterval;
+        private readonly TimeSpan _defaultCacheInterval;
 
         private static JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
 
         public KwfRedisCache(KwfRedisCacheOptions options)
             : base(options?.BuildRedisCacheOptions() ?? new RedisCacheOptions())
         {
-            if (options is not null && options.CachedKeySettings is not null)
-            {
-                _cachedKeySettings = options.CachedKeySettings;
-                _defaultCacheInterval = options.DefaultCacheInterval;
-            }
-            else
-            {
-                _defaultCacheInterval = new CacheTimeSettings
-                {
-                    Minutes = 60
-                };
-                _cachedKeySettings = new Dictionary<string, CacheKeyEntry>();
-            }
+            _cachedKeySettings = options?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
+            _defaultCacheInterval = options?.DefaultCacheInterval?.GetTimeSpan() ?? new TimeSpan(0, 60, 0);
         }
 
         public Task<CachedResult<TResult>> GetCachedItemAsync<TResult>(
@@ -215,11 +203,9 @@
                     return value;
                 }
 
-                var hours = settings.Expiration?.Hours ?? 0;
-                var minutes = settings.Expiration?.Minutes ?? 0;
-                var seconds = settings.Expiration?.Seconds ?? 0;
+                var timespan = settings.Expiration?.GetTimeSpan();
 
-                if (hours == 0 && minutes == 0 && seconds == 0)
+                if (timespan is null)
                 {
                     throw new KwfRedisCacheException("REDISNOEXPIRATIONDEFINED", $"{key} doesn't have Expiration defined, either set expiration object or NoExpiration flag");
                 }
@@ -229,9 +215,7 @@
                     SerializeObject(value),
                     new DistributedCacheEntryOptions
                     {
-                     AbsoluteExpiration = DateTime.Now.AddHours(hours)
-                                                      .AddMinutes(minutes)
-                                                      .AddSeconds(seconds)
+                        AbsoluteExpirationRelativeToNow = timespan.Value
                     },
                     cancellationToken ?? default);
                 return value;
@@ -242,9 +226,7 @@
                 SerializeObject(value),
                 new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpiration = DateTime.Now.AddHours(_defaultCacheInterval.Hours ?? 0)
-                                                     .AddMinutes(_defaultCacheInterval.Minutes ?? 0)
-                                                     .AddSeconds(_defaultCacheInterval.Seconds ?? 0)
+                    AbsoluteExpirationRelativeToNow = _defaultCacheInterval
                 },
                 cancellationToken ?? default);
 

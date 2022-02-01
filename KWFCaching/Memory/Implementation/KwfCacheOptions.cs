@@ -9,5 +9,6 @@
     public class KwfCacheOptions : MemoryCacheOptions
     {
         public IDictionary<string, CacheKeyEntry>? CachedKeySettings { get; set; }
+        public TimeSpan? DefaultCacheExpiration { get; set; }
     }
 }

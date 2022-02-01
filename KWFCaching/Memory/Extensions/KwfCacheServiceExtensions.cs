@@ -40,10 +40,7 @@
 
             services.Configure<KwfCacheOptions>(x =>
             {
-                x.ExpirationScanFrequency = new TimeSpan(
-                    cacheSettings.CleanupInterval?.Hours ?? 0,
-                    cacheSettings.CleanupInterval?.Minutes ?? 30,
-                    cacheSettings.CleanupInterval?.Seconds ?? 0);
+                x.ExpirationScanFrequency = cacheSettings.CleanupInterval?.GetTimeSpan() ?? new TimeSpan(0, 30, 0);
 
                 if (cacheSettings.CacheSizeSettings is not null)
                 {
@@ -59,6 +56,7 @@
                 }
 
                 x.CachedKeySettings = cacheSettings.CacheKeySettings;
+                x.DefaultCacheExpiration = cacheSettings.DefaultCacheExpiration?.GetTimeSpan();
             });
 
             return services;

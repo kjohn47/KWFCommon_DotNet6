@@ -15,30 +15,18 @@
     {
         private readonly IDictionary<string, CacheKeyEntry> _cachedKeySettings;
 
-        private const int DefaultCacheIntervalMinutes = 60;
+        private readonly TimeSpan _defaultCacheExpiration;
 
         public KwfCacheOnMemory(Microsoft.Extensions.Options.IOptions<KwfCacheOptions> options) : base(options)
         {
-            if (options != null && options.Value != null && options.Value.CachedKeySettings != null)
-            {
-                _cachedKeySettings = options.Value.CachedKeySettings;
-            }
-            else
-            {
-                _cachedKeySettings = new Dictionary<string, CacheKeyEntry>();
-            }
+            _cachedKeySettings = options?.Value?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
+            _defaultCacheExpiration = options?.Value?.DefaultCacheExpiration ?? new TimeSpan(0, 60, 0);
         }
 
         public KwfCacheOnMemory(Microsoft.Extensions.Options.IOptions<KwfCacheOptions> options, ILoggerFactory loggerFactory) : base(options, loggerFactory)
         {
-            if (options != null && options.Value != null && options.Value.CachedKeySettings != null)
-            {
-                _cachedKeySettings = options.Value.CachedKeySettings;
-            }
-            else
-            {
-                _cachedKeySettings = new Dictionary<string, CacheKeyEntry>();
-            }
+            _cachedKeySettings = options?.Value?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
+            _defaultCacheExpiration = options?.Value?.DefaultCacheExpiration ?? new TimeSpan(0, 60, 0);
         }
 
         public CachedResult<TResult> GetCachedItem<TResult>(string key)
@@ -212,11 +200,9 @@
                     return value;
                 }
 
-                var hours = settings.Expiration?.Hours ?? 0;
-                var minutes = settings.Expiration?.Minutes ?? 0;
-                var seconds = settings.Expiration?.Seconds ?? 0;
+                var timeSpan = settings.Expiration?.GetTimeSpan();
 
-                if (hours == 0 && minutes == 0 && seconds == 0)
+                if (timeSpan is null)
                 {
                     throw new KwfOnMemoryCacheException(Constants.CacheConfigurationKey, $"{key} doesn't have Expiration defined, either set expiration object or NoExpiration flag");
                 }
@@ -224,16 +210,14 @@
                 this.Set(
                     key,
                     value,
-                    DateTime.Now.AddHours(hours)
-                                .AddMinutes(minutes)
-                                .AddSeconds(seconds));
+                    timeSpan.Value);
                 return value;
             }
 
             this.Set(
                 key,
                 value,
-                DateTime.Now.AddMinutes(DefaultCacheIntervalMinutes));
+                _defaultCacheExpiration);
 
             return value;
         }

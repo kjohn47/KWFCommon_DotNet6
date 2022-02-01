@@ -8,6 +8,8 @@
     {
         public CacheTimeSettings? CleanupInterval { get; set; }
 
+        public CacheTimeSettings? DefaultCacheExpiration { get; set; }
+
         public KwfCacheSizeSettings? CacheSizeSettings { get; set; }
 
         public IDictionary<string, CacheKeyEntry>? CacheKeySettings { get; set; }
