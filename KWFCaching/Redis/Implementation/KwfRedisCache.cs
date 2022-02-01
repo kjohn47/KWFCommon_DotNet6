@@ -1,61 +1,67 @@
-﻿namespace KWFCaching.Memory.Implementation
+﻿namespace KWFCaching.Redis.Implementation
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     using KWFCaching.Abstractions.Interfaces;
     using KWFCaching.Abstractions.Models;
-    using KWFCaching.Memory.Interfaces;
+    using KWFCaching.Redis.Interfaces;
 
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.Caching.StackExchangeRedis;
 
-    public class KwfCacheOnMemory : MemoryCache, IKwfCacheOnMemory
+    using System;
+    using System.Text;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
+    using System.Threading.Tasks;
+
+    public class KwfRedisCache : RedisCache, IKwfRedisCache
     {
         private readonly IDictionary<string, CacheKeyEntry> _cachedKeySettings;
 
-        private const int DefaultCacheIntervalMinutes = 60;
+        private readonly CacheTimeSettings _defaultCacheInterval;
 
-        public KwfCacheOnMemory(Microsoft.Extensions.Options.IOptions<KwfCacheOptions> options) : base(options)
+        private static JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
+
+        public KwfRedisCache(KwfRedisCacheOptions options)
+            : base(options?.BuildRedisCacheOptions() ?? new RedisCacheOptions())
         {
-            if (options != null && options.Value != null && options.Value.CachedKeySettings != null)
+            if (options is not null && options.CachedKeySettings is not null)
             {
-                _cachedKeySettings = options.Value.CachedKeySettings;
+                _cachedKeySettings = options.CachedKeySettings;
+                _defaultCacheInterval = options.DefaultCacheInterval;
             }
             else
             {
+                _defaultCacheInterval = new CacheTimeSettings
+                {
+                    Minutes = 60
+                };
                 _cachedKeySettings = new Dictionary<string, CacheKeyEntry>();
             }
         }
 
-        public KwfCacheOnMemory(Microsoft.Extensions.Options.IOptions<KwfCacheOptions> options, ILoggerFactory loggerFactory) : base(options, loggerFactory)
-        {
-            if (options != null && options.Value != null && options.Value.CachedKeySettings != null)
-            {
-                _cachedKeySettings = options.Value.CachedKeySettings;
-            }
-            else
-            {
-                _cachedKeySettings = new Dictionary<string, CacheKeyEntry>();
-            }
-        }
-
-        public CachedResult<TResult> GetCachedItem<TResult>(string key)
+        public Task<CachedResult<TResult>> GetCachedItemAsync<TResult>(
+            string key,
+            CancellationToken? cancellationToken = null)
             where TResult : class
         {
-            return GetAndValidateCacheValue<TResult>(key);
+            return GetAndValidateCacheValueAsync<TResult>(key, cancellationToken);
         }
 
-        public void SetCachedItem<TItem>(string key, TItem value, string? settingsKey = null)
+        public Task SetCachedItemAsync<TItem>(
+            string key,
+            TItem value,
+            string? settingsKey = null,
+            CancellationToken? cancellationToken = null)
             where TItem : class
         {
-            SetCacheValue(value, key, settingsKey);
+            return SetCacheValueAsync(value, key, settingsKey, cancellationToken);
         }
 
-        public void RemoveCachedItem(string key)
+        public Task RemoveCachedItemAsync(
+            string key,
+            CancellationToken? cancellationToken = null)
         {
-            Remove(key);
+            return RemoveAsync(key, cancellationToken?? default);
         }
 
         public Task<CachedResult<TResult>> GetOrInsertCachedItemAsync<TResult>(
@@ -154,11 +160,11 @@
             CancellationToken? cancellationToken = null)
             where TResult : class
         {
-            CachedResult<TResult> cachedValue = GetAndValidateCacheValue<TResult>(key);
+            CachedResult<TResult> cachedValue = await GetAndValidateCacheValueAsync<TResult>(key, cancellationToken);
             if (cachedValue.CacheMiss)
             {
                 var response = await fetchDataHandler(cancellationToken);
-                if (fetchDataResultHandler != null)
+                if (fetchDataResultHandler is not null)
                 {
                     var handledResponse = fetchDataResultHandler(response);
                     if (handledResponse.PreventCacheWrite)
@@ -169,27 +175,23 @@
                     response = handledResponse.Result;
                 }
 
-                cachedValue.Result = SetCacheValue(response, key, settingsKey);
+                cachedValue.Result = await SetCacheValueAsync(response, key, settingsKey, cancellationToken);
             }
 
             return cachedValue;
         }
 
-        private CachedResult<TResult> GetAndValidateCacheValue<TResult>(string key)
+        private async Task<CachedResult<TResult>> GetAndValidateCacheValueAsync<TResult>(
+            string key,
+            CancellationToken? cancellationToken)
             where TResult : class
         {
-            if (TryGetValue(key, out object value))
-            {
-                if (value is not TResult parsedValue)
-                {
-                    throw new KwfOnMemoryCacheException(
-                        Constants.MemoryCacheObjectTypeExCode,
-                        string.Format(Constants.MemoryCacheObjectTypeExMessage, key, typeof(TResult).Name));
-                }
-
+            var value = await this.GetStringAsync(key, cancellationToken ?? default);
+            if (!string.IsNullOrEmpty(value))
+            { 
                 return new CachedResult<TResult>
                 {
-                    Result = parsedValue
+                    Result = ParseStringToObject<TResult>(value)
                 };
             }
 
@@ -199,16 +201,17 @@
             };
         }
 
-        private TResult SetCacheValue<TResult>(
+        private async Task<TResult> SetCacheValueAsync<TResult>(
             TResult value,
             string key,
-            string? settingsKey)
+            string? settingsKey,
+            CancellationToken? cancellationToken)
         {
             if (_cachedKeySettings.TryGetValue(string.IsNullOrEmpty(settingsKey) ? key : settingsKey, out CacheKeyEntry? settings) && settings is not null)
             {
                 if (settings.NoExpiration)
                 {
-                    this.Set(key, value);
+                    await this.SetStringAsync(key, SerializeObject(value), cancellationToken ?? default);
                     return value;
                 }
 
@@ -218,24 +221,70 @@
 
                 if (hours == 0 && minutes == 0 && seconds == 0)
                 {
-                    throw new KwfOnMemoryCacheException(Constants.CacheConfigurationKey, $"{key} doesn't have Expiration defined, either set expiration object or NoExpiration flag");
+                    throw new KwfRedisCacheException("REDISNOEXPIRATIONDEFINED", $"{key} doesn't have Expiration defined, either set expiration object or NoExpiration flag");
                 }
 
-                this.Set(
+                await this.SetStringAsync(
                     key,
-                    value,
-                    DateTime.Now.AddHours(hours)
-                                .AddMinutes(minutes)
-                                .AddSeconds(seconds));
+                    SerializeObject(value),
+                    new DistributedCacheEntryOptions
+                    {
+                     AbsoluteExpiration = DateTime.Now.AddHours(hours)
+                                                      .AddMinutes(minutes)
+                                                      .AddSeconds(seconds)
+                    },
+                    cancellationToken ?? default);
                 return value;
             }
 
-            this.Set(
+            await this.SetStringAsync(
                 key,
-                value,
-                DateTime.Now.AddMinutes(DefaultCacheIntervalMinutes));
+                SerializeObject(value),
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddHours(_defaultCacheInterval.Hours ?? 0)
+                                                     .AddMinutes(_defaultCacheInterval.Minutes ?? 0)
+                                                     .AddSeconds(_defaultCacheInterval.Seconds ?? 0)
+                },
+                cancellationToken ?? default);
 
             return value;
+        }
+
+        private static string SerializeObject<T>(T value)
+        {
+            try
+            {
+                return JsonSerializer.Serialize(value, _jsonSerializerOptions);
+            }
+            catch (Exception ex)
+            {
+                throw new KwfRedisCacheException("REDISSERIALIZEOBJEX","An error occured while serializing object to redis", ex);
+            }
+        }
+
+        private static T ParseStringToObject<T>(string value)
+            where T : class
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(value, _jsonSerializerOptions)!;
+            }
+            catch (Exception ex)
+            {
+                throw new KwfRedisCacheException("REDISSERIALIZEOBJEX", "An error occured while serializing object to redis", ex);
+            }
+        }
+
+        private static JsonSerializerOptions GetJsonOptions()
+        {
+            var settings = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+            settings.Converters.Add(new JsonStringEnumConverter());
+
+            return settings;
         }
     }
 }

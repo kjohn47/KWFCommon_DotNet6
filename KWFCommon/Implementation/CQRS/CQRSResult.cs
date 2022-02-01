@@ -11,7 +11,9 @@
     {
         private readonly NullableObject<IErrorResult> _error;
 
-        private CQRSResult(TResponse response, HttpStatusCode? httpStatusCode)
+        private CQRSResult(
+            TResponse response,
+            HttpStatusCode? httpStatusCode)
         {
             Response = response;
             HttpStatusCode = httpStatusCode;
@@ -32,7 +34,9 @@
 
         public INullableObject<IErrorResult> Error => _error;
 
-        public static CQRSResult<TResponse> Success(TResponse response, HttpStatusCode? httpStatusCode = null)
+        public static CQRSResult<TResponse> Success(
+            TResponse response,
+            HttpStatusCode? httpStatusCode = null)
         {
             return new CQRSResult<TResponse>(response, httpStatusCode);
         }

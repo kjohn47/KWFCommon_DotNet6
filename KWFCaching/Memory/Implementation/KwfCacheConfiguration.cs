@@ -1,5 +1,7 @@
 ﻿namespace KWFCaching.Memory.Implementation
 {
+    using KWFCaching.Abstractions.Models;
+
     using System.Collections.Generic;
 
     public class KwfCacheConfiguration

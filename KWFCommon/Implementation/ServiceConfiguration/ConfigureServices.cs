@@ -14,7 +14,8 @@
 
     public static class ConfigureServices
     {
-        public static IApplicationBuilder UseKWFCommon(this WebApplication webApp,
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
             Action<IApplicationBuilder>? configureAuth,
             Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool>? configureApplicationServices,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions>? configureEndpoints,

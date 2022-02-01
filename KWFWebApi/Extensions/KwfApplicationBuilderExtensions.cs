@@ -52,7 +52,9 @@
                 customLoggingConfigurationKey);
         }
 
-        public static IKwfApplicationBuilder BuildKwfApplication(this WebApplicationBuilder applicationBuilder, bool enableAuthentication)
+        public static IKwfApplicationBuilder BuildKwfApplication(
+            this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication)
         {
             return KwfApplicationBuilder.BuildKwfApplication(
                 applicationBuilder,

@@ -11,11 +11,15 @@
     /// </summary>
     public abstract class EndpointConfigurationBase : IEndpointConfiguration
     {
-        public virtual IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration)
+        public virtual IKwfEndpointBuilder InitializeRoute(
+            IKwfEndpointInitialize builder,
+            IConfiguration configuration)
         {
             return builder.InitializeEndpoint(this.GetType().Name);
         }
 
-        public abstract void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration);
+        public abstract void ConfigureEndpoints(
+            IKwfEndpointBuilder builder,
+            IConfiguration configuration);
     }
 }

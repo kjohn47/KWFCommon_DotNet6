@@ -145,7 +145,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
+        public Task<IResult> HandleQueryAsync<TRequest, TResponse>(
+            TRequest request,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest
             where TResponse : IQueryResponse
         {
@@ -161,7 +163,10 @@
         /// <param name="query">The Query Handler implementing IQueryHandler<TRequest, TResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public async Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, IQueryHandler<TRequest, TResponse> query, CancellationToken? cancellationToken = null)
+        public async Task<IResult> HandleQueryAsync<TRequest, TResponse>(
+            TRequest request,
+            IQueryHandler<TRequest, TResponse> query,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest
             where TResponse : IQueryResponse
         {
@@ -175,7 +180,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
+        public Task<IResult> HandleFileQueryAsync<TRequest>(
+            TRequest request,
+            CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
         {
             return HandleFileQueryAsync(request, GetService<IQueryHandler<TRequest, IFileQueryResponse>>(), cancellationToken);
         }
@@ -188,7 +195,10 @@
         /// <param name="query">The query handler implementing IQueryHandler<TRequest, IFileQueryResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public async Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, IQueryHandler<TRequest, IFileQueryResponse> query, CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
+        public async Task<IResult> HandleFileQueryAsync<TRequest>(
+            TRequest request,
+            IQueryHandler<TRequest, IFileQueryResponse> query,
+            CancellationToken? cancellationToken = null) where TRequest : IQueryRequest
         {
             var result = await query.HandleAsync(request, cancellationToken);
 
@@ -211,7 +221,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
+        public Task<IResult> HandleCommandAsync<TRequest, TResponse>(
+            TRequest request,
+            CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {
@@ -227,7 +239,10 @@
         /// <param name="command">The command Handler implementing ICommandHandler<TRequest, TResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        public async Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, ICommandHandler<TRequest, TResponse> command, CancellationToken? cancellationToken = null)
+        public async Task<IResult> HandleCommandAsync<TRequest, TResponse>(
+            TRequest request,
+            ICommandHandler<TRequest, TResponse> command,
+            CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {

@@ -11,7 +11,10 @@
 
     public static class KestrelConfigurator
     {
-        public static ConfigureWebHostBuilder ConfigureKestrel(this ConfigureWebHostBuilder builder, KestrelConfiguration configuration, bool isDev = false)
+        public static ConfigureWebHostBuilder ConfigureKestrel(
+            this ConfigureWebHostBuilder builder,
+            KestrelConfiguration configuration,
+            bool isDev = false)
         {
             builder.ConfigureKestrel(serverOptions =>
             {
@@ -52,7 +55,9 @@
             return builder;
         }
 
-        private static void ConfigureHttps(this ListenOptions opt, KestrelCertificateSettings? kestrelCertificateSettings = null)
+        private static void ConfigureHttps(
+            this ListenOptions opt,
+            KestrelCertificateSettings? kestrelCertificateSettings = null)
         {
             if (kestrelCertificateSettings?.Path is not null)
             {

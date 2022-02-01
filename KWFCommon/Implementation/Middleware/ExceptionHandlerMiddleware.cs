@@ -13,7 +13,10 @@
 
     public static class ExceptionHandlerMiddleware
     {
-        public static IApplicationBuilder UseExceptionHandlerMidleware(this IApplicationBuilder app, JsonSerializerOptions serializerOpt, bool isDev = false)
+        public static IApplicationBuilder UseExceptionHandlerMidleware(
+            this IApplicationBuilder app,
+            JsonSerializerOptions serializerOpt,
+            bool isDev = false)
         {
             app.UseExceptionHandler(a => a.Run(async ctx =>
             {

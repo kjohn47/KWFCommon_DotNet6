@@ -13,27 +13,48 @@
 
     public static class LoggingConfigurator
     {
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
+        public static IServiceCollection AddLogging(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string? customConfigurationKey = null)
         {
             return AddLoggingInternal(services, configuration, null, false, customConfigurationKey);
         }
 
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, string? customConfigurationKey = null)
+        public static IServiceCollection AddLogging(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            IEnumerable<KwfLoggerProviderBuilder>? additionalProviders,
+            string? customConfigurationKey = null)
         {
             return AddLoggingInternal(services, configuration, additionalProviders, false, customConfigurationKey);
         }
 
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, bool isDev, string? customConfigurationKey = null)
+        public static IServiceCollection AddLogging(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            bool isDev,
+            string? customConfigurationKey = null)
         {
             return AddLoggingInternal(services, configuration, null, isDev, customConfigurationKey);
         }
 
-        public static IServiceCollection AddLogging(this IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev, string? customConfigurationKey = null)
+        public static IServiceCollection AddLogging(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            IEnumerable<KwfLoggerProviderBuilder>? additionalProviders,
+            bool isDev,
+            string? customConfigurationKey = null)
         {
             return AddLoggingInternal(services, configuration, additionalProviders, isDev, customConfigurationKey);
         }
 
-        private static IServiceCollection AddLoggingInternal(IServiceCollection services, IConfiguration configuration, IEnumerable<KwfLoggerProviderBuilder>? additionalProviders, bool isDev, string? customConfigurationKey)
+        private static IServiceCollection AddLoggingInternal(
+            IServiceCollection services,
+            IConfiguration configuration,
+            IEnumerable<KwfLoggerProviderBuilder>? additionalProviders,
+            bool isDev,
+            string? customConfigurationKey)
         {
             var config = configuration.GetSection(customConfigurationKey ?? LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
 
@@ -79,17 +100,28 @@
             return services;
         }
 
-        public static IApplicationBuilder UseLogging(this IApplicationBuilder app, IConfiguration configuration, bool isDev, string? customConfigurationKey = null)
+        public static IApplicationBuilder UseLogging(
+            this IApplicationBuilder app,
+            IConfiguration configuration,
+            bool isDev,
+            string? customConfigurationKey = null)
         {
             return UseLoggingInternal(app, configuration, isDev, customConfigurationKey);
         }
 
-        public static IApplicationBuilder UseLogging(this IApplicationBuilder app, IConfiguration configuration, string? customConfigurationKey = null)
+        public static IApplicationBuilder UseLogging(
+            this IApplicationBuilder app,
+            IConfiguration configuration,
+            string? customConfigurationKey = null)
         {
             return UseLoggingInternal(app, configuration, false, customConfigurationKey);
         }
 
-        public static IApplicationBuilder UseLoggingInternal(IApplicationBuilder app, IConfiguration configuration, bool isDev, string? customConfigurationKey)
+        public static IApplicationBuilder UseLoggingInternal(
+            IApplicationBuilder app,
+            IConfiguration configuration,
+            bool isDev,
+            string? customConfigurationKey)
         {
             var config = configuration.GetSection(customConfigurationKey ?? LoggingConstants.Configuration_Key).Get<LoggingConfiguration>();
 

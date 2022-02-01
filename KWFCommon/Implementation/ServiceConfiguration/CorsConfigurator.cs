@@ -6,7 +6,10 @@
 
     public static class CorsConfigurator
     {
-        public static IApplicationBuilder UseCorsConfigurator(this IApplicationBuilder app, CorsConfiguration? configuration, bool isDev = false)
+        public static IApplicationBuilder UseCorsConfigurator(
+            this IApplicationBuilder app,
+            CorsConfiguration? configuration,
+            bool isDev = false)
         {
             if (isDev)
             {

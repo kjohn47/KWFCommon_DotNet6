@@ -12,7 +12,10 @@
 
     public static class StatusCodeConfigurator
     {
-        public static void UseStatusCodeHandler(this IApplicationBuilder app, JsonSerializerOptions serializerOpt, bool isDev = false)
+        public static void UseStatusCodeHandler(
+            this IApplicationBuilder app,
+            JsonSerializerOptions serializerOpt,
+            bool isDev = false)
         {
             app.UseStatusCodePages(a => a.Run(async ctx =>
             {

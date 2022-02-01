@@ -17,7 +17,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleQueryAsync<TRequest, TResponse>(
+            TRequest request,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest 
             where TResponse: IQueryResponse;
 
@@ -30,7 +32,10 @@
         /// <param name="query">The Query Handler implementing IQueryHandler<TRequest, TResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleQueryAsync<TRequest, TResponse>(TRequest request, IQueryHandler<TRequest, TResponse> query, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleQueryAsync<TRequest, TResponse>(
+            TRequest request,
+            IQueryHandler<TRequest, TResponse> query,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest
             where TResponse : IQueryResponse;
 
@@ -41,7 +46,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleFileQueryAsync<TRequest>(
+            TRequest request,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest;
 
         /// <summary>
@@ -52,7 +59,10 @@
         /// <param name="query">The query handler implementing IQueryHandler<TRequest, IFileQueryResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleFileQueryAsync<TRequest>(TRequest request, IQueryHandler<TRequest, IFileQueryResponse> query, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleFileQueryAsync<TRequest>(
+            TRequest request,
+            IQueryHandler<TRequest, IFileQueryResponse> query,
+            CancellationToken? cancellationToken = null)
             where TRequest : IQueryRequest;
 
         /// <summary>
@@ -63,7 +73,9 @@
         /// <param name="request">The Request</param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleCommandAsync<TRequest, TResponse>(
+            TRequest request,
+            CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse;
 
@@ -76,7 +88,10 @@
         /// <param name="command">The command Handler implementing ICommandHandler<TRequest, TResponse></param>
         /// <param name="cancellationToken">The Cancellation Token(optional)</param>
         /// <returns>IResult</returns>
-        Task<IResult> HandleCommandAsync<TRequest, TResponse>(TRequest request, ICommandHandler<TRequest, TResponse> command, CancellationToken? cancellationToken = null)
+        Task<IResult> HandleCommandAsync<TRequest, TResponse>(
+            TRequest request,
+            ICommandHandler<TRequest, TResponse> command,
+            CancellationToken? cancellationToken = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse;
 

@@ -17,7 +17,10 @@
 
         private readonly string _errorMessage;
 
-        private CQRSValidationError(string errorCode, string errorMessage, HttpStatusCode httpStatusCode)
+        private CQRSValidationError(
+            string errorCode,
+            string errorMessage,
+            HttpStatusCode httpStatusCode)
         {
             _errorCode = errorCode;
             _errorMessage = errorMessage;
@@ -58,7 +61,10 @@
             return new CQRSValidationError(errorCode, errorMessage, HttpStatusCode.PreconditionFailed);
         }
 
-        public static ICQRSValidationErrorBuilder Initialize(string errorCode, string errorMessage, HttpStatusCode httpStatusCode)
+        public static ICQRSValidationErrorBuilder Initialize(
+            string errorCode,
+            string errorMessage,
+            HttpStatusCode httpStatusCode)
         {
             return new CQRSValidationError(errorCode, errorMessage, httpStatusCode);
         }

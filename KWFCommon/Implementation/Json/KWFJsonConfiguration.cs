@@ -7,7 +7,8 @@
     {
         private JsonSerializerOptions options;
 
-        public KWFJsonConfiguration(bool writeIndented = false): this(new JsonSerializerOptions(), writeIndented)
+        public KWFJsonConfiguration(bool writeIndented = false)
+            : this(new JsonSerializerOptions(), writeIndented)
         {
         }
 

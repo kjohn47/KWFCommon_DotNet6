@@ -19,7 +19,8 @@
 
     public static class KwfWebApiConfiguration
     {
-        public static void RunKwfApplication(this WebApplicationBuilder applicationBuilder,
+        public static void RunKwfApplication(
+            this WebApplicationBuilder applicationBuilder,
             string? customAppConfigurationKey,
             string? customBearerConfigurationKey,
             string? customLoggingConfigurationKey,
@@ -86,7 +87,8 @@
                 .Run();
         }
 
-        private static WebApplication BuildKwfServices(this WebApplicationBuilder applicationBuilder,
+        private static WebApplication BuildKwfServices(
+            this WebApplicationBuilder applicationBuilder,
             Action<IServiceCollection, JsonSerializerOptions> applicationServices,
             IEnumerable<KwfLoggerProviderBuilder>? loggerProviders,
             bool enableAuthentication,
@@ -108,7 +110,8 @@
             return applicationBuilder.Build();
         }
 
-        private static WebApplication UseKwfConfiguration(this WebApplication app,
+        private static WebApplication UseKwfConfiguration(
+            this WebApplication app,
             Action<IApplicationBuilder> configureApplicationServices,
             Action<IEndpointRouteBuilder, JsonSerializerOptions> configureEndpoints,
             bool enableAuthentication,

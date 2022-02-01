@@ -36,7 +36,9 @@
             _enableAuthentication = enableAuthentication;
         }
 
-        public IKwfApplicationBuilder AddLoggerProvider(string providerName, Action<ILoggingBuilder, IConfiguration> providerConfigure)
+        public IKwfApplicationBuilder AddLoggerProvider(
+            string providerName,
+            Action<ILoggingBuilder, IConfiguration> providerConfigure)
         {
             if (_loggerProviders is null)
             {

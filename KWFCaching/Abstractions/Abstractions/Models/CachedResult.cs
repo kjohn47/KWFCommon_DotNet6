@@ -1,4 +1,4 @@
-﻿namespace KWFCaching.Memory.Implementation
+﻿namespace KWFCaching.Abstractions.Models
 {
     public class CachedResult<TResult>
         where TResult : class

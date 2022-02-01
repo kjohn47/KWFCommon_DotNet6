@@ -1,6 +1,7 @@
 ﻿namespace Sample.SampleApi
 {
     using KWFCaching.Memory.Extensions;
+    using KWFCaching.Redis.Extensions;
 
     using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Abstractions.Services;
@@ -17,7 +18,10 @@
         public void AddServices(IServiceCollection services)
         {
             // ---- Add aditional services ----
+            // Memory cache
             services.AddKwfCacheOnMemory(_configuration);
+            //Redis distributed cache
+            //services.AddKwfRedisCache(_configuration);
 
             // ---- Add common services ----
             services.AddSingleton<WeatherForecastServices>();

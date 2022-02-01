@@ -4,6 +4,7 @@
 
     using KWFCaching.Memory.Implementation;
     using KWFCaching.Memory.Interfaces;
+    using KWFCaching.Redis.Interfaces;
 
     using KWFCommon.Abstractions.CQRS;
     using KWFCommon.Abstractions.Models;
@@ -26,12 +27,14 @@
         private readonly WeatherForecastServices _service;
         private readonly IKWFLogger<WeatherForecastQueryHandler> _logger;
         private readonly IKwfCacheOnMemory _cache;
+        //private readonly IKwfRedisCache _cache;
 
         public WeatherForecastQueryHandler(
             WeatherForecastServices service, 
             ILoggerFactory loggerFactory, 
             IUserContextAccessor ctx,
             IKwfCacheOnMemory cache,
+            //IKwfRedisCache cache,
             KWFJsonConfiguration jsonCfg)
         {
             _service = service;
@@ -60,7 +63,7 @@
             {
                 var summaries = await _cache.GetOrInsertCachedItemAsync(
                     "WEATHER_SUMARIES",
-                    () => _service.GetSumaries(),
+                    t => _service.GetSumaries(),
                     res => 
                     {
                         _logger.LogInformation(res.CacheMiss ? "Getting data from service" : "Getting data from cache");

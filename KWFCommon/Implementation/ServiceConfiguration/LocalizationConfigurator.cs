@@ -13,7 +13,9 @@
         {
             if (string.IsNullOrEmpty(configuration?.LocalizationCode))
             {
-                throw new ArgumentNullException("LocalizationConfiguration:LocalizationCode", "Missing Localization Configuration or Localization Code on App Configuration");
+                throw new ArgumentNullException(
+                    "LocalizationConfiguration:LocalizationCode",
+                    "Missing Localization Configuration or Localization Code on App Configuration");
             }
 
             var cultureInfo = new CultureInfo(configuration.LocalizationCode);

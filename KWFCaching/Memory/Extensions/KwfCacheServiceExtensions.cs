@@ -11,13 +11,18 @@
 
     public static class KwfCacheServiceExtensions
     {
-        public static IServiceCollection AddKwfCacheOnMemory(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
+        public static IServiceCollection AddKwfCacheOnMemory(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string? customConfigurationKey = null)
         {
             KwfCacheConfiguration cacheSettings = configuration.GetSection(customConfigurationKey ?? Constants.CacheConfigurationKey).Get<KwfCacheConfiguration>() ?? new KwfCacheConfiguration();
             return AddKwfCacheOnMemory(services, cacheSettings);
         }
 
-        public static IServiceCollection AddKwfCacheOnMemory(this IServiceCollection services, KwfCacheConfiguration cacheSettings)
+        public static IServiceCollection AddKwfCacheOnMemory(
+            this IServiceCollection services,
+            KwfCacheConfiguration cacheSettings)
         {
             if (services == null)
             {

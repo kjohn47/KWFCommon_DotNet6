@@ -55,7 +55,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory", "KWFCaching\Memory
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQLEntityFramework", "KWFDatabase\SQLEntityFramework\SQLEntityFramework.csproj", "{436636B9-1675-40F8-AFFF-096A97991B3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "KWFEventBus\Abstractions\Abstractions.csproj", "{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFEventBus\Abstractions\Abstractions.csproj", "{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "KWFCaching\Abstractions\Abstractions\Abstractions.csproj", "{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +137,10 @@ Global
 		{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,6 +164,7 @@ Global
 		{124F143E-FF26-4C55-95E3-F62BAE660E62} = {116C5965-EFAC-4C72-B3F9-D77C755F7833}
 		{436636B9-1675-40F8-AFFF-096A97991B3E} = {B5D0CA02-B9FF-4137-9982-E69826E17807}
 		{B9F1F1AD-9710-40E4-BF66-3FE405CFD688} = {BC5691DA-5435-43E9-8CDA-B6DB9C7C1879}
+		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8} = {116C5965-EFAC-4C72-B3F9-D77C755F7833}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF837ABA-24C4-4640-9485-F144768A585A}

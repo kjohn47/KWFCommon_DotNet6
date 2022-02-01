@@ -17,7 +17,9 @@
         /// <param name="endpoint">The route pattern</param>
         /// <param name="requireAuthorization">The global Require authorized user flag</param>
         /// <returns>IKwfEndpointBuilder</returns>
-        IKwfEndpointBuilder InitializeEndpoint(string endpoint, bool requireAuthorization);
+        IKwfEndpointBuilder InitializeEndpoint(
+            string endpoint,
+            bool requireAuthorization);
 
         /// <summary>
         /// Initialize endpoint global settings
@@ -25,7 +27,9 @@
         /// <param name="endpoint">The route pattern</param>
         /// <param name="globalAuthorizationPolicy">The global roles authorized for this endpoint</param>
         /// <returns>IKwfEndpointBuilder</returns>
-        IKwfEndpointBuilder InitializeEndpoint(string endpoint, params string[] globalAuthorizationPolicy);
+        IKwfEndpointBuilder InitializeEndpoint(
+            string endpoint,
+            params string[] globalAuthorizationPolicy);
 
         /// <summary>
         /// Initialize endpoint global settings
@@ -33,6 +37,8 @@
         /// <param name="endpoint">The route pattern</param>
         /// <param name="globalAuthorizationPolicy">The Global Authorization Policy from PoliciesEnum</param>
         /// <returns>IKwfEndpointBuilder</returns>
-        IKwfEndpointBuilder InitializeEndpoint(string endpoint, PoliciesEnum globalAuthorizationPolicy);
+        IKwfEndpointBuilder InitializeEndpoint(
+            string endpoint,
+            PoliciesEnum globalAuthorizationPolicy);
     }
 }

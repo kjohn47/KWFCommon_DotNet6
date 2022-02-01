@@ -7,14 +7,23 @@
 
     public sealed class KWFHandledException : Exception
     {
-        public KWFHandledException(string errorCode, string errorMessage, HttpStatusCode httpStatusCode, ErrorTypeEnum errorType) : base(errorMessage)
+        public KWFHandledException(
+            string errorCode,
+            string errorMessage,
+            HttpStatusCode httpStatusCode,
+            ErrorTypeEnum errorType) : base(errorMessage)
         {
             ErrorCode = errorCode;
             HttpStatusCode = httpStatusCode;
             ErrorType = errorType;
         }
 
-        public KWFHandledException(string errorCode, string errorMessage, HttpStatusCode httpStatusCode, ErrorTypeEnum errorType, Exception innerException) : base(errorMessage, innerException)
+        public KWFHandledException(
+            string errorCode,
+            string errorMessage,
+            HttpStatusCode httpStatusCode,
+            ErrorTypeEnum errorType,
+            Exception innerException) : base(errorMessage, innerException)
         {
             ErrorCode = errorCode;
             HttpStatusCode = httpStatusCode;

@@ -17,7 +17,10 @@
 
     public static class AuthenticationInjector
     {
-        public static IServiceCollection AddBearerAuthentication(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey)
+        public static IServiceCollection AddBearerAuthentication(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string? customConfigurationKey)
         {
             if (configuration.GetSection(customConfigurationKey ?? AuthConstants.BearerConfigurationKey).Get<BearerConfiguration>() is not BearerConfiguration bearerConfiguration)
             {
@@ -27,7 +30,9 @@
             return services.AddBearerAuthentication(bearerConfiguration);
         }
 
-        public static IServiceCollection AddBearerAuthentication(this IServiceCollection services, BearerConfiguration configuration)
+        public static IServiceCollection AddBearerAuthentication(
+            this IServiceCollection services,
+            BearerConfiguration configuration)
         {
             if (string.IsNullOrEmpty(configuration.TokenIdentifier))
             {
