@@ -57,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQLEntityFramework", "KWFDa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFEventBus\Abstractions\Abstractions.csproj", "{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "KWFCaching\Abstractions\Abstractions\Abstractions.csproj", "{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "KWFCaching\Abstractions\Abstractions.csproj", "{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
