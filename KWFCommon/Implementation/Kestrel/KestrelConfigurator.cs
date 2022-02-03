@@ -18,11 +18,11 @@
         {
             builder.ConfigureKestrel(serverOptions =>
             {
+                bool hasHttps = configuration.HasHttpsAvailable;
                 if (isDev)
                 {
                     if (configuration.HttpPort is not null) serverOptions.ListenLocalhost(configuration.HttpPort.Value);
-
-                    serverOptions.ListenLocalhost(configuration.HttpsPort, l => l.ConfigureHttps());
+                    if (hasHttps) serverOptions.ListenLocalhost(configuration.HttpsPort, l => l.ConfigureHttps());
                 }
                 else
                 {
@@ -33,20 +33,22 @@
                             var ip = IPAddress.Parse(listenIpAddress);
                             if (configuration.HttpPort is not null) serverOptions.Listen(ip, configuration.HttpPort.Value);
 
-                            serverOptions.Listen(
-                                ip, 
-                                configuration.HttpsPort,
-                                l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
+                            if (hasHttps) 
+                                serverOptions.Listen(
+                                    ip, 
+                                    configuration.HttpsPort,
+                                    l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
                         }
                     }
                     else
                     {
                         if (configuration.HttpPort is not null) serverOptions.Listen(IPAddress.Any, configuration.HttpPort.Value);
 
-                        serverOptions.Listen(
-                            IPAddress.Any, 
-                            configuration.HttpsPort,
-                            l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
+                        if (hasHttps)
+                            serverOptions.Listen(
+                                IPAddress.Any, 
+                                configuration.HttpsPort,
+                                l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
                     }
                 }
 

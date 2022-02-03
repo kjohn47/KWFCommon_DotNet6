@@ -32,14 +32,19 @@
                                     : new KWFJsonConfiguration(isDev))
                                 .GetJsonSerializerOptions();
             if (apiConfig.LocalizationConfiguration is not null) app.UseLocalization(apiConfig.LocalizationConfiguration);
+            
             app.UseExceptionHandlerMidleware(serializerOpt, isDev);
-            app.UseHttpsRedirection();
+            
+            if (apiConfig.KestrelConfiguration?.HasHttpsAvailable ?? false) app.UseHttpsRedirection();
+
             app.UseStatusCodeHandler(serializerOpt, isDev);
             app.UseCorsConfigurator(apiConfig.CorsConfiguration, isDev);
-            if (isDev && apiConfig.SwaggerSettings is not null)
+
+            if (apiConfig.SwaggerSettings is not null)
             {
                 app.UseSwagger(apiConfig.SwaggerSettings);
             }
+
             if (configureAuth is not null) configureAuth(app);
             if (configureApplicationServices is not null) configureApplicationServices(app, webApp.Configuration, serializerOpt, isDev);
             if (configureEndpoints is not null) configureEndpoints(webApp, webApp.Configuration, serializerOpt);

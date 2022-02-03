@@ -38,10 +38,13 @@
             if (appConfiguration.KestrelConfiguration is not null)
             {
                 applicationBuilder.WebHost.ConfigureKestrel(appConfiguration.KestrelConfiguration, isDev);
-                services.AddHttpsRedirection(opt =>
+                if (appConfiguration.KestrelConfiguration.HasHttpsAvailable)
                 {
-                    opt.HttpsPort = appConfiguration.KestrelConfiguration.HttpsPort;
-                });
+                    services.AddHttpsRedirection(opt =>
+                    {
+                        opt.HttpsPort = appConfiguration.KestrelConfiguration.HttpsPort;
+                    });
+                }
             }
 
             services.Configure<JsonOptions>(options =>
