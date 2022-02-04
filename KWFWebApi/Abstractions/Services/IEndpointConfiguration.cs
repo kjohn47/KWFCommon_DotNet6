@@ -12,7 +12,10 @@
         /// <param name="builder">The Initialize endpoint builder</param>
         /// <param name="configuration">The app configuration</param>
         /// <returns>IKwfEndpointBuilder</returns>
-        IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration);
+        IKwfEndpointBuilder InitializeRoute(IKwfEndpointInitialize builder, IConfiguration configuration)
+        {
+            return builder.InitializeEndpoint(this.GetType().Name);
+        }
 
         /// <summary>
         /// Configure endpoints for route pattern

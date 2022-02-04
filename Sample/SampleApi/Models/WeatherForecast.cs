@@ -1,4 +1,4 @@
-﻿namespace Sample.SampleApi
+﻿namespace Sample.SampleApi.Models
 {
     public record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
     {

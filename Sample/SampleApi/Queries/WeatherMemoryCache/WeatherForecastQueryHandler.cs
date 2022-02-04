@@ -1,10 +1,8 @@
-﻿namespace Sample.SampleApi
+﻿namespace Sample.SampleApi.Queries.WeatherMemoryCache
 {
     using KWFAuthentication.Abstractions.Context;
 
-    using KWFCaching.Memory.Implementation;
     using KWFCaching.Memory.Interfaces;
-    using KWFCaching.Redis.Interfaces;
 
     using KWFCommon.Abstractions.CQRS;
     using KWFCommon.Abstractions.Models;
@@ -15,6 +13,9 @@
     using KWFWebApi.Abstractions.Logging;
     using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Extensions;
+
+    using Sample.SampleApi.Models;
+    using Sample.SampleApi.Services;
 
     using System.Diagnostics;
     using System.Net;
@@ -27,14 +28,12 @@
         private readonly WeatherForecastServices _service;
         private readonly IKWFLogger<WeatherForecastQueryHandler> _logger;
         private readonly IKwfCacheOnMemory _cache;
-        //private readonly IKwfRedisCache _cache;
 
         public WeatherForecastQueryHandler(
             WeatherForecastServices service, 
             ILoggerFactory loggerFactory, 
             IUserContextAccessor ctx,
             IKwfCacheOnMemory cache,
-            //IKwfRedisCache cache,
             KWFJsonConfiguration jsonCfg)
         {
             _service = service;

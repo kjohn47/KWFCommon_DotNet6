@@ -15,6 +15,9 @@
         /// Configure App Services
         /// </summary>
         /// <param name="app">The Application Builder</param>
-        void ConfigureServices(IApplicationBuilder app);
+        void ConfigureServices(IApplicationBuilder app)
+        {
+
+        }
     }
 }

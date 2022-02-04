@@ -40,6 +40,7 @@
 
         private static IServiceCollection AddHandlersFromAssemblies(this IServiceCollection services, Type handlerInterfaceType, ServiceLifetime? serviceLifetime, params Type[] assemblyTypes)
         {
+            var lifetime = serviceLifetime ?? ServiceLifetime.Transient;
 
             foreach (var assembly in assemblyTypes.Select(x => x.Assembly))
             {
@@ -53,13 +54,7 @@
                 foreach (var handler in handlerTypes)
                 {
                     var handlerInterface = handler.ImplementedInterfaces.First(i => i.GetGenericTypeDefinition().IsAssignableTo(handlerInterfaceType));
-                    if (serviceLifetime is null)
-                    {
-                        services.TryAddTransient(handlerInterface, handler);
-                        return services;
-                    }
-
-                    services.TryAdd(new ServiceDescriptor(handlerInterface, handler, serviceLifetime.Value));
+                    services.TryAdd(new ServiceDescriptor(handlerInterface, handler, lifetime));
                 }
             }
 

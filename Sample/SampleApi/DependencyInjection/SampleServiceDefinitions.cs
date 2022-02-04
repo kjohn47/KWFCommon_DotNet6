@@ -1,11 +1,12 @@
-﻿namespace Sample.SampleApi
+﻿namespace Sample.SampleApi.DependencyInjection
 {
     using KWFCaching.Memory.Extensions;
     using KWFCaching.Redis.Extensions;
 
-    using KWFWebApi.Abstractions.Query;
     using KWFWebApi.Abstractions.Services;
     using KWFWebApi.Extensions.CQRSHandlers;
+
+    using Sample.SampleApi.Services;
 
     public class SampleServiceDefinitions : IServiceDefinition
     {
@@ -21,7 +22,7 @@
             // Memory cache
             services.AddKwfCacheOnMemory(_configuration);
             //Redis distributed cache
-            //services.AddKwfRedisCache(_configuration);
+            services.AddKwfRedisCache(_configuration);
 
             // ---- Add common services ----
             services.AddSingleton<WeatherForecastServices>();
@@ -45,8 +46,14 @@
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
         }
 
+        /*
+         * Defaulted on interface, can have implementation ignored
+         * 
+
         public void ConfigureServices(IApplicationBuilder app)
         {
         }
+
+        */
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Sample.SampleApi
+﻿namespace Sample.SampleApi.Services
 {
     public class WeatherForecastServices
     {
