@@ -16,13 +16,13 @@
             IConfiguration configuration,
             string? customConfigurationKey = null)
         {
-            KwfCacheConfiguration cacheSettings = configuration.GetSection(customConfigurationKey ?? Constants.CacheConfigurationKey).Get<KwfCacheConfiguration>() ?? new KwfCacheConfiguration();
+            KwfCacheConfiguration? cacheSettings = configuration?.GetSection(customConfigurationKey ?? Constants.CacheConfigurationKey).Get<KwfCacheConfiguration>() ?? null;
             return AddKwfCacheOnMemory(services, cacheSettings);
         }
 
         public static IServiceCollection AddKwfCacheOnMemory(
             this IServiceCollection services,
-            KwfCacheConfiguration cacheSettings)
+            KwfCacheConfiguration? cacheSettings)
         {
             if (services == null)
             {

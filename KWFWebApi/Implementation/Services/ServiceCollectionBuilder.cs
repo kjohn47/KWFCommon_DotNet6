@@ -82,20 +82,48 @@
 
                 var serviceInstallers = serviceInstallerTypes
                     .Select(x => {
-                        if (x.GetConstructors().Any(c => c.GetParameters().Length == 2))
-                            return Activator.CreateInstance(x, Configuration, IsDev);
+                        var constructorsParams = x.GetConstructors()?
+                                                  .FirstOrDefault(x => x.IsPublic && x.GetParameters().Any())?
+                                                  .GetParameters();
+                        
+                        if (constructorsParams is null)
+                        {
+                            return Activator.CreateInstance(x);
+                        }
 
-                        if (x.GetConstructors().Any(c => 
-                                                    c.GetParameters().Length == 1 && 
-                                                    c.GetParameters().First().ParameterType.Equals(typeof(IConfiguration))))
-                            return Activator.CreateInstance(x, Configuration);
+                        var paramsObj = new List<object>();
+                        var isDevAssigned = false;
+                        foreach (var cParam in constructorsParams)
+                        {
+                            var paramType = cParam.ParameterType;
+                            if (paramType is null)
+                            {
+                                continue;
+                            }
 
-                        if (x.GetConstructors().Any(c =>
-                                                    c.GetParameters().Length == 1 &&
-                                                    c.GetParameters().First().ParameterType.Equals(typeof(bool))))
-                            return Activator.CreateInstance(x, IsDev);
+                            if (paramType.Equals(typeof(IConfiguration)))
+                            {
+                                paramsObj.Add(Configuration);
+                                continue;
+                            }
+                            
+                            if (!isDevAssigned && paramType.Equals(typeof(bool)))
+                            {
+                                isDevAssigned = true;
+                                paramsObj.Add(IsDev);
+                                continue;
+                            }
+                            
+                            if (paramType.IsValueType)
+                            {
+                                paramsObj.Add(Activator.CreateInstance(paramType)!);
+                                continue;
+                            }
 
-                        return Activator.CreateInstance(x);
+                            paramsObj.Add(null!);
+                        }
+                        
+                        return Activator.CreateInstance(x, paramsObj.ToArray());                        
                     })
                     .Cast<IServiceDefinition>();
 

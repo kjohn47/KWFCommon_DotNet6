@@ -19,7 +19,7 @@
 
         public static IServiceCollection AddKwfRedisCache(
             this IServiceCollection services,
-            KwfRedisCacheOptions cacheSettings)
+            KwfRedisCacheOptions? cacheSettings)
         {
             if (services == null)
             {
@@ -35,11 +35,11 @@
             return services;
         }
 
-        public static KwfRedisCacheOptions GetRedisCacheOptions(
+        public static KwfRedisCacheOptions? GetRedisCacheOptions(
             this IConfiguration configuration,
             string? customConfigurationKey = null)
         {
-            return configuration.GetSection(customConfigurationKey ?? "KwfRedisCacheConfiguration").Get<KwfRedisCacheOptions>() ?? new KwfRedisCacheOptions();
+            return configuration?.GetSection(customConfigurationKey ?? "KwfRedisCacheConfiguration").Get<KwfRedisCacheOptions>() ?? null;
         }
     }
 }
