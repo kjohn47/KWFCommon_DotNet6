@@ -20,8 +20,5 @@
         Task RemoveCachedItemAsync(
             string key,
             CancellationToken? cancellationToken = null);
-
-        Task<IEnumerable<T>?> GetValuesListFromPaternAsync<T>(string pattern)
-            where T : class;
     }
 }

@@ -57,14 +57,6 @@
             _redisCache = new RedisCache(_redisConfiguration);
         }
 
-        public async Task<IEnumerable<T>?> GetValuesListFromPaternAsync<T>(string pattern)
-            where T : class
-        {
-            await ConnectAsync();
-            var values = await _db!.HashGetAllAsync(pattern);
-            return values.Select(x => ParseStringToObject<T>(x.Value.ToString()));
-        }
-
         public Task<CachedResult<TResult>> GetCachedItemAsync<TResult>(
             string key,
             CancellationToken? cancellationToken = null)
