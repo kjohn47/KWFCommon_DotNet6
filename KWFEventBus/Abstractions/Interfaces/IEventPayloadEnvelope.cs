@@ -1,4 +1,4 @@
-﻿namespace KWFEventBus.Abstractions
+﻿namespace KWFEventBus.Abstractions.Interfaces
 {
     public interface IEventPayloadEnvelope<T> where T : class
     {

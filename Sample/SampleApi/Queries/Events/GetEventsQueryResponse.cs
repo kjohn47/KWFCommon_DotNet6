@@ -2,7 +2,7 @@
 {
     using KWFWebApi.Abstractions.Query;
 
-    using Sample.SampleApi.Models;
+    using Sample.SampleApi.Events;
 
     public class GetEventsQueryResponse : IQueryResponse
     {

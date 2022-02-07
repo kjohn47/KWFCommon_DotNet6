@@ -9,6 +9,7 @@
 
     using KWFWebApi.Abstractions.Command;
 
+    using Sample.SampleApi.Events;
     using Sample.SampleApi.Models;
 
     using System.Threading;

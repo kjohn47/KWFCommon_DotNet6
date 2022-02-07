@@ -7,6 +7,7 @@
 
     using KWFWebApi.Abstractions.Query;
 
+    using Sample.SampleApi.Events;
     using Sample.SampleApi.Models;
 
     using System.Net;
