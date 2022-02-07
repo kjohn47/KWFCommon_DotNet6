@@ -55,6 +55,7 @@
 
         public void StartConsuming()
         {
+            _consumeEnabled = true;
             if (_consumer is not null)
             {
                 Task.Run(async () =>
