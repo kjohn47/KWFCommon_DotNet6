@@ -7,24 +7,62 @@
     using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Caching.StackExchangeRedis;
 
+    using StackExchange.Redis;
+
     using System;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
 
-    public class KwfRedisCache : RedisCache, IKwfRedisCache
+    public class KwfRedisCache : IKwfRedisCache, IDisposable
     {
+        private bool _disposed;
+
+        private readonly RedisCache _redisCache;
+
+        private IConnectionMultiplexer? _connectionMultiplexer;
+
+        private IDatabase? _db;
+
         private readonly IDictionary<string, CacheKeyEntry> _cachedKeySettings;
 
         private readonly TimeSpan _defaultCacheInterval;
 
+        private readonly RedisCacheOptions _redisConfiguration;
+
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
+
         private static JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
 
         public KwfRedisCache(KwfRedisCacheOptions options)
-            : base(options?.BuildRedisCacheOptions() ?? new RedisCacheOptions())
         {
             _cachedKeySettings = options?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
             _defaultCacheInterval = options?.DefaultCacheInterval?.GetTimeSpan() ?? new TimeSpan(0, 60, 0);
+            _redisConfiguration = options?.BuildRedisCacheOptions() ?? new RedisCacheOptions();
+            if (_redisConfiguration?.ConfigurationOptions is null)
+            {
+                throw new KwfRedisCacheException("REDISMISSINGCONFIG", "Could not connect to redis cache server : missing configuration");
+            }
+
+            _redisConfiguration.ConnectionMultiplexerFactory = async () =>
+            {
+                if (_db is null)
+                {
+                    await ConnectAsync();
+                }
+
+                return _connectionMultiplexer;
+            };
+
+            _redisCache = new RedisCache(_redisConfiguration);
+        }
+
+        public async Task<IEnumerable<T>?> GetValuesListFromPaternAsync<T>(string pattern)
+            where T : class
+        {
+            await ConnectAsync();
+            var values = await _db!.HashGetAllAsync(pattern);
+            return values.Select(x => ParseStringToObject<T>(x.Value.ToString()));
         }
 
         public Task<CachedResult<TResult>> GetCachedItemAsync<TResult>(
@@ -126,6 +164,33 @@
             CancellationToken? cancellationToken = null) where TResult : class
         {
             return GetHandledItemFromCacheAsync(key, fetchDataHandler, resultHandler, fetchDataResultHandler, settingsKey, cancellationToken);
+        }
+
+        public byte[] Get(string key) => _redisCache.Get(key);
+
+        public Task<byte[]> GetAsync(string key, CancellationToken token = default) => _redisCache.GetAsync(key, token);
+
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => _redisCache.Set(key, value, options);
+
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+            => _redisCache.SetAsync(key, value, options, token);
+
+        public void Refresh(string key) => _redisCache.Refresh(key);
+
+        public Task RefreshAsync(string key, CancellationToken token = default) => _redisCache.RefreshAsync(key, token);
+
+        public void Remove(string key) => _redisCache.Remove(key);
+
+        public Task RemoveAsync(string key, CancellationToken token = default) => _redisCache.RemoveAsync(key, token);
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                _connectionMultiplexer?.Close();
+                _redisCache?.Dispose();
+            }
         }
 
         private async Task<TResult> GetHandledItemFromCacheAsync<TResult>(
@@ -231,6 +296,34 @@
                 cancellationToken ?? default);
 
             return value;
+        }
+
+        private async Task ConnectAsync()
+        {
+            if (_disposed)
+            {
+                throw new KwfRedisCacheException("REDISDISPOS", "Kwf Redis cache was disposed and cannot initialize connection");
+            }
+
+            if (_db is not null)
+            {
+                return;
+            }
+
+            _connectionLock.Wait();
+            try
+            {
+                if (_connectionMultiplexer is null)
+                {
+                    _connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_redisConfiguration.ConfigurationOptions);
+                }
+
+                _db = _connectionMultiplexer!.GetDatabase();
+            }
+            finally
+            {
+                _connectionLock.Release();
+            }
         }
 
         private static string SerializeObject<T>(T value)
