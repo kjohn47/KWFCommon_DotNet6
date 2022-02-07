@@ -11,23 +11,28 @@
     using Microsoft.Extensions.DependencyInjection.Extensions;
 
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Text.Json;
-    using System.Threading.Tasks;
 
     public static class KwfKafkaBusExtensions
     {
-        private static readonly JsonSerializerOptions _eventJsonSettings = EventsJsonOptions.GetJsonOptions();
-        public static IServiceCollection AddKwfKafkaBus(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddKwfKafkaBus(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
-            return services;
+            var config = configuration?.GetSection(customConfigurationKey ?? "KwfKafkaConfiguration").Get<KwfKafkaConfiguration>() ?? null;
+            return services.AddKwfKafkaBus(config!);
         }
 
         public static IServiceCollection AddKwfKafkaBus(this IServiceCollection services, KwfKafkaConfiguration kwfKafkaConfiguration)
         {
-            services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(kwfKafkaConfiguration, _eventJsonSettings));
+            if (services is null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (kwfKafkaConfiguration is null)
+            {
+                throw new ArgumentNullException(nameof(kwfKafkaConfiguration));
+            }
+
+            services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(kwfKafkaConfiguration, EventsJsonOptions.GetJsonOptions()));
             return services;
         }
 
@@ -35,6 +40,16 @@
             where THandler : class, IKwfEventHandler<TPayload>
             where TPayload : class
         {
+            if (services is null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (string.IsNullOrEmpty(topic))
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             services.TryAddSingleton<IKwfEventHandler<TPayload>, THandler>();
             services.TryAddSingleton(async s =>
             {

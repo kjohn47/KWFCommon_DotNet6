@@ -77,7 +77,9 @@
 
             var consumer = new ConsumerBuilder<string, byte[]>(config)
                         .Build();
+
             consumer.Subscribe(topic);
+
             while (!_disposed)
             {
                 var message = consumer.Consume(5000);
@@ -85,7 +87,10 @@
                 {
                     try
                     {
-                        var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(Encoding.UTF8.GetString(message.Message.Value));
+                        var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
+                                            Encoding.UTF8.GetString(message.Message.Value),
+                                            _jsonSerializerOptions);
+
                         if (payloadObj is not null)
                         {
                             await handler.HandleEventAsync(payloadObj);
