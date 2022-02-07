@@ -28,17 +28,17 @@
 
         private readonly TimeSpan _defaultCacheInterval;
 
-        private readonly RedisCacheOptions _redisConfiguration;
+        private readonly RedisCacheOptions? _redisConfiguration;
 
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
 
-        private static JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
 
         public KwfRedisCache(KwfRedisCacheOptions options)
         {
             _cachedKeySettings = options?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
             _defaultCacheInterval = options?.DefaultCacheInterval?.GetTimeSpan() ?? new TimeSpan(0, 60, 0);
-            _redisConfiguration = options?.BuildRedisCacheOptions() ?? new RedisCacheOptions();
+            _redisConfiguration = options?.BuildRedisCacheOptions();
             if (_redisConfiguration?.ConfigurationOptions is null)
             {
                 throw new KwfRedisCacheException("REDISMISSINGCONFIG", "Could not connect to redis cache server : missing configuration");
@@ -307,7 +307,7 @@
             {
                 if (_connectionMultiplexer is null)
                 {
-                    _connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_redisConfiguration.ConfigurationOptions);
+                    _connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_redisConfiguration!.ConfigurationOptions);
                 }
 
                 _db = _connectionMultiplexer!.GetDatabase();

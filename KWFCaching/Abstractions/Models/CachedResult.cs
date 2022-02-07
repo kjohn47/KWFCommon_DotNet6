@@ -3,7 +3,7 @@
     public class CachedResult<TResult>
         where TResult : class
     {
-        public TResult? Result { get; set; }
+        public TResult Result { get; set; } = default!;
 
         public bool CacheMiss { get; set; }
     }
