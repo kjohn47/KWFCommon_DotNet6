@@ -4,11 +4,11 @@
 
     public class PublishEventCommandResponse : ICommandResponse
     {
-        public PublishEventCommandResponse(Guid publishedId)
+        public PublishEventCommandResponse(string topic)
         {
-            PublishedId = publishedId;
+            PublishedToTopic = topic;
         }
 
-        public Guid PublishedId { get; set; } = Guid.Empty;
+        public string PublishedToTopic { get; set; } = string.Empty;
     }
 }

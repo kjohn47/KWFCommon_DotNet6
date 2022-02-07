@@ -1,26 +1,24 @@
 ﻿namespace Sample.SampleApi.Commands.Events
 {
-    using KWFCaching.Memory.Interfaces;
-
     using KWFCommon.Abstractions.CQRS;
     using KWFCommon.Abstractions.Models;
     using KWFCommon.Implementation.CQRS;
     using KWFCommon.Implementation.Models;
 
-    using KWFWebApi.Abstractions.Command;
+    using KWFEventBus.KWFKafka.Interfaces;
 
-    using Sample.SampleApi.Events;
-    using Sample.SampleApi.Models;
+    using KWFWebApi.Abstractions.Command;
 
     using System.Threading;
     using System.Threading.Tasks;
 
     public class PublishEventCommandHandler : ICommandHandler<PublishEventCommandRequest, PublishEventCommandResponse>
     {
-        private readonly IKwfCacheOnMemory _cache;
-        public PublishEventCommandHandler(IKwfCacheOnMemory cache)
+        private const string Topic = "kwf.kafka.event.test";
+        private readonly IKwfKafkaBus _eventBus;
+        public PublishEventCommandHandler(IKwfKafkaBus eventBus)
         {
-            _cache = cache;
+            _eventBus = eventBus;
         }
 
         public Task<INullableObject<ICQRSValidationError>> ValidateAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
@@ -38,17 +36,9 @@
 
         public async Task<ICQRSResult<PublishEventCommandResponse>> ExecuteCommandAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
         {
-            var newEvent = new KwfEvent(request.EventMessage);
-            await _cache.GetOrInsertCachedItemAsync(
-                "EVENT_LIST", 
-                _ => Task.FromResult(new List<KwfEvent>()),
-                r =>
-                {
-                    r.Result.Add(newEvent);
-                    return r.Result;
-                });
-
-            return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(newEvent.Id));
+            await _eventBus.ProduceAsync(request.EventMessage, Topic);
+            
+            return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(Topic));
         }
     }
 }

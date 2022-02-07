@@ -20,11 +20,11 @@
 
         public IDictionary<string, IEnumerable<EventBusProperty>>? TopicConsumerProperties { get; set; }
 
-        public IDictionary<string, string>? GetProducerProperties()
+        public IDictionary<string, string> GetProducerProperties()
         {
             if (CommonProperties is null && ProducerProperties is null)
             {
-                return null;
+                return new Dictionary<string, string>();
             }
 
             if (ProducerProperties is null)
@@ -40,12 +40,12 @@
             return GetProperties(CommonProperties.Union(ProducerProperties)); ;
         }
 
-        public IDictionary<string, string>? GetConsumerProperties(string? configurationKey = null)
+        public IDictionary<string, string> GetConsumerProperties(string? configurationKey = null)
         {
 
             if (string.IsNullOrEmpty(configurationKey) && CommonProperties is null && ConsumerProperties is null)
             {
-                return null;
+                return new Dictionary<string, string>(); ;
             }
 
             if (!string.IsNullOrEmpty(configurationKey))

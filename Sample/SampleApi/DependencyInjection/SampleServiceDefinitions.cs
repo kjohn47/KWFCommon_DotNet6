@@ -2,10 +2,12 @@
 {
     using KWFCaching.Memory.Extensions;
     using KWFCaching.Redis.Extensions;
+    using KWFEventBus.KWFKafka.Extensions;
 
     using KWFWebApi.Abstractions.Services;
     using KWFWebApi.Extensions.CQRSHandlers;
 
+    using Sample.SampleApi.Events;
     using Sample.SampleApi.Services;
 
     public class SampleServiceDefinitions : IServiceDefinition
@@ -23,6 +25,11 @@
             services.AddKwfCacheOnMemory(_configuration);
             //Redis distributed cache
             services.AddKwfRedisCache(_configuration);
+
+            //kafka event bus
+            services.AddKwfKafkaBus(_configuration);
+            //register consumer handler for topic
+            services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>("kwf.kafka.event.test");
 
             // ---- Add common services ----
             services.AddSingleton<WeatherForecastServices>();
@@ -49,11 +56,14 @@
         /*
          * Defaulted on interface, can have implementation ignored
          * 
-
+        */
         public void ConfigureServices(IApplicationBuilder app)
         {
-        }
+            //start specific consumer handler for event handler
+            //app.StartConsumingKafkaEvent<KwfPublishEventHandler, string>();
 
-        */
+            //start all registered consumers
+            app.StartConsumingAllKafkaEvents();
+        }
     }
 }

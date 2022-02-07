@@ -22,18 +22,26 @@
 
         public KwfKafkaBus(KwfKafkaConfiguration configuration, JsonSerializerOptions? jsonSerializerOptions = null)
         {
+            if (string.IsNullOrEmpty(configuration.AppName))
+            {
+                throw new ArgumentNullException(nameof(configuration.AppName));
+            }
+
             _configuration = configuration;
             _jsonSerializerOptions = jsonSerializerOptions ?? EventsJsonOptions.GetJsonOptions();
             _serverEndpoints = configuration.GetServerEndpoints();
 
             _defaultProducerProperties = new ProducerConfig(configuration.GetProducerProperties())
             {
-                BootstrapServers = _serverEndpoints
+                BootstrapServers = _serverEndpoints,
+                MessageTimeoutMs = 5000,
+                RequestTimeoutMs = 5000
             };
 
             _defaultConsumerProperties = new ConsumerConfig(configuration.GetConsumerProperties())
             {
-                BootstrapServers = _serverEndpoints
+                BootstrapServers = _serverEndpoints,
+                GroupId = _configuration.AppName
             };
 
             _producer = new ProducerBuilder<string, byte[]>(_defaultProducerProperties).Build();
@@ -62,60 +70,21 @@
                 Key = key!,
                 Value = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions)),
                 Timestamp = new Timestamp(envelope.TimeStamp)
-            });
+            },
+            cancellationToken ?? default);
         }
 
-        public async Task<IConsumer<string, byte[]>> RegisterConsumer<TPayload>(IKwfEventHandler<TPayload> handler, string topic, string? topipConfigurationKey = null)
-            where TPayload : class
+        public (IConsumer<string, byte[]>, ConsumerConfig) CreateConsumer(string? topipConfigurationKey = null)
         {
             var config = string.IsNullOrEmpty(topipConfigurationKey)
                         ? _defaultConsumerProperties
                         : new ConsumerConfig(_configuration.GetConsumerProperties(topipConfigurationKey))
                         {
-                            BootstrapServers = _serverEndpoints
+                            BootstrapServers = _serverEndpoints,
+                            GroupId = _configuration.AppName
                         };
 
-            var consumer = new ConsumerBuilder<string, byte[]>(config)
-                        .Build();
-
-            consumer.Subscribe(topic);
-
-            while (!_disposed)
-            {
-                var message = consumer.Consume(5000);
-                if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
-                {
-                    try
-                    {
-                        var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
-                                            Encoding.UTF8.GetString(message.Message.Value),
-                                            _jsonSerializerOptions);
-
-                        if (payloadObj is not null)
-                        {
-                            await handler.HandleEventAsync(payloadObj);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new KwfKafkaBusException("KAFKACONSUMEERR", $"Error occured during consumption of topic {topic}", ex);
-                    }
-                }
-
-                if (config?.EnableAutoCommit is not null && config.EnableAutoCommit.Value == false)
-                {
-                    try
-                    {
-                        consumer.Commit();
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            consumer.Close();
-
-            return consumer;
+            return (new ConsumerBuilder<string, byte[]>(config).Build(), config!);
         }
     }
 }
