@@ -123,6 +123,7 @@
                     consumer,
                     config!,
                     _configuration.ConsumerTimeout,
+                    _configuration.ConsumerMaxRetries,
                     _jsonSerializerOptions!,
                     _logger);
         }

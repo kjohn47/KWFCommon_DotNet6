@@ -4,5 +4,6 @@
     {
         void StartConsuming();
         void StopConsuming();
+        bool IsStarted { get; }
     }
 }

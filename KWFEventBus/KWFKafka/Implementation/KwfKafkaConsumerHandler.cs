@@ -22,7 +22,8 @@
         private readonly ILogger? _logger;
         private readonly JsonSerializerOptions _kafkaJsonSettings;
         private readonly string _topic;
-        private bool _consumeEnabled = true;
+        private readonly int _maxRetry;
+        private bool _consumeEnabled = false;
         bool _disposed;
 
         public KwfKafkaConsumerHandler(
@@ -31,6 +32,7 @@
             IConsumer<string, byte[]> consumer,
             ConsumerConfig configuration,
             int timeout,
+            int maxRetries,
             JsonSerializerOptions kafkaJsonSettings,
             ILogger? logger)
         {
@@ -41,6 +43,7 @@
             _configuration = configuration;
             _timeout = timeout;
             _logger = logger;
+            _maxRetry = maxRetries;
         }
 
         public void Dispose()
@@ -52,53 +55,59 @@
                 {
                     _consumer.Close();
                 }
-
             }
         }
 
+        public bool IsStarted => _consumeEnabled && !_disposed;
+
         public void StartConsuming()
         {
+            if (IsStarted || _disposed)
+            {
+                return;
+            }
+
             _consumeEnabled = true;
             if (_consumer is not null)
             {
                 Task.Run(async () =>
                 {
-                    while (!_disposed && _consumeEnabled)
+                    var retry = _maxRetry;
+                    bool messageProcessException = false;
+                    while (IsStarted)
                     {
                         try
                         {
                             var message = _consumer?.Consume(_timeout);
+                            retry = messageProcessException ? retry : _maxRetry;
                             if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
                             {
-
-                                var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
-                                                    Encoding.UTF8.GetString(message.Message.Value),
-                                                    _kafkaJsonSettings);
-
-                                if (payloadObj is not null)
+                                try
                                 {
-                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
-                                    {
-                                        _logger.LogInformation("Consuming event from topic {0} with id {1}", _topic, payloadObj.Id);
-                                    }
+                                    var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
+                                                        Encoding.UTF8.GetString(message.Message.Value),
+                                                        _kafkaJsonSettings);
 
-                                    await _kwfEventHandler.HandleEventAsync(payloadObj);
-                                }
-
-                                if (_configuration?.EnableAutoCommit is null || _configuration.EnableAutoCommit.Value == false)
-                                {
-                                    try
+                                    if (payloadObj is not null)
                                     {
-                                        _consumer?.Commit(message);
-                                    }
-                                    catch
-                                    {
-                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                                         {
-                                            _logger.LogWarning("Error occurred during commit of topic {0}, payload id:{1}", _topic, payloadObj?.Id);
+                                            _logger.LogInformation("Consuming event from topic {0} with id {1}", _topic, payloadObj.Id);
                                         }
+
+                                        await _kwfEventHandler.HandleEventAsync(payloadObj);
                                     }
+                                    retry = _maxRetry;
+                                    messageProcessException = false;
                                 }
+                                catch
+                                {
+                                    TryComminMessage(message);
+                                    messageProcessException = true;
+                                    throw;
+                                }
+
+                                TryComminMessage(message);
                             }
                         }
                         catch (Exception ex)
@@ -119,10 +128,13 @@
                                 {
                                     _logger.LogError(kwfEx, "Error occured on consumer for topic {0}", _topic);
                                 }
-                                else
+
+                                if (retry == 0)
                                 {
                                     throw kwfEx;
                                 }
+
+                                retry--;
                             }
                         }
                     }
@@ -133,9 +145,32 @@
         public void StopConsuming()
         {
             _consumeEnabled = false;
-            if (_consumer is not null)
+            try
             {
-                _consumer.Close();
+                if (_configuration?.EnableAutoCommit is null || _configuration.EnableAutoCommit.Value == false)
+                {
+                    _consumer.Commit();
+                }
+            }
+            catch
+            { }
+        }
+
+        private void TryComminMessage(ConsumeResult<string, byte[]> message, Guid? id = null)
+        {
+            if (_configuration?.EnableAutoCommit is null || _configuration.EnableAutoCommit.Value == false)
+            {
+                try
+                {
+                    _consumer?.Commit(message);
+                }
+                catch
+                {
+                    if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                    {
+                        _logger.LogWarning("Error occurred during commit of topic {0}, payload id:{1}", _topic, id);
+                    }
+                }
             }
         }
     }

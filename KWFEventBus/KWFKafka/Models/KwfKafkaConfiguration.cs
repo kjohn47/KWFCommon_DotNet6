@@ -38,6 +38,8 @@
 
         public int ConsumerTimeout { get; set; } = 5000;
 
+        public int ConsumerMaxRetries { get; set; } = 5;
+
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
 
         public IEnumerable<EventBusProperty>? CommonProperties { get; set; }
