@@ -14,8 +14,8 @@
 
         public T Payload { get; set; }
 
-        public Guid Id { get; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        public DateTime TimeStamp { get; } = DateTime.UtcNow;
+        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
     }
 }

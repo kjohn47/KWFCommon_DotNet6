@@ -76,6 +76,11 @@
 
                                 if (payloadObj is not null)
                                 {
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                                    {
+                                        _logger.LogInformation("Consuming event from topic {0} with id {1}", _topic, payloadObj.Id);
+                                    }
+
                                     await _kwfEventHandler.HandleEventAsync(payloadObj);
                                 }
 
@@ -87,12 +92,24 @@
                                     }
                                     catch
                                     {
+                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                        {
+                                            _logger.LogWarning("Error occurred during commit of topic {0}, payload id:{1}", _topic, payloadObj?.Id);
+                                        }
                                     }
                                 }
                             }
                             catch (Exception ex)
                             {
-                                throw new KwfKafkaBusException("KAFKACONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
+                                var kwfEx = new KwfKafkaBusException("KAFKACONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
+                                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                                {
+                                    _logger.LogError(kwfEx, "Error occured on consumer for topic {0}", _topic);
+                                }
+                                else
+                                {
+                                    throw kwfEx;
+                                }
                             }
                         }
                     }
