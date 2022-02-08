@@ -1,7 +1,6 @@
 ﻿namespace KWFEventBus.KWFKafka.Extensions
 {
     using KWFEventBus.Abstractions.Interfaces;
-    using KWFEventBus.Abstractions.Models;
     using KWFEventBus.KWFKafka.Implementation;
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
