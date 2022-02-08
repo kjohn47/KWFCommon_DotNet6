@@ -131,6 +131,7 @@
 
                                 if (retry == 0)
                                 {
+                                    _consumeEnabled = false;
                                     throw kwfEx;
                                 }
 
