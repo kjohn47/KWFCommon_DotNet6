@@ -88,7 +88,7 @@
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();          
+            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();
 
             return app;
         }
