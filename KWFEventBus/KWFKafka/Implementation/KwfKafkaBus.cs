@@ -7,6 +7,8 @@
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
 
+    using Microsoft.Extensions.Logging;
+
     using System.Text;
     using System.Text.Json;
 
@@ -17,34 +19,27 @@
         private readonly IProducer<string, byte[]> _producer;
         private readonly ProducerConfig? _defaultProducerProperties;
         private readonly ConsumerConfig? _defaultConsumerProperties;
-        private readonly string _serverEndpoints;
+        private readonly Headers? _producerHeaders;
+        private readonly ILogger? _logger;
         private bool _disposed;
 
-        public KwfKafkaBus(KwfKafkaConfiguration configuration, JsonSerializerOptions? jsonSerializerOptions = null)
+        public KwfKafkaBus(KwfKafkaConfiguration configuration, ILoggerFactory? loggerFactory, JsonSerializerOptions? jsonSerializerOptions = null)
         {
-            if (string.IsNullOrEmpty(configuration.AppName))
-            {
-                throw new ArgumentNullException(nameof(configuration.AppName));
-            }
-
             _configuration = configuration;
             _jsonSerializerOptions = jsonSerializerOptions ?? EventsJsonOptions.GetJsonOptions();
-            _serverEndpoints = configuration.GetServerEndpoints();
-
-            _defaultProducerProperties = new ProducerConfig(configuration.GetProducerProperties())
+            _defaultProducerProperties = _configuration.GetProducerConfiguration();
+            _defaultConsumerProperties = _configuration.GetConsumerConfiguration();
+            _producerHeaders = new Headers
             {
-                BootstrapServers = _serverEndpoints,
-                MessageTimeoutMs = 5000,
-                RequestTimeoutMs = 5000
+                { "application-name", Encoding.UTF8.GetBytes(_configuration.AppName) },
+                { "host-name", Encoding.UTF8.GetBytes(_configuration.ClientName) }
             };
-
-            _defaultConsumerProperties = new ConsumerConfig(configuration.GetConsumerProperties())
-            {
-                BootstrapServers = _serverEndpoints,
-                GroupId = _configuration.AppName
-            };
-
             _producer = new ProducerBuilder<string, byte[]>(_defaultProducerProperties).Build();
+
+            if (loggerFactory is not null)
+            {
+                _logger = loggerFactory.CreateLogger<KwfKafkaBus>();
+            }
         }
 
         public void Dispose()
@@ -67,6 +62,7 @@
 
             return _producer.ProduceAsync(topic, new Message<string, byte[]>
             {
+                Headers = _producerHeaders,
                 Key = key!,
                 Value = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions)),
                 Timestamp = new Timestamp(envelope.TimeStamp)
@@ -74,17 +70,26 @@
             cancellationToken ?? default);
         }
 
-        public (IConsumer<string, byte[]>, ConsumerConfig) CreateConsumer(string? topipConfigurationKey = null)
+        public IKwfEventConsumerHandler CreateConsumer<TPayload>(
+            IKwfEventHandler<TPayload> eventHandler, 
+            string topic,
+            string? topipConfigurationKey = null)
+        where TPayload : class
         {
             var config = string.IsNullOrEmpty(topipConfigurationKey)
                         ? _defaultConsumerProperties
-                        : new ConsumerConfig(_configuration.GetConsumerProperties(topipConfigurationKey))
-                        {
-                            BootstrapServers = _serverEndpoints,
-                            GroupId = _configuration.AppName
-                        };
+                        : _configuration.GetConsumerConfiguration(topipConfigurationKey);
+            var consumer = new ConsumerBuilder<string, byte[]>(config).Build();
+            consumer.Subscribe(topic);
 
-            return (new ConsumerBuilder<string, byte[]>(config).Build(), config!);
+            return new KwfKafkaConsumerHandler<IKwfEventHandler<TPayload>, TPayload>(
+                    eventHandler,
+                    topic,
+                    consumer,
+                    config!,
+                    _configuration.ConsumerTimeout,
+                    _jsonSerializerOptions!,
+                    _logger);
         }
     }
 }

@@ -10,13 +10,13 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Logging;
 
     using System;
     using System.Text.Json;
 
     public static class KwfKafkaBusExtensions
     {
-        private static readonly JsonSerializerOptions _kafkaJsonSettings = EventsJsonOptions.GetJsonOptions();
         public static IServiceCollection AddKwfKafkaBus(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
             var config = configuration?.GetSection(customConfigurationKey ?? "KwfKafkaConfiguration").Get<KwfKafkaConfiguration>() ?? null;
@@ -35,13 +35,15 @@
                 throw new ArgumentNullException(nameof(kwfKafkaConfiguration));
             }
 
-            services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(kwfKafkaConfiguration, _kafkaJsonSettings));
-            services.TryAddSingleton<IKwfKafkaConsumerAcessor, KwfKafkaConsumerAcessor>();
+            services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(
+                kwfKafkaConfiguration, 
+                s.GetService<ILoggerFactory>()));
+            services.TryAddSingleton<IKwfConsumerAcessor, KwfKafkaConsumerAcessor>();
             return services;
         }
 
-        public static IServiceCollection AddKwfKafkaConsumer<THandler, TPayload>(this IServiceCollection services, string topic, string? topipConfigurationKey = null)
-            where THandler : class, IKwfEventHandler<TPayload>
+        public static IServiceCollection AddKwfKafkaConsumer<THandlerImplementation, TPayload>(this IServiceCollection services, string topic, string? topicConfigurationKey = null)
+            where THandlerImplementation : class, IKwfEventHandler<TPayload>
             where TPayload : class
         {
             if (services is null)
@@ -54,15 +56,14 @@
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            services.TryAddSingleton<IKwfEventHandler<TPayload>, THandler>();
+            services.TryAddSingleton<IKwfEventHandler<TPayload>, THandlerImplementation>();
             services.AddSingleton<IKwfEventConsumerHandler>(s =>
             {
-                return new KwfEventConsumerHandler<THandler, TPayload>(
-                    s.GetRequiredService<IKwfEventHandler<TPayload>>(), 
-                    s.GetRequiredService<IKwfKafkaBus>(),
-                    topic,
-                    _kafkaJsonSettings,
-                    topipConfigurationKey);
+                return s.GetRequiredService<IKwfKafkaBus>()
+                        .CreateConsumer(
+                            s.GetRequiredService<IKwfEventHandler<TPayload>>(),
+                            topic,
+                            topicConfigurationKey);
             });
 
             return services;
@@ -77,7 +78,7 @@
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfKafkaConsumerAcessor>()?.StartConsuming<THandler, TPayload>();
+            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsuming<THandler, TPayload>();
 
             return app;
         }
@@ -89,7 +90,7 @@
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfKafkaConsumerAcessor>()?.StartConsumingAll();          
+            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();          
 
             return app;
         }

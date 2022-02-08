@@ -1,4 +1,4 @@
-﻿namespace KWFEventBus.KWFKafka.Interfaces
+﻿namespace KWFEventBus.Abstractions.Interfaces
 {
     public interface IKwfEventConsumerHandler
     {

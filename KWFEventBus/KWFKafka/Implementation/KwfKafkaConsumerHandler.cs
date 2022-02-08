@@ -4,40 +4,43 @@
 
     using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.Abstractions.Models;
-    using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
+
+    using Microsoft.Extensions.Logging;
 
     using System.Text;
     using System.Text.Json;
 
-    internal class KwfEventConsumerHandler<THandler, TPayload> : IKwfEventConsumerHandler, IDisposable
+    public class KwfKafkaConsumerHandler<THandler, TPayload> : IKwfEventConsumerHandler, IDisposable
         where THandler : class, IKwfEventHandler<TPayload>
         where TPayload : class
     {
         private readonly IKwfEventHandler<TPayload> _kwfEventHandler;
-        private readonly IKwfKafkaBus _kwfKafkaBus;
+        private readonly IConsumer<string, byte[]> _consumer;
+        private readonly ConsumerConfig _configuration;
+        private readonly int _timeout;
+        private readonly ILogger? _logger;
         private readonly JsonSerializerOptions _kafkaJsonSettings;
-        private readonly ConsumerConfig _consumerConfig;
-        private readonly IConsumer<string, byte[]>? _consumer;
         private readonly string _topic;
-        private readonly string? _topicConfigurationKey;
         private bool _consumeEnabled = true;
         bool _disposed;
 
-        public KwfEventConsumerHandler(
-            IKwfEventHandler<TPayload> kwfEventHandler, 
-            IKwfKafkaBus kwfKafkaBus,
+        public KwfKafkaConsumerHandler(
+            IKwfEventHandler<TPayload> kwfEventHandler,
             string topic,
+            IConsumer<string, byte[]> consumer,
+            ConsumerConfig configuration,
+            int timeout,
             JsonSerializerOptions kafkaJsonSettings,
-            string? topicConfigurationKey = null)
+            ILogger? logger)
         {
-            _kwfKafkaBus = kwfKafkaBus;
             _kwfEventHandler = kwfEventHandler;
             _kafkaJsonSettings = kafkaJsonSettings;
             _topic = topic;
-            _topicConfigurationKey = topicConfigurationKey;
-            (_consumer, _consumerConfig) = _kwfKafkaBus.CreateConsumer(_topicConfigurationKey);
-            _consumer.Subscribe(_topic);
+            _consumer = consumer;
+            _configuration = configuration;
+            _timeout = timeout;
+            _logger = logger;
         }
 
         public void Dispose()
@@ -62,7 +65,7 @@
                 {
                     while (!_disposed && _consumeEnabled)
                     {
-                        var message = _consumer.Consume(5000);
+                        var message = _consumer.Consume(_timeout);
                         if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
                         {
                             try
@@ -76,7 +79,7 @@
                                     await _kwfEventHandler.HandleEventAsync(payloadObj);
                                 }
 
-                                if (_consumerConfig?.EnableAutoCommit is null || _consumerConfig.EnableAutoCommit.Value == false)
+                                if (_configuration?.EnableAutoCommit is null || _configuration.EnableAutoCommit.Value == false)
                                 {
                                     try
                                     {

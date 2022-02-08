@@ -1,5 +1,7 @@
 ﻿namespace KWFEventBus.KWFKafka.Models
 {
+    using Confluent.Kafka;
+
     using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.Abstractions.Models;
 
@@ -8,7 +10,31 @@
 
     public class KwfKafkaConfiguration : IKWFEventBusConfiguration
     {
+        private string? _endpoints;
+
+        private static IDictionary<string, string> _defaultProducerProps = new Dictionary<string, string>
+        {
+            {"acks", "all"},
+            {"request.timeout.ms", "5000"},
+            {"message.timeout.ms", "5000"},
+            {"transaction.timeout.ms", "5000"},
+            {"socket.timeout.ms", "5000"}
+        };
+
+        private static IDictionary<string, string> _defaultConsumerProps = new Dictionary<string, string>
+        {
+            
+            {"enable.auto.commit", "true"},
+            {"socket.timeout.ms", "5000"},
+            {"session.timeout.ms", "10000"},
+            {"auto.commit.interval.ms", "5000" }
+        };
+
         public string AppName { get; set; } = string.Empty;
+
+        public string ClientName { get; set; } = Environment.MachineName;
+
+        public int ConsumerTimeout { get; set; } = 5000;
 
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
 
@@ -20,39 +46,62 @@
 
         public IDictionary<string, IEnumerable<EventBusProperty>>? TopicConsumerProperties { get; set; }
 
-        public IDictionary<string, string> GetProducerProperties()
+        public ConsumerConfig GetConsumerConfiguration(string? configurationKey = null)
+        {
+            if (string.IsNullOrEmpty(AppName))
+            {
+                throw new KwfKafkaBusException("KWFKAFKAMISSPROP", "Missing kafka AppName, this property is defined as group id for consumer");
+            }
+
+            return new ConsumerConfig(GetConsumerProperties(configurationKey))
+            {
+                BootstrapServers = GetServerEndpoints(),
+                GroupId = AppName,
+                ClientId = $"{ClientName}.{AppName}"
+            };
+        }
+
+        public ProducerConfig GetProducerConfiguration()
+        {
+            return new ProducerConfig(GetProducerProperties())
+            {
+                BootstrapServers = GetServerEndpoints(),
+                ClientId = $"{ClientName}.{AppName}"
+            };
+        }
+
+        private IDictionary<string, string> GetProducerProperties()
         {
             if (CommonProperties is null && ProducerProperties is null)
             {
-                return new Dictionary<string, string>();
+                return _defaultProducerProps;
             }
 
             if (ProducerProperties is null)
             {
-                return GetProperties(CommonProperties!);
+                return GetProperties(CommonProperties!, _defaultProducerProps);
             }
 
             if (CommonProperties is null)
             {
-                return GetProperties(ProducerProperties!);
+                return GetProperties(ProducerProperties!, _defaultProducerProps);
             }
 
-            return GetProperties(CommonProperties.Union(ProducerProperties)); ;
+            return GetProperties(CommonProperties.Union(ProducerProperties), _defaultProducerProps); ;
         }
 
-        public IDictionary<string, string> GetConsumerProperties(string? configurationKey = null)
+        private IDictionary<string, string> GetConsumerProperties(string? configurationKey = null)
         {
 
             if (string.IsNullOrEmpty(configurationKey) && CommonProperties is null && ConsumerProperties is null)
             {
-                return new Dictionary<string, string>(); ;
+                return _defaultConsumerProps;
             }
 
             if (!string.IsNullOrEmpty(configurationKey))
             {
                 if (TopicConsumerProperties is null || !TopicConsumerProperties.ContainsKey(configurationKey))
                 {
-                    //If key is defined, props for key must be set
                     throw new KwfKafkaBusException("KWFKAFKAMISSPROP", "Missing kafka properties for selected consumer key");
                 }
 
@@ -60,62 +109,68 @@
 
                 if (CommonProperties is null)
                 {
-                    return GetProperties(topicProps);
+                    return GetProperties(topicProps, _defaultConsumerProps);
                 }
 
-                return GetProperties(CommonProperties.Union(topicProps));
+                return GetProperties(CommonProperties.Union(topicProps), _defaultConsumerProps);
             }
 
             if (ConsumerProperties is null)
             {
-                return GetProperties(CommonProperties!);
+                return GetProperties(CommonProperties!, _defaultConsumerProps);
             }
 
             if (CommonProperties is null)
             {
-                return GetProperties(ConsumerProperties!);
+                return GetProperties(ConsumerProperties!, _defaultConsumerProps);
             }
 
-            return GetProperties(CommonProperties.Union(ConsumerProperties));
+            return GetProperties(CommonProperties.Union(ConsumerProperties), _defaultConsumerProps);
         }
 
-        public string GetServerEndpoints()
+        private string GetServerEndpoints()
         {
-            if (Endpoints is null || !Endpoints.Any())
+            if (string.IsNullOrEmpty(_endpoints))
             {
-                throw new KwfKafkaBusException("MISSKAFKAENDPOINT", "Missing endpoints for kafka bus");
-            }
-
-            var strBuilder = new StringBuilder();
-            var numEndpoints = Endpoints.Count();
-            if (numEndpoints > 1)
-            {
-                for (int i = 0; i < numEndpoints - 1; i++)
+                if (Endpoints is null || !Endpoints.Any())
                 {
-                    var endpoint = Endpoints.ElementAt(i);
-                    strBuilder.Append(endpoint.Url)
-                              .Append(':')
-                              .Append(endpoint.Port)
-                              .Append(',');
+                    throw new KwfKafkaBusException("MISSKAFKAENDPOINT", "Missing endpoints for kafka bus");
                 }
+
+                var strBuilder = new StringBuilder();
+                var numEndpoints = Endpoints.Count();
+                if (numEndpoints > 1)
+                {
+                    for (int i = 0; i < numEndpoints - 1; i++)
+                    {
+                        var endpoint = Endpoints.ElementAt(i);
+                        strBuilder.Append(endpoint.Url)
+                                  .Append(':')
+                                  .Append(endpoint.Port)
+                                  .Append(',');
+                    }
+                }
+
+                var lastEndpoint = Endpoints.ElementAt(numEndpoints - 1);
+                strBuilder.Append(lastEndpoint.Url)
+                          .Append(':')
+                          .Append(lastEndpoint.Port);
+
+                _endpoints = strBuilder.ToString();
             }
 
-            var lastEndpoint = Endpoints.ElementAt(numEndpoints - 1);
-            strBuilder.Append(lastEndpoint.Url)
-                      .Append(':')
-                      .Append(lastEndpoint.Port);
-
-            return strBuilder.ToString();
+            return _endpoints;
         }
 
-        private IDictionary<string, string> GetProperties(IEnumerable<EventBusProperty> properties)
+        private IDictionary<string, string> GetProperties(IEnumerable<EventBusProperty> properties, IDictionary<string, string> initialProps)
         {
-            var dictionary = new Dictionary<string, string>();
+            var dictionary = new Dictionary<string, string>(initialProps);
             foreach (var property in properties)
             {
                 if (dictionary.ContainsKey(property.PropertyName))
                 {
                     dictionary[property.PropertyName] = property.PropertyValue;
+                    continue;
                 }
 
                 dictionary.Add(property.PropertyName, property.PropertyValue);

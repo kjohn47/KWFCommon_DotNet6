@@ -1,12 +1,11 @@
 ﻿namespace KWFEventBus.KWFKafka.Implementation
 {
     using KWFEventBus.Abstractions.Interfaces;
-    using KWFEventBus.KWFKafka.Interfaces;
 
     using System.Collections.Generic;
     using System.Linq;
 
-    internal class KwfKafkaConsumerAcessor : IKwfKafkaConsumerAcessor
+    internal class KwfKafkaConsumerAcessor : IKwfConsumerAcessor
     {
         private readonly IEnumerable<IKwfEventConsumerHandler> _consumerHandlers;
 
@@ -24,7 +23,7 @@
             where THandler : class, IKwfEventHandler<TPayload>
             where TPayload : class
         {
-            return _consumerHandlers.FirstOrDefault(x => x is KwfEventConsumerHandler<THandler, TPayload>);
+            return _consumerHandlers.FirstOrDefault(x => x is KwfKafkaConsumerHandler<THandler, TPayload>);
         }
 
         public void StartConsumingAll()

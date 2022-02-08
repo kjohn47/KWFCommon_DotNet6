@@ -1,8 +1,7 @@
-﻿namespace KWFEventBus.KWFKafka.Interfaces
-{
-    using KWFEventBus.Abstractions.Interfaces;
+﻿namespace KWFEventBus.Abstractions.Interfaces
+{ 
 
-    public interface IKwfKafkaConsumerAcessor
+    public interface IKwfConsumerAcessor
     {
         IKwfEventConsumerHandler? GetConsumerService<THandler, TPayload>()
             where THandler : class, IKwfEventHandler<TPayload>
