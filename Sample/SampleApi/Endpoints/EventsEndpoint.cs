@@ -14,13 +14,11 @@
         {
             builder.AddGet<GetEventsQueryResponse>(r =>
                 r.SetRoute("get-all")
-                 .SetSuccessHttpCodes(204)
                  .SetAction(h => 
                     () => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest())));
 
             builder.AddGet<GetEventsQueryResponse>(r =>
                 r.SetRoute("get-by-id/{id}")
-                 .SetSuccessHttpCodes(204)
                  .SetAction<Guid>(h =>
                     (Guid id) => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id))));
 

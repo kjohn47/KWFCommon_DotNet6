@@ -7,6 +7,7 @@
     using KWFWebApi.Abstractions.Services;
     using KWFWebApi.Extensions.CQRSHandlers;
 
+    using Sample.SampleApi.Constants;
     using Sample.SampleApi.Events;
     using Sample.SampleApi.Services;
 
@@ -29,7 +30,7 @@
             //kafka event bus
             services.AddKwfKafkaBus(_configuration);
             //register consumer handler for topic
-            services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>("kwf.kafka.event.test");
+            services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>(AppConstants.TestTopic);
 
             // ---- Add common services ----
             services.AddSingleton<WeatherForecastServices>();

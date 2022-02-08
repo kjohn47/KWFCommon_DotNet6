@@ -8,9 +8,7 @@
     using KWFWebApi.Abstractions.Query;
 
     using Sample.SampleApi.Events;
-    using Sample.SampleApi.Models;
 
-    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -29,7 +27,7 @@
             {
                 return Task.FromResult<ICQRSResult<GetEventsQueryResponse>>(
                     CQRSResult<GetEventsQueryResponse>.Success(
-                        new GetEventsQueryResponse(), HttpStatusCode.NoContent));
+                        new GetEventsQueryResponse()));
             }
 
             if (request.EventId is not null)

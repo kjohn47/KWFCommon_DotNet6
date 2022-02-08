@@ -9,12 +9,13 @@
 
     using KWFWebApi.Abstractions.Command;
 
+    using Sample.SampleApi.Constants;
+
     using System.Threading;
     using System.Threading.Tasks;
 
     public class PublishEventCommandHandler : ICommandHandler<PublishEventCommandRequest, PublishEventCommandResponse>
     {
-        private const string Topic = "kwf.kafka.event.test";
         private readonly IKwfKafkaBus _eventBus;
         public PublishEventCommandHandler(IKwfKafkaBus eventBus)
         {
@@ -36,9 +37,9 @@
 
         public async Task<ICQRSResult<PublishEventCommandResponse>> ExecuteCommandAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
         {
-            await _eventBus.ProduceAsync(request.EventMessage, Topic);
+            await _eventBus.ProduceAsync(request.EventMessage, AppConstants.TestTopic);
             
-            return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(Topic));
+            return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(AppConstants.TestTopic));
         }
     }
 }

@@ -27,7 +27,9 @@
             {"enable.auto.commit", "true"},
             {"socket.timeout.ms", "5000"},
             {"session.timeout.ms", "10000"},
-            {"auto.commit.interval.ms", "5000" }
+            {"auto.commit.interval.ms", "5000" },
+            {"allow.auto.create.topics", "true" },
+            {"auto.offset.reset", "earliest" }
         };
 
         public string AppName { get; set; } = string.Empty;

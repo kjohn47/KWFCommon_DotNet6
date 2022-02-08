@@ -65,11 +65,12 @@
                 {
                     while (!_disposed && _consumeEnabled)
                     {
-                        var message = _consumer.Consume(_timeout);
-                        if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
+                        try
                         {
-                            try
+                            var message = _consumer?.Consume(_timeout);
+                            if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
                             {
+
                                 var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
                                                     Encoding.UTF8.GetString(message.Message.Value),
                                                     _kafkaJsonSettings);
@@ -88,7 +89,7 @@
                                 {
                                     try
                                     {
-                                        _consumer.Commit(message);
+                                        _consumer?.Commit(message);
                                     }
                                     catch
                                     {
@@ -99,7 +100,19 @@
                                     }
                                 }
                             }
-                            catch (Exception ex)
+                        }
+                        catch (Exception ex)
+                        {
+                            if ((_configuration?.AllowAutoCreateTopics ?? false) && 
+                                ex is KafkaException kafkaEx && 
+                                kafkaEx.Error.Code == ErrorCode.UnknownTopicOrPart)
+                            {
+                                if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                {
+                                    _logger.LogWarning("{0} for consumer on topic {1}", kafkaEx.Message, _topic);
+                                }
+                            }
+                            else
                             {
                                 var kwfEx = new KwfKafkaBusException("KAFKACONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
