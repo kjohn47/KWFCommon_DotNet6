@@ -34,6 +34,8 @@
 
         private static readonly JsonSerializerOptions _jsonSerializerOptions = GetJsonOptions();
 
+        public IDatabase RedisDatabase => _db ?? GetRedisDatabaseAsync().GetAwaiter().GetResult();
+
         public KwfRedisCache(KwfRedisCacheOptions options)
         {
             _cachedKeySettings = options?.CachedKeySettings ?? new Dictionary<string, CacheKeyEntry>();
@@ -312,10 +314,24 @@
 
                 _db = _connectionMultiplexer!.GetDatabase();
             }
+            catch (Exception ex)
+            {
+                throw new KwfRedisCacheException("KWFREDISCONFAIL", "Failed to connect to Redis server", ex);
+            }
             finally
             {
                 _connectionLock.Release();
             }
+        }
+
+        private async Task<IDatabase> GetRedisDatabaseAsync()
+        {
+            if (_db is null)
+            {
+                await ConnectAsync();
+            }
+
+            return _db!;
         }
 
         private static string SerializeObject<T>(T value)

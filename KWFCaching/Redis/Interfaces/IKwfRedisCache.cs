@@ -5,6 +5,8 @@
 
     using Microsoft.Extensions.Caching.Distributed;
 
+    using StackExchange.Redis;
+
     public interface IKwfRedisCache : IKwfCacheBase, IDistributedCache
     {
         Task<CachedResult<TResult>> GetCachedItemAsync<TResult>(
@@ -20,5 +22,7 @@
         Task RemoveCachedItemAsync(
             string key,
             CancellationToken? cancellationToken = null);
+
+        IDatabase RedisDatabase { get; }
     }
 }
