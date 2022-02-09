@@ -18,17 +18,15 @@
         public void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
         {
             //Any user - disable global setting
-            builder.AddGet<WeatherForecastQueryResponse>(route =>
-                route.SetRoute("get-weather-no-auth")
+            builder.AddGet<WeatherForecastQueryResponse>("get-weather-no-auth")
                      .DisableGlobalRoles()
                      .SetAction(handler =>
-                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest()));
 
             //Authenticated user in any role as set by global setting
-            builder.AddGet<WeatherForecastQueryResponse>(route =>
-                route.SetRoute("get-weather-authenticated-global")
+            builder.AddGet<WeatherForecastQueryResponse>("get-weather-authenticated-global")
                      .SetAction(handler =>
-                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest())));
+                        () => handler.HandleQueryAsync<WeatherForecastQueryRequest, WeatherForecastQueryResponse>(new WeatherForecastQueryRequest()));
         }
     }
 }

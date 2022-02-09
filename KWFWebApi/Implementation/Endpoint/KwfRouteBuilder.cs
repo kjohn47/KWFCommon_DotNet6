@@ -6,15 +6,17 @@
 
     using System;
 
-    internal sealed class KwfRouteBuilder : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder, IKwfRouteBuilderResult
+    internal sealed class KwfRouteBuilder<TResp> : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder
     {
-        private readonly IKwfEndpointHandler _handlers;
+        private readonly KwfEndpointBuilder _endpointHandler;
 
-        public KwfRouteBuilder(IKwfEndpointHandler endpointHandler)
+        public KwfRouteBuilder(KwfEndpointBuilder endpointHandler, HttpMethodEnum httpMethod)
         {
-            _handlers = endpointHandler;
+            _endpointHandler = endpointHandler;
+            HttpMethod = httpMethod;
         }
 
+        public HttpMethodEnum HttpMethod { get; init; }
         public string? Route { get; private set; }
         public string[]? Roles { get; private set; }
         public Delegate? Action { get; private set; }
@@ -175,17 +177,18 @@
 
         private IKwfRouteBuilderResult AddAction(Func<IKwfEndpointHandler, Delegate> action)
         {
-            Action = action(_handlers);
-            return this;
+            Action = action(_endpointHandler);
+            _endpointHandler.AddRouteMethod<TResp>(this);
+            return _endpointHandler;
         }
 
-        private KwfRouteBuilder AddSuccessHttpCodes(params int[] codes)
+        private KwfRouteBuilder<TResp> AddSuccessHttpCodes(params int[] codes)
         {
             SuccessHttpCodes = codes;
             return this;
         }
 
-        public KwfRouteBuilder AddErrorHttpCodes(params int[] codes)
+        private KwfRouteBuilder<TResp> AddErrorHttpCodes(params int[] codes)
         {
             ErrorHttpCodes = codes;
             return this;

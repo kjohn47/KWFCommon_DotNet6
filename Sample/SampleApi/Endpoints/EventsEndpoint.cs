@@ -12,20 +12,16 @@
     {
         public void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
         {
-            builder.AddGet<GetEventsQueryResponse>(r =>
-                r.SetRoute("get-all")
-                 .SetAction(h => 
-                    () => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest())));
+            builder.AddGet<GetEventsQueryResponse>("get-all")
+                 .SetAction(h => () => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest()));
 
-            builder.AddGet<GetEventsQueryResponse>(r =>
-                r.SetRoute("get-by-id/{id}")
-                 .SetAction<Guid>(h =>
-                    (Guid id) => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id))));
+            builder.AddGet<GetEventsQueryResponse>("get-by-id/{id}")
+                .SetAction<Guid>(h =>
+                    (Guid id) => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id)));
 
-            builder.AddPost<PublishEventCommandResponse>(r =>
-                r.SetRoute("publish-event")
+            builder.AddPost<PublishEventCommandResponse>("publish-event")
                  .SetAction<PublishEventCommandRequest>(h =>
-                    (PublishEventCommandRequest req) => h.HandleCommandAsync<PublishEventCommandRequest, PublishEventCommandResponse>(req)));
+                    (PublishEventCommandRequest req) => h.HandleCommandAsync<PublishEventCommandRequest, PublishEventCommandResponse>(req));
         }
     }
 }

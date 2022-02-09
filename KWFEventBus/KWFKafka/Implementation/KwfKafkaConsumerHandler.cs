@@ -131,6 +131,11 @@
 
                                 if (retry == 0)
                                 {
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
+                                    {
+                                        _logger.LogCritical("Consumer for topic {0} has stoped", _topic);
+                                    }
+
                                     _consumeEnabled = false;
                                     throw kwfEx;
                                 }

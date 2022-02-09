@@ -33,5 +33,10 @@
         /// <param name="routeBuilder">The Route builder</param>
         /// <returns>IKwfEndpointBuilder</returns>
         IKwfEndpointBuilder AddDelete<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder);
+
+        IKwfRouteStatusBuilder AddGet<TResp>(string? route = null);
+        IKwfRouteStatusBuilder AddPost<TResp>(string? route = null);
+        IKwfRouteStatusBuilder AddPut<TResp>(string? route = null);
+        IKwfRouteStatusBuilder AddDelete<TResp>(string? route = null);
     }
 }

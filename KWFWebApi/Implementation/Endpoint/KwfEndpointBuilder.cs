@@ -24,7 +24,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal sealed class KwfEndpointBuilder : IKwfEndpointBuilder, IKwfEndpointHandler, IKwfEndpointInitialize
+    internal sealed class KwfEndpointBuilder : IKwfEndpointBuilder, IKwfEndpointHandler, IKwfEndpointInitialize, IKwfRouteBuilderResult
     {
         private readonly IEndpointRouteBuilder _appBuilder;
         private readonly JsonSerializerOptions _jsonSerializerOpt;
@@ -49,19 +49,8 @@
         /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddGet<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
-            var configuration = BuildRouteConfiguration(routeBuilder);
-            if (configuration?.Action is not null)
-            {
-                var route = BuildRoute(configuration.Route);
-                _appBuilder.MapGet(route, configuration.Action)
-                       .WithName(GetOperationId(route, "Get"))
-                       .ConfigureKwfRoute<TResp>(
-                            BaseUrl,
-                            configuration.SuccessHttpCodes,
-                            configuration.ErrorHttpCodes,
-                            configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
-            }
-
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Get);
+            routeBuilder(configuration);
             return this;
         }
 
@@ -73,19 +62,8 @@
         /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddPost<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
-            var configuration = BuildRouteConfiguration(routeBuilder);
-            if (configuration?.Action is not null)
-            {
-                var route = BuildRoute(configuration.Route);
-                _appBuilder.MapPost(route, configuration.Action)
-                       .WithName(GetOperationId(route, "Post"))
-                       .ConfigureKwfRoute<TResp>(
-                            BaseUrl,
-                            configuration.SuccessHttpCodes,
-                            configuration.ErrorHttpCodes,
-                            configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
-            }
-            
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Post);
+            routeBuilder(configuration);
             return this;
         }
 
@@ -97,19 +75,8 @@
         /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddPut<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
-            var configuration = BuildRouteConfiguration(routeBuilder);
-            if (configuration?.Action is not null)
-            {
-                var route = BuildRoute(configuration.Route);
-                _appBuilder.MapPut(route, configuration.Action)
-                       .WithName(GetOperationId(route, "Put"))
-                       .ConfigureKwfRoute<TResp>(
-                            BaseUrl,
-                            configuration.SuccessHttpCodes,
-                            configuration.ErrorHttpCodes,
-                            configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
-            }
-
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Put);
+            routeBuilder(configuration);
             return this;
         }
 
@@ -121,18 +88,58 @@
         /// <returns>IKwfEndpointBuilder</returns>
         public IKwfEndpointBuilder AddDelete<TResp>(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
         {
-            var configuration = BuildRouteConfiguration(routeBuilder);
-            if (configuration?.Action is not null)
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Delete);
+            routeBuilder(configuration);
+            return this;
+        }
+
+        public IKwfRouteStatusBuilder AddGet<TResp>(string? route = null)
+        {
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Get);
+            return string.IsNullOrEmpty(route) ? configuration : configuration.SetRoute(route);
+        }
+
+        public IKwfRouteStatusBuilder AddPost<TResp>(string? route = null)
+        {
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Post);
+            return string.IsNullOrEmpty(route) ? configuration : configuration.SetRoute(route);
+        }
+
+        public IKwfRouteStatusBuilder AddPut<TResp>(string? route = null)
+        {
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Put);
+            return string.IsNullOrEmpty(route) ? configuration : configuration.SetRoute(route);
+        }
+
+        public IKwfRouteStatusBuilder AddDelete<TResp>(string? route = null)
+        {
+            var configuration = new KwfRouteBuilder<TResp>(this, HttpMethodEnum.Delete);
+            return string.IsNullOrEmpty(route) ? configuration : configuration.SetRoute(route);
+        }
+
+        public IKwfEndpointBuilder AddRouteMethod<TResp>(KwfRouteBuilder<TResp> configuration)
+        {
+            if (configuration?.Action is null)
             {
-                var route = BuildRoute(configuration.Route);
-                _appBuilder.MapDelete(route, configuration.Action)
-                           .WithName(GetOperationId(route, "Delete"))
-                           .ConfigureKwfRoute<TResp>(
+                throw new ArgumentNullException(nameof(configuration), "Configuration or action must be set");
+            }
+
+            var route = BuildRoute(configuration.Route);
+            var map = configuration.HttpMethod switch
+            {
+                HttpMethodEnum.Get => _appBuilder.MapGet(route, configuration.Action),
+                HttpMethodEnum.Post => _appBuilder.MapPost(route, configuration.Action),
+                HttpMethodEnum.Put => _appBuilder.MapPut(route, configuration.Action),
+                HttpMethodEnum.Delete => _appBuilder.MapDelete(route, configuration.Action),
+                _ => throw new NotImplementedException()
+            };
+
+            map.WithName(GetOperationId(route, configuration.HttpMethod.GetMethodName()))
+               .ConfigureKwfRoute<TResp>(
                                 BaseUrl,
                                 configuration.SuccessHttpCodes,
                                 configuration.ErrorHttpCodes,
                                 configuration.Roles ?? (configuration.RemoveGlobalRoles ? null : _roles));
-            }
 
             return this;
         }
@@ -328,19 +335,6 @@
         private string BuildRoute(string? route)
         {
             return $"{BaseUrl}/{route}";
-        }
-
-        private KwfRouteBuilder BuildRouteConfiguration(Func<IKwfRouteBuilder, IKwfRouteBuilderResult> routeBuilder)
-        {
-            var configuration = new KwfRouteBuilder(this);
-            routeBuilder(configuration);
-
-            if (configuration.Action is null)
-            {
-                throw new ArgumentNullException(nameof(configuration.Action));
-            }
-
-            return configuration;
         }
 
         private IResult HandleCQRSResult<TResponse>(ICQRSResult<TResponse> result) 
