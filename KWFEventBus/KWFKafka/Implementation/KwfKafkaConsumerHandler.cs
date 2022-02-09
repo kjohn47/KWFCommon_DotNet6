@@ -92,7 +92,10 @@
                                     {
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                                         {
-                                            _logger.LogInformation("Consuming event from topic {0} with id {1}", _topic, payloadObj.Id);
+                                            _logger.LogInformation("Consuming event from topic {0} with id {1} and key {2}",
+                                                _topic, 
+                                                payloadObj.Id, 
+                                                message.Message.Key);
                                         }
 
                                         await _kwfEventHandler.HandleEventAsync(payloadObj);

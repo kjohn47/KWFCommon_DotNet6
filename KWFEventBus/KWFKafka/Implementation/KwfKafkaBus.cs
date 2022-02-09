@@ -71,7 +71,10 @@
                 var envelope = new EventPayloadEnvelope<T>(payload);
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Producing event to topic {0} with id {1}", topic, envelope.Id);
+                    _logger.LogInformation("Producing event to topic {0} with id {1} and key {2}",
+                        topic,
+                        envelope.Id,
+                        key);
                 }
 
                 await _producer.ProduceAsync(topic, new Message<string, byte[]>
