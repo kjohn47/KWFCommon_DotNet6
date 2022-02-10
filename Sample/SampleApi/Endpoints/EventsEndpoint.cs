@@ -10,18 +10,16 @@
 
     public class EventsEndpoint : IEndpointConfiguration
     {
-        public void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration)
+        public void ConfigureEndpoints(IKwfEndpointBuilder builder, IKwfEndpointHandler handlers, IConfiguration configuration)
         {
             builder.AddGet<GetEventsQueryResponse>("get-all")
-                 .SetAction(h => () => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest()));
+                 .SetAction(() => handlers.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest()));
 
             builder.AddGet<GetEventsQueryResponse>("get-by-id/{id}")
-                .SetAction<Guid>(h =>
-                    (Guid id) => h.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id)));
+                .SetAction((Guid id) => handlers.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id)));
 
             builder.AddPost<PublishEventCommandResponse>("publish-event")
-                 .SetAction<PublishEventCommandRequest>(h =>
-                    (PublishEventCommandRequest req) => h.HandleCommandAsync<PublishEventCommandRequest, PublishEventCommandResponse>(req));
+                 .SetAction((PublishEventCommandRequest req) => handlers.HandleCommandAsync<PublishEventCommandRequest, PublishEventCommandResponse>(req));
         }
     }
 }

@@ -6,22 +6,22 @@
 
     using System;
 
-    internal sealed class KwfRouteBuilder<TResp> : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder
+    internal sealed class KwfRouteBuilder : IKwfRouteBuilder, IKwfRouteErrorStatusBuilder, IKwfRouteSuccessStatusBuilder, IKwfRouteBuilderResult
     {
-        private readonly KwfEndpointBuilder _endpointHandler;
-
-        public KwfRouteBuilder(KwfEndpointBuilder endpointHandler, HttpMethodEnum httpMethod)
+        public KwfRouteBuilder(HttpMethodEnum httpMethod, Type responseType)
         {
-            _endpointHandler = endpointHandler;
             HttpMethod = httpMethod;
+            ResponseType = responseType;
         }
 
+        public Type ResponseType { get; init; }
         public HttpMethodEnum HttpMethod { get; init; }
         public string? Route { get; private set; }
         public string[]? Roles { get; private set; }
         public int[]? SuccessHttpCodes { get; private set; }
         public int[]? ErrorHttpCodes { get; private set; }
         public bool RemoveGlobalRoles { get; private set; }
+        public Delegate? Action { get; private set; }
 
         public IKwfRouteStatusBuilder SetRoute(string route)
         {
@@ -73,120 +73,115 @@
             return this;
         }
 
-        public IKwfRouteBuilderResult SetAction(
-            Func<IKwfEndpointHandler, ResultDelegate> action)
+        public IKwfRouteBuilderResult SetAction(ResultDelegate action)
         {
             return AddAction(action);
         }
-        public IKwfRouteBuilderResult SetAction<T0>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0>> action)
-        {
-            return AddAction(action);
-        }
-
-        public IKwfRouteBuilderResult SetAction<T0, T1>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1>> action)
+        public IKwfRouteBuilderResult SetAction<T0>(ResultDelegate<T0> action)
         {
             return AddAction(action);
         }
 
-        public IKwfRouteBuilderResult SetAction<T0, T1, T2>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2>> action)
+        public IKwfRouteBuilderResult SetAction<T0, T1>(ResultDelegate<T0, T1> action)
         {
             return AddAction(action);
         }
 
-        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3>> action)
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2>(ResultDelegate<T0, T1, T2> action)
+        {
+            return AddAction(action);
+        }
+
+        public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3>(ResultDelegate<T0, T1, T2, T3> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4>> action)
+            ResultDelegate<T0, T1, T2, T3, T4> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action)
         {
             return AddAction(action);
         }
 
         public IKwfRouteBuilderResult SetAction<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
-            Func<IKwfEndpointHandler, ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>> action)
+            ResultDelegate<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> action)
         {
             return AddAction(action);
         }
 
-        private IKwfRouteBuilderResult AddAction(Func<IKwfEndpointHandler, Delegate> action)
+        private IKwfRouteBuilderResult AddAction(Delegate action)
         {
-            _endpointHandler.AddRouteMethod<TResp>(this, action(_endpointHandler));
-            return _endpointHandler;
+            Action = action;
+            return this;
         }
 
-        private KwfRouteBuilder<TResp> AddSuccessHttpCodes(params int[] codes)
+        private KwfRouteBuilder AddSuccessHttpCodes(params int[] codes)
         {
             SuccessHttpCodes = codes;
             return this;
         }
 
-        private KwfRouteBuilder<TResp> AddErrorHttpCodes(params int[] codes)
+        private KwfRouteBuilder AddErrorHttpCodes(params int[] codes)
         {
             ErrorHttpCodes = codes;
             return this;

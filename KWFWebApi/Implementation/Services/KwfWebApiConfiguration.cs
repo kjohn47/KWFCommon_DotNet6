@@ -68,16 +68,18 @@
                     {
                         if (endpointConfigurations is not null)
                         {
-                            foreach(var endpointCfg in endpointConfigurations)
+                            var handler = new KwfEndpointHandler(app, jsonOpt);
+                            foreach (var endpointCfg in endpointConfigurations)
                             {
-                                var routeBuilder = KwfEndpointBuilder.CreateEndpointBuilder(app, jsonOpt);
-                                var endpointBuilder = endpointCfg.InitializeRoute(routeBuilder, applicationBuilder.Configuration);
-                                if (string.IsNullOrEmpty((endpointBuilder as KwfEndpointBuilder)?.BaseUrl))
+                                var routeBuilder = KwfEndpointBuilder.CreateEndpointBuilder(app);
+                                endpointCfg.InitializeRoute(routeBuilder, applicationBuilder.Configuration);
+                                if (string.IsNullOrEmpty(routeBuilder?.BaseUrl))
                                 {
                                     throw new ArgumentNullException(nameof(KwfEndpointBuilder), "BaseUrl must be set for endpoint");
                                 }
 
-                                endpointCfg.ConfigureEndpoints(endpointBuilder, applicationBuilder.Configuration);
+                                endpointCfg.ConfigureEndpoints(routeBuilder, handler, applicationBuilder.Configuration);
+                                routeBuilder.Build();
                             }
                         }
                     },

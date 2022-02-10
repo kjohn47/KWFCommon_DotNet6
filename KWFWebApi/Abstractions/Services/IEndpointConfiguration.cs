@@ -21,7 +21,8 @@
         /// Configure endpoints for route pattern
         /// </summary>
         /// <param name="builder">The endpoint builder</param>
+        /// <param name="handlers">The endpoint handlers</param>
         /// <param name="configuration">The app configuration</param>
-        void ConfigureEndpoints(IKwfEndpointBuilder builder, IConfiguration configuration);
+        void ConfigureEndpoints(IKwfEndpointBuilder builder, IKwfEndpointHandler handlers, IConfiguration configuration);
     }
 }
