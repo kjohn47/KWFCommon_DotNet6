@@ -117,9 +117,9 @@
             return string.IsNullOrEmpty(route) ? configuration : configuration.SetRoute(route);
         }
 
-        public IKwfEndpointBuilder AddRouteMethod<TResp>(KwfRouteBuilder<TResp> configuration)
+        public IKwfEndpointBuilder AddRouteMethod<TResp>(KwfRouteBuilder<TResp> configuration, Delegate? action)
         {
-            if (configuration?.Action is null)
+            if (action is null)
             {
                 throw new ArgumentNullException(nameof(configuration), "Configuration or action must be set");
             }
@@ -127,10 +127,10 @@
             var route = BuildRoute(configuration.Route);
             var map = configuration.HttpMethod switch
             {
-                HttpMethodEnum.Get => _appBuilder.MapGet(route, configuration.Action),
-                HttpMethodEnum.Post => _appBuilder.MapPost(route, configuration.Action),
-                HttpMethodEnum.Put => _appBuilder.MapPut(route, configuration.Action),
-                HttpMethodEnum.Delete => _appBuilder.MapDelete(route, configuration.Action),
+                HttpMethodEnum.Get => _appBuilder.MapGet(route, action),
+                HttpMethodEnum.Post => _appBuilder.MapPost(route, action),
+                HttpMethodEnum.Put => _appBuilder.MapPut(route, action),
+                HttpMethodEnum.Delete => _appBuilder.MapDelete(route, action),
                 _ => throw new NotImplementedException()
             };
 

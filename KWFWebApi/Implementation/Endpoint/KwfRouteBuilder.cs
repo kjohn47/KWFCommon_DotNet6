@@ -19,7 +19,6 @@
         public HttpMethodEnum HttpMethod { get; init; }
         public string? Route { get; private set; }
         public string[]? Roles { get; private set; }
-        public Delegate? Action { get; private set; }
         public int[]? SuccessHttpCodes { get; private set; }
         public int[]? ErrorHttpCodes { get; private set; }
         public bool RemoveGlobalRoles { get; private set; }
@@ -177,8 +176,7 @@
 
         private IKwfRouteBuilderResult AddAction(Func<IKwfEndpointHandler, Delegate> action)
         {
-            Action = action(_endpointHandler);
-            _endpointHandler.AddRouteMethod<TResp>(this);
+            _endpointHandler.AddRouteMethod<TResp>(this, action(_endpointHandler));
             return _endpointHandler;
         }
 
