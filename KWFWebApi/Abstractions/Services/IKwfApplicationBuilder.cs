@@ -3,7 +3,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
-    public interface IKwfApplicationBuilder : IKwfApplicationServicesBuilder
+    public interface IKwfApplicationBuilder : IKwfApplicationMiddlewareBuilder
     {
         /// <summary>
         /// Add Custom logger provider

@@ -21,6 +21,7 @@
         private Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]>? _serviceFactories;
         private ICollection<IEndpointConfiguration>? _endpointConfigurations;
         private ICollection<KwfLoggerProviderBuilder>? _loggerProviders;
+        private ICollection<Type>? _middlewares;
 
         private KwfApplicationBuilder(
             WebApplicationBuilder applicationBuilder, 
@@ -51,6 +52,19 @@
             }
 
             _loggerProviders.Add(KwfLoggerProviderBuilder.AddProviderConfiguration(providerName, providerConfigure));
+
+            return this;
+        }
+
+        public IKwfApplicationMiddlewareBuilder AddMiddleware<T>()
+            where T : KwfMiddlewareBase
+        {
+            if (_middlewares is null)
+            {
+                _middlewares = new List<Type>();
+            }
+
+            _middlewares.Add(typeof(T));
 
             return this;
         }
@@ -126,6 +140,7 @@
                 _customLoggingConfigurationKey,
                 _enableAuthentication,
                 _loggerProviders,
+                _middlewares,
                 _serviceFactories,
                 _endpointConfigurations?.ToArray());
         }

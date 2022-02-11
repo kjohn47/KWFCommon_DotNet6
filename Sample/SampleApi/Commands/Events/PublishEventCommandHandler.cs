@@ -6,6 +6,7 @@
     using KWFCommon.Implementation.Models;
 
     using KWFEventBus.KWFKafka.Interfaces;
+    using KWFEventBus.KWFKafka.Models;
 
     using KWFWebApi.Abstractions.Command;
 
@@ -37,9 +38,19 @@
 
         public async Task<ICQRSResult<PublishEventCommandResponse>> ExecuteCommandAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
         {
-            await _eventBus.ProduceAsync(request.EventMessage, AppConstants.TestTopic);
-            
-            return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(AppConstants.TestTopic));
+            try
+            {
+                await _eventBus.ProduceAsync(request.EventMessage, AppConstants.TestTopic);
+                return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(AppConstants.TestTopic));
+            }
+            catch (KwfKafkaBusException ex)
+            {
+                return CQRSResult<PublishEventCommandResponse>.Failure(new ErrorResult(ex.Code, ex.Message, ErrorTypeEnum.Exception));
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

@@ -4,7 +4,6 @@
 
     using Microsoft.Extensions.Configuration;
 
-    using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
 
     internal sealed class ServiceCollectionBuilder : IServiceCollectionBuilder, IAddServiceToCollectionBuilder, IServiceCollectionBuilderReturn

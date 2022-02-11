@@ -1,7 +1,6 @@
 ﻿namespace KWFCommon.Implementation.Exception
 {
     using KWFCommon.Abstractions.Models;
-    using KWFCommon.Implementation.Json;
     using KWFCommon.Implementation.Models;
 
     using Microsoft.AspNetCore.Builder;
@@ -20,6 +19,11 @@
         {
             app.UseExceptionHandler(a => a.Run(async ctx =>
             {
+                if (ctx.Response.HasStarted)
+                {
+                    return;
+                }
+
                 var error = (IExceptionHandlerFeature?)ctx.Features[typeof(IExceptionHandlerFeature)];
                 if (error is null)
                 {

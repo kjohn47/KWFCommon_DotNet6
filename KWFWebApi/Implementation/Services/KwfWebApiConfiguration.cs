@@ -26,6 +26,7 @@
             string? customLoggingConfigurationKey,
             bool enableAuthentication,
             IEnumerable<KwfLoggerProviderBuilder>? loggerProviders,
+            IEnumerable<Type>? middlewares,
             Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]>? addApplicationServices,
             params IEndpointConfiguration[]? endpointConfigurations)
         {
@@ -54,13 +55,29 @@
                     customAppConfigurationKey,
                     customBearerConfigurationKey,
                     customLoggingConfigurationKey)
-                .UseKwfConfiguration((app) =>
+                .UseKwfConfiguration(
+                    (app) =>
+                    {
+                        if (middlewares is not null)
+                        {
+                            foreach(var middleware in middlewares)
+                            {
+                                if (middleware.IsAbstract || middleware.IsInterface || !typeof(KwfMiddlewareBase).IsAssignableFrom(middleware))
+                                {
+                                    throw new InvalidOperationException($"Invalid middleware type {middleware.Name} for application");
+                                }
+
+                                app.UseMiddleware(middleware);
+                            }
+                        }
+                    },
+                    (serviceProvider) =>
                     {
                         if (applicationServices is not null)
                         {
-                            foreach (var serviceProvider in applicationServices)
+                            foreach (var serviceDef in applicationServices)
                             {
-                                serviceProvider.ConfigureServices(app);
+                                serviceDef.ConfigureServices(serviceProvider);
                             }
                         }
                     },
@@ -114,7 +131,8 @@
 
         private static WebApplication UseKwfConfiguration(
             this WebApplication app,
-            Action<IApplicationBuilder> configureApplicationServices,
+            Action<IApplicationBuilder> addMiddlewares,
+            Action<IServiceProvider> configureApplicationServices,
             Action<IEndpointRouteBuilder, JsonSerializerOptions> configureEndpoints,
             bool enableAuthentication,
             bool isDev,
@@ -124,8 +142,9 @@
                 a => { if (enableAuthentication) a.UseKwfAuth(); },
                 (a, cfg, jsonCfg, dev) => {
                     a.UseLogging(cfg, dev, customLoggingConfigurationKey);
-                    configureApplicationServices(a);
+                    addMiddlewares(a);
                 },
+                (sp, cfg, jsonCfg, dev) => configureApplicationServices(sp),
                 (a, cfg, jsonOpt) => configureEndpoints(a, jsonOpt),
                 isDev);
 

@@ -14,37 +14,130 @@
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IApplicationBuilder> configureAuth,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureApplicationServices, configureEndpoints, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, configureApplicationServices, configureEndpoints, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IApplicationBuilder> configureAuth,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureApplicationServices, configureEndpoints, false);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, configureApplicationServices, configureEndpoints, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, configureApplicationServices, configureEndpoints, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, configureApplicationServices, configureEndpoints, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, configureApplicationServices, configureEndpoints, false);
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, configureApplicationServices, configureEndpoints, false);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
+            bool isDev)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, null, configureEndpoints, isDev);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, null, configureEndpoints, false);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            bool isDev)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, configureApplicationServices, null, isDev);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, configureApplicationServices, null, false);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            bool isDev)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, null, null, isDev);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder> configureAuth,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureMiddlewares, null, null, false);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
+            bool isDev)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, null, configureEndpoints, isDev);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, null, configureEndpoints, false);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            bool isDev)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, configureApplicationServices, null, isDev);
+        }
+
+        public static IApplicationBuilder UseKWFCommon(
+            this WebApplication webApp,
+            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureMiddlewares,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
+        {
+            return ConfigureServices.UseKWFCommon(webApp, null, configureMiddlewares, configureApplicationServices, null, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
@@ -53,7 +146,7 @@
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, configureEndpoints, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, configureEndpoints, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
@@ -61,24 +154,24 @@
             Action<IApplicationBuilder> configureAuth,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, configureEndpoints, false);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, configureEndpoints, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IApplicationBuilder> configureAuth,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureApplicationServices, null, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, configureApplicationServices, null, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IApplicationBuilder> configureAuth,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, configureApplicationServices, null, false);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, configureApplicationServices, null, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
@@ -86,14 +179,14 @@
             Action<IApplicationBuilder> configureAuth,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, null, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IApplicationBuilder> configureAuth)
         {
-            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, false);
+            return ConfigureServices.UseKWFCommon(webApp, configureAuth, null, null, null, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
@@ -101,29 +194,29 @@
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, null, configureEndpoints, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, null, null, null, configureEndpoints, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
             Action<IEndpointRouteBuilder, IConfiguration, JsonSerializerOptions> configureEndpoints)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, null, configureEndpoints, false);
+            return ConfigureServices.UseKWFCommon(webApp, null, null, null, configureEndpoints, false);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices,
             bool isDev)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, configureApplicationServices, null, isDev);
+            return ConfigureServices.UseKWFCommon(webApp, null, null, configureApplicationServices, null, isDev);
         }
 
         public static IApplicationBuilder UseKWFCommon(
             this WebApplication webApp,
-            Action<IApplicationBuilder, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
+            Action<IServiceProvider, IConfiguration, JsonSerializerOptions, bool> configureApplicationServices)
         {
-            return ConfigureServices.UseKWFCommon(webApp, null, configureApplicationServices, null, false);
+            return ConfigureServices.UseKWFCommon(webApp, null, null, configureApplicationServices, null, false);
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class KwfKafkaBusException : Exception
+    public class KwfKafkaBusException : Exception
     {
         public KwfKafkaBusException(string code, string message) : base(message)
         {

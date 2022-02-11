@@ -19,6 +19,11 @@
         {
             app.UseStatusCodePages(a => a.Run(async ctx =>
             {
+                if (ctx.Response.HasStarted)
+                {
+                    return;
+                }
+
                 switch (ctx.Response.StatusCode)
                 {
                     case ((int)HttpStatusCode.Unauthorized):

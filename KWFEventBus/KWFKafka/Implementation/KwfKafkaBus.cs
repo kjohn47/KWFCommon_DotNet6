@@ -92,10 +92,8 @@
                 {
                     _logger.LogError("Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
                 }
-                else
-                {
-                    throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during consumption of topic {topic}", ex);
-                }
+                
+                throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
             }
         }
 

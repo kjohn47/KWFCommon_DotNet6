@@ -1,6 +1,5 @@
 ﻿namespace KWFWebApi.Abstractions.Services
 { 
-    using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.DependencyInjection;
 
     public interface IServiceDefinition
@@ -15,7 +14,7 @@
         /// Configure App Services
         /// </summary>
         /// <param name="app">The Application Builder</param>
-        void ConfigureServices(IApplicationBuilder app)
+        void ConfigureServices(IServiceProvider app)
         {
 
         }

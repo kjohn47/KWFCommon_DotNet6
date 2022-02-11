@@ -1,5 +1,6 @@
 using Sample.SampleApi;
 using KWFWebApi.Extensions;
+using Sample.SampleApi.Middleware;
 
 WebApplication.CreateBuilder(args)
     // Build Web application with Kwf authentication, logs and common settings, you can pass custom keys for settings and enable/disable bearer authentication(enabled by default)
@@ -7,10 +8,16 @@ WebApplication.CreateBuilder(args)
 
     // you can add more than one provider for same name, name must be set on AppSettings LoggingConfiguration - Providers array
     // Console, Debug, Event and EventSource don't need to be added with AddLoggerProvider, just add them on AppSettings LoggingConfiguration - Providers array
-    /*
-     * .AddLoggerProvider("Console_2", l => l.AddConsole())
-     */
-
+    //
+    //.AddLoggerProvider("Console_2", (l, c) => l.AddConsole())
+    //
+    //
+    //Adding middleware, comes after excepeiton handler, authentication and logger in pipeline (req) and in inverse order on resp
+    //The middlewares are added in order so top will be first on request and last on response
+    //Middleware classes must implement KwfMiddlewareBase abstract class
+    .AddMiddleware<TestMiddleware>()
+    //
+    //
     // Add services implementations classes, they must implement IServiceDefinition - this classes allow to:
     // add services (Dependency Injection)
     // configure services (IApplicationBuilder)

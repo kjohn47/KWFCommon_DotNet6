@@ -58,13 +58,13 @@
          * Defaulted on interface, can have implementation ignored
          * 
         */
-        public void ConfigureServices(IApplicationBuilder app)
+        public void ConfigureServices(IServiceProvider services)
         {
             //start specific consumer handler for event handler
             //app.StartConsumingKafkaEvent<KwfPublishEventHandler, string>();
 
             //start all registered consumers
-            app.StartConsumingAllKafkaEvents();
+            services.StartConsumingAllKafkaEvents();
         }
     }
 }

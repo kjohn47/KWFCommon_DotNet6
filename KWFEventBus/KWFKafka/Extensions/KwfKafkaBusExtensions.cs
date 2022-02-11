@@ -81,16 +81,16 @@
             return app;
         }
 
-        public static IApplicationBuilder StartConsumingAllKafkaEvents(this IApplicationBuilder app)
+        public static IServiceProvider StartConsumingAllKafkaEvents(this IServiceProvider services)
         {
-            if (app is null)
+            if (services is null)
             {
-                throw new ArgumentNullException(nameof(app));
+                throw new ArgumentNullException(nameof(services));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();
+            services.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();
 
-            return app;
+            return services;
         }
     }
 }
