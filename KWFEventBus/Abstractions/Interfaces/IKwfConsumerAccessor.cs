@@ -1,7 +1,7 @@
 ﻿namespace KWFEventBus.Abstractions.Interfaces
 { 
 
-    public interface IKwfConsumerAcessor
+    public interface IKwfConsumerAccessor
     {
         IKwfEventConsumerHandler? GetConsumerService<THandler, TPayload>()
             where THandler : class, IKwfEventHandler<TPayload>

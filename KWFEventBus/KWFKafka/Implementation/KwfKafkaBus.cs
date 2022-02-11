@@ -97,10 +97,11 @@
             }
         }
 
-        public IKwfEventConsumerHandler CreateConsumer<TPayload>(
-            IKwfEventHandler<TPayload> eventHandler, 
+        public IKwfEventConsumerHandler CreateConsumer<THandler, TPayload>(
+            THandler eventHandler, 
             string topic,
             string? topipConfigurationKey = null)
+        where THandler : class, IKwfEventHandler<TPayload>
         where TPayload : class
         {
             var config = string.IsNullOrEmpty(topipConfigurationKey)
@@ -118,7 +119,7 @@
                                 .Build();
             consumer.Subscribe(topic);
 
-            return new KwfKafkaConsumerHandler<IKwfEventHandler<TPayload>, TPayload>(
+            return new KwfKafkaConsumerHandler<THandler, TPayload>(
                     eventHandler,
                     topic,
                     consumer,

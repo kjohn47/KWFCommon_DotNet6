@@ -4,10 +4,11 @@
 
     public interface IKwfKafkaBus : IKWFEventBusProducer
     {
-        IKwfEventConsumerHandler CreateConsumer<TPayload>(
-            IKwfEventHandler<TPayload> eventHandler,
+        IKwfEventConsumerHandler CreateConsumer<THandler, TPayload>(
+            THandler eventHandler,
             string topic,
             string? topipConfigurationKey = null)
+        where THandler : class, IKwfEventHandler<TPayload>
         where TPayload : class;
     }
 }

@@ -36,7 +36,7 @@
             services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(
                 kwfKafkaConfiguration, 
                 s.GetService<ILoggerFactory>()));
-            services.TryAddSingleton<IKwfConsumerAcessor, KwfKafkaConsumerAcessor>();
+            services.TryAddSingleton<IKwfConsumerAccessor, KwfKafkaConsumerAccessor>();
             return services;
         }
 
@@ -54,12 +54,12 @@
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            services.TryAddSingleton<IKwfEventHandler<TPayload>, THandlerImplementation>();
+            services.TryAddSingleton<THandlerImplementation>();
             services.AddSingleton<IKwfEventConsumerHandler>(s =>
             {
                 return s.GetRequiredService<IKwfKafkaBus>()
-                        .CreateConsumer(
-                            s.GetRequiredService<IKwfEventHandler<TPayload>>(),
+                        .CreateConsumer<THandlerImplementation, TPayload>(
+                            s.GetRequiredService<THandlerImplementation>(),
                             topic,
                             topicConfigurationKey);
             });
@@ -76,7 +76,7 @@
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfConsumerAcessor>()?.StartConsuming<THandler, TPayload>();
+            app.ApplicationServices.GetRequiredService<IKwfConsumerAccessor>()?.StartConsuming<THandler, TPayload>();
 
             return app;
         }
@@ -88,7 +88,7 @@
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.GetRequiredService<IKwfConsumerAcessor>()?.StartConsumingAll();
+            services.GetRequiredService<IKwfConsumerAccessor>()?.StartConsumingAll();
 
             return services;
         }

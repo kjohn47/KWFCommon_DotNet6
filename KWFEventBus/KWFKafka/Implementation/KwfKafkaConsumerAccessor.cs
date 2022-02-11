@@ -5,11 +5,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    internal class KwfKafkaConsumerAcessor : IKwfConsumerAcessor
+    internal class KwfKafkaConsumerAccessor : IKwfConsumerAccessor
     {
         private readonly IEnumerable<IKwfEventConsumerHandler> _consumerHandlers;
 
-        public KwfKafkaConsumerAcessor(IEnumerable<IKwfEventConsumerHandler> consumerHandlers)
+        public KwfKafkaConsumerAccessor(IEnumerable<IKwfEventConsumerHandler> consumerHandlers)
         {
             _consumerHandlers = consumerHandlers;
         }
