@@ -4,6 +4,7 @@
 
     using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.Abstractions.Models;
+    using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
 
     using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@
     using System.Text;
     using System.Text.Json;
 
-    public class KwfKafkaConsumerHandler<THandler, TPayload> : IKwfEventConsumerHandler, IDisposable
+    public class KwfKafkaConsumerHandler<THandler, TPayload> : IKwfKafkaEventConsumerHandler, IDisposable
         where THandler : class, IKwfEventHandler<TPayload>
         where TPayload : class
     {

@@ -17,7 +17,7 @@
     {
         public static IServiceCollection AddKwfKafkaBus(this IServiceCollection services, IConfiguration configuration, string? customConfigurationKey = null)
         {
-            var config = configuration?.GetSection(customConfigurationKey ?? "KwfKafkaConfiguration").Get<KwfKafkaConfiguration>() ?? null;
+            var config = configuration?.GetSection(customConfigurationKey ?? nameof(KwfKafkaConfiguration)).Get<KwfKafkaConfiguration>() ?? null;
             return services.AddKwfKafkaBus(config!);
         }
 
@@ -36,7 +36,7 @@
             services.TryAddSingleton<IKwfKafkaBus>(s => new KwfKafkaBus(
                 kwfKafkaConfiguration, 
                 s.GetService<ILoggerFactory>()));
-            services.TryAddSingleton<IKwfConsumerAccessor, KwfKafkaConsumerAccessor>();
+            services.TryAddSingleton<IKwfKafkaConsumerAccessor, KwfKafkaConsumerAccessor>();
             return services;
         }
 
@@ -55,7 +55,7 @@
             }
 
             services.TryAddSingleton<THandlerImplementation>();
-            services.AddSingleton<IKwfEventConsumerHandler>(s =>
+            services.AddSingleton<IKwfKafkaEventConsumerHandler>(s =>
             {
                 return s.GetRequiredService<IKwfKafkaBus>()
                         .CreateConsumer<THandlerImplementation, TPayload>(
@@ -67,18 +67,18 @@
             return services;
         }
 
-        public static IApplicationBuilder StartConsumingKafkaEvent<THandler, TPayload>(this IApplicationBuilder app)
+        public static IServiceProvider StartConsumingKafkaEvent<THandler, TPayload>(this IServiceProvider services)
             where THandler : class, IKwfEventHandler<TPayload>
             where TPayload : class
         {
-            if (app is null)
+            if (services is null)
             {
-                throw new ArgumentNullException(nameof(app));
+                throw new ArgumentNullException(nameof(services));
             }
 
-            app.ApplicationServices.GetRequiredService<IKwfConsumerAccessor>()?.StartConsuming<THandler, TPayload>();
+            services.GetRequiredService<IKwfKafkaConsumerAccessor>()?.StartConsuming<THandler, TPayload>();
 
-            return app;
+            return services;
         }
 
         public static IServiceProvider StartConsumingAllKafkaEvents(this IServiceProvider services)
@@ -88,7 +88,7 @@
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.GetRequiredService<IKwfConsumerAccessor>()?.StartConsumingAll();
+            services.GetRequiredService<IKwfKafkaConsumerAccessor>()?.StartConsumingAll();
 
             return services;
         }

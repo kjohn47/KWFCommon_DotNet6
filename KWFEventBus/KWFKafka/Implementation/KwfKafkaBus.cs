@@ -97,7 +97,7 @@
             }
         }
 
-        public IKwfEventConsumerHandler CreateConsumer<THandler, TPayload>(
+        public IKwfKafkaEventConsumerHandler CreateConsumer<THandler, TPayload>(
             THandler eventHandler, 
             string topic,
             string? topipConfigurationKey = null)

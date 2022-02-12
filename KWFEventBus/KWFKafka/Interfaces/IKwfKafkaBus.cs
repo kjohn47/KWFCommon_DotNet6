@@ -4,7 +4,7 @@
 
     public interface IKwfKafkaBus : IKWFEventBusProducer
     {
-        IKwfEventConsumerHandler CreateConsumer<THandler, TPayload>(
+        IKwfKafkaEventConsumerHandler CreateConsumer<THandler, TPayload>(
             THandler eventHandler,
             string topic,
             string? topipConfigurationKey = null)

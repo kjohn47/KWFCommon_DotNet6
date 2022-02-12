@@ -1,15 +1,16 @@
 ﻿namespace KWFEventBus.KWFKafka.Implementation
 {
     using KWFEventBus.Abstractions.Interfaces;
+    using KWFEventBus.KWFKafka.Interfaces;
 
     using System.Collections.Generic;
     using System.Linq;
 
-    internal class KwfKafkaConsumerAccessor : IKwfConsumerAccessor
+    internal class KwfKafkaConsumerAccessor : IKwfKafkaConsumerAccessor
     {
-        private readonly IEnumerable<IKwfEventConsumerHandler> _consumerHandlers;
+        private readonly IEnumerable<IKwfKafkaEventConsumerHandler> _consumerHandlers;
 
-        public KwfKafkaConsumerAccessor(IEnumerable<IKwfEventConsumerHandler> consumerHandlers)
+        public KwfKafkaConsumerAccessor(IEnumerable<IKwfKafkaEventConsumerHandler> consumerHandlers)
         {
             _consumerHandlers = consumerHandlers;
         }
