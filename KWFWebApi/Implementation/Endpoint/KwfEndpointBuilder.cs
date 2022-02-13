@@ -235,6 +235,7 @@
 
             builder.Produces<ErrorResult>(400)
                    .Produces<ErrorResult>(404)
+                   .Produces<ErrorResult>(412)
                    .Produces<ErrorResult>(500)
                    .Produces<ErrorResult>(501)
                    .Produces<ErrorResult>(503);

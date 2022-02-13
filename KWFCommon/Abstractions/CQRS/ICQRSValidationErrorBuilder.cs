@@ -1,8 +1,10 @@
 ﻿namespace KWFCommon.Abstractions.CQRS
 {
+    using KWFCommon.Abstractions.Models;
+
     public interface ICQRSValidationErrorBuilder : ICQRSValidationError
     {
-        ICQRSValidationErrorBuilder AddValidationError(string parameter, string message);
-        ICQRSValidationErrorBuilder AddValidationErrorRange(IDictionary<string, string> errors);
+        ICQRSValidationErrorBuilder AddValidationError(string errorCode, string parameter, string message);
+        ICQRSValidationErrorBuilder AddValidationErrorRange(IEnumerable<PropertyValidationError> errors);
     }
 }

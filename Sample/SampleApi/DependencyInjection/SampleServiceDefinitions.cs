@@ -4,9 +4,12 @@
     using KWFCaching.Redis.Extensions;
     using KWFEventBus.KWFKafka.Extensions;
 
+    using KWFValidation.KWFCQRSValidation.Interfaces;
+
     using KWFWebApi.Abstractions.Services;
     using KWFWebApi.Extensions.CQRSHandlers;
 
+    using Sample.SampleApi.Commands.Events;
     using Sample.SampleApi.Constants;
     using Sample.SampleApi.Events;
     using Sample.SampleApi.Services;
@@ -52,6 +55,8 @@
             //services.AddCommandHandlersFromAssembly<SampleServiceDefinitions>(ServiceLifetime.Scoped);
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
+
+            services.AddSingleton<IKwfCQRSValidator<PublishEventCommandRequest>, PublishEventCommandValidator>();
         }
 
         /*

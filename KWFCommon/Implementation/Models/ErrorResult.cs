@@ -37,8 +37,8 @@
         {
         }
 
-        public ErrorResult(string errorCode, string errorDescription, HttpStatusCode httpStatus, IEnumerable<KeyValuePair<string, string>> validationErrors) 
-            : this(errorCode, errorDescription, HttpStatusCode.InternalServerError, ErrorTypeEnum.Validation, validationErrors)
+        public ErrorResult(string errorCode, string errorDescription, HttpStatusCode httpStatus, IEnumerable<PropertyValidationError> validationErrors) 
+            : this(errorCode, errorDescription, httpStatus, ErrorTypeEnum.Validation, validationErrors)
         {
         }
 
@@ -52,7 +52,7 @@
             string errorDescription,
             HttpStatusCode httpStatus,
             ErrorTypeEnum type,
-            IEnumerable<KeyValuePair<string, string>>? validationErrors)
+            IEnumerable<PropertyValidationError>? validationErrors)
         {
             ErrorCode = errorCode;
             ErrorDescription = errorDescription;
@@ -65,6 +65,6 @@
         public string ErrorDescription { get; private set; }
         public HttpStatusCode HttpStatusCode { get; private set; }
         public ErrorTypeEnum ErrorType { get; private set; }
-        public IEnumerable<KeyValuePair<string, string>>? ValidationErrors { get; private set; }
+        public IEnumerable<PropertyValidationError>? ValidationErrors { get; private set; }
     }
 }

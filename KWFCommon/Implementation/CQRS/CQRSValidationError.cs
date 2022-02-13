@@ -9,7 +9,7 @@
 
     public sealed class CQRSValidationError : ICQRSValidationErrorBuilder
     {
-        private readonly IDictionary<string, string> _errors;
+        private readonly List<PropertyValidationError> _errors;
 
         private readonly HttpStatusCode _httpStatusCode;
 
@@ -25,34 +25,27 @@
             _errorCode = errorCode;
             _errorMessage = errorMessage;
             _httpStatusCode = httpStatusCode;
-            _errors = new Dictionary<string, string>();
+            _errors = new List<PropertyValidationError>();
         }
 
         public IErrorResult GetErrorFromValidation()
         {
-            return new ErrorResult(_errorCode, _errorMessage, _httpStatusCode, _errors.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)));
+            return new ErrorResult(
+                _errorCode,
+                _errorMessage,
+                _httpStatusCode,
+                _errors);
         }
 
-        public ICQRSValidationErrorBuilder AddValidationError(string parameter, string message)
+        public ICQRSValidationErrorBuilder AddValidationError(string errorCode, string parameter, string message)
         {
-            if (!_errors.TryAdd(parameter, message))
-            {
-                throw new KWFHandledException(_errorCode, _errorMessage, HttpStatusCode.PreconditionFailed, ErrorTypeEnum.Validation);
-            }
-
+            _errors.Add(new PropertyValidationError(parameter, errorCode, message));
             return this;
         }
 
-        public ICQRSValidationErrorBuilder AddValidationErrorRange(IDictionary<string, string> errors)
+        public ICQRSValidationErrorBuilder AddValidationErrorRange(IEnumerable<PropertyValidationError> errors)
         {
-            foreach(var err in errors)
-            {
-                if (!_errors.TryAdd(err.Key, err.Value))
-                {
-                    throw new KWFHandledException(_errorCode, _errorMessage, HttpStatusCode.PreconditionFailed, ErrorTypeEnum.Validation);
-                }
-            }
-
+            _errors.AddRange(errors);
             return this;
         }
 

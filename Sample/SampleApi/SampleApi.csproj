@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\KWFCaching\Memory\Memory.csproj" />
     <ProjectReference Include="..\..\KWFCaching\Redis\Redis.csproj" />
     <ProjectReference Include="..\..\KWFEventBus\KWFKafka\KWFKafka.csproj" />
+    <ProjectReference Include="..\..\KWFValidation\KWFCQRSValidation\KWFCQRSValidation.csproj" />
     <ProjectReference Include="..\..\KWFWebApi\Extensions\Extensions.csproj" />
   </ItemGroup>
 

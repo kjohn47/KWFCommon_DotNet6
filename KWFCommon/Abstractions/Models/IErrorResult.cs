@@ -6,7 +6,7 @@
     {
         string ErrorCode { get; }
         string ErrorDescription { get; }
-        IEnumerable<KeyValuePair<string, string>>? ValidationErrors { get; }
+        IEnumerable<PropertyValidationError>? ValidationErrors { get; }
         HttpStatusCode HttpStatusCode { get; }
         ErrorTypeEnum ErrorType { get; }
     }

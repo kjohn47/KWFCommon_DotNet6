@@ -8,6 +8,8 @@
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
 
+    using KWFValidation.KWFCQRSValidation.Interfaces;
+
     using KWFWebApi.Abstractions.Command;
 
     using Sample.SampleApi.Constants;
@@ -18,22 +20,17 @@
     public class PublishEventCommandHandler : ICommandHandler<PublishEventCommandRequest, PublishEventCommandResponse>
     {
         private readonly IKwfKafkaBus _eventBus;
-        public PublishEventCommandHandler(IKwfKafkaBus eventBus)
+        private readonly IKwfCQRSValidator<PublishEventCommandRequest> _validator;
+
+        public PublishEventCommandHandler(IKwfKafkaBus eventBus, IKwfCQRSValidator<PublishEventCommandRequest> validator)
         {
             _eventBus = eventBus;
+            _validator = validator;
         }
 
         public Task<INullableObject<ICQRSValidationError>> ValidateAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
         {
-            if (string.IsNullOrEmpty(request?.EventMessage))
-            {
-                return Task.FromResult<INullableObject<ICQRSValidationError>>(
-                    NullableObject<ICQRSValidationError>.FromResult(
-                        CQRSValidationError.Initialize("INVEVTMSG", "Invalid event message")
-                                           .AddValidationError("EventMessage", "Value cannot be null or empty")));
-            }
-
-            return Task.FromResult<INullableObject<ICQRSValidationError>>(NullableObject<ICQRSValidationError>.EmptyResult());
+            return _validator.ValidateRequestAsync(request, cancellationToken);
         }
 
         public async Task<ICQRSResult<PublishEventCommandResponse>> ExecuteCommandAsync(PublishEventCommandRequest request, CancellationToken? cancellationToken)
