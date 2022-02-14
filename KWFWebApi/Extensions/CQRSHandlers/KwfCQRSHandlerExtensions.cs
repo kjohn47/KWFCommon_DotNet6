@@ -53,7 +53,11 @@
 
                 foreach (var handler in handlerTypes)
                 {
-                    var handlerInterface = handler.ImplementedInterfaces.First(i => i.GetGenericTypeDefinition().IsAssignableTo(handlerInterfaceType));
+                    var handlerInterface = handler.ImplementedInterfaces.First(i => 
+                        i.IsInterface && 
+                        i.IsGenericType && 
+                        i.GetGenericTypeDefinition().IsAssignableTo(handlerInterfaceType));
+
                     services.TryAdd(new ServiceDescriptor(handlerInterface, handler, lifetime));
                 }
             }

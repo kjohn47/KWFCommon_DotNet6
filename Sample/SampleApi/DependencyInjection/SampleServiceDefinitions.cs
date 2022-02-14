@@ -4,6 +4,7 @@
     using KWFCaching.Redis.Extensions;
     using KWFEventBus.KWFKafka.Extensions;
 
+    using KWFValidation.KWFCQRSValidation.Extensions;
     using KWFValidation.KWFCQRSValidation.Interfaces;
 
     using KWFWebApi.Abstractions.Services;
@@ -35,8 +36,12 @@
             //register consumer handler for topic
             services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>(AppConstants.TestTopic);
 
+
+
             // ---- Add common services ----
             services.AddSingleton<WeatherForecastServices>();
+
+
 
             // ---- Add Query and Command handlers one at a time ----
             //services.AddTransient<IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>, WeatherForecastQueryHandler>();
@@ -56,7 +61,19 @@
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
 
-            services.AddSingleton<IKwfCQRSValidator<PublishEventCommandRequest>, PublishEventCommandValidator>();
+
+
+            // ---- Add single validator implementing IKwfCQRSValidator<T> or KwfCQRSValidator<T> with IKwfCQRSValidator<T> as dependency injection type ----
+            //services.AddKwfCqrsValidator<PublishEventCommandValidator, PublishEventCommandRequest>(); //default lifetime -> singleton
+            //services.AddKwfCqrsValidator<PublishEventCommandValidator, PublishEventCommandRequest>(ServiceLifetime.Transient);
+
+            // ---- Add all validators implementing IKwfCQRSValidator<T> or KwfCQRSValidator<T> on this marker with IKwfCQRSValidator<T> as dependency injection type ----
+            services.AddKwfCqrsValidatorsFromAssembly<SampleServiceDefinitions>(); //default lifetime -> singleton
+            //services.AddKwfCqrsValidatorsFromAssembly<SampleServiceDefinitions>(ServiceLifetime.Transient);
+
+            // ---- Add all validators implementing IKwfCQRSValidator<T> or KwfCQRSValidator<T> on this markers with IKwfCQRSValidator<T> as dependency injection type ----
+            //services.AddKwfCqrsValidatorsFromAssemblies(typeof(SampleServiceDefinitions), typeof(Program)); //lifetime -> singleton
+            //services.AddKwfCqrsValidatorsFromAssemblies(ServiceLifetime.Transient, typeof(SampleServiceDefinitions), typeof(Program));
         }
 
         /*
