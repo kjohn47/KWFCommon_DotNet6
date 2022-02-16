@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFEventBus.Abstractions</AssemblyName>
     <RootNamespace>KWFEventBus.Abstractions</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
 </Project>

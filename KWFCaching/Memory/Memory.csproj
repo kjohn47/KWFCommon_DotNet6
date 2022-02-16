@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFCaching.Memory</AssemblyName>
     <RootNamespace>KWFCaching.Memory</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +19,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
   </ItemGroup>
-
+	
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*"/>
+	</ItemGroup>
+  </Target>
 </Project>

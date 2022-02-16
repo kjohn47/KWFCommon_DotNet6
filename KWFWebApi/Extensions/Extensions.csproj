@@ -6,10 +6,16 @@
     <Nullable>enable</Nullable>
     <RootNamespace>KWFWebApi.Extensions</RootNamespace>
     <AssemblyName>KWFWebApi.Extensions</AssemblyName>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Implementation\Implementation.csproj" />
   </ItemGroup>
-
+	
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*"/>
+	</ItemGroup>
+  </Target>
 </Project>

@@ -6,6 +6,12 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFDatabase.SQLEntityFramework</AssemblyName>
     <RootNamespace>KWFDatabase.SQLEntityFramework</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-
+	
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*"/>
+	</ItemGroup>
+  </Target>
 </Project>

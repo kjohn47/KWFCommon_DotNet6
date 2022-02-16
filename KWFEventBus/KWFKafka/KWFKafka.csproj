@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFEventBus.KWFKafka</AssemblyName>
     <RootNamespace>KWFEventBus.KWFKafka</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,4 +22,17 @@
     <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*"/>
+	</ItemGroup>
+  </Target>
+
+  <Target Name="CustomContentInPackage" AfterTargets="CopyProjectReferencesToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutDir)runtimes\*\native\*">
+          <PackagePath>lib\$(TargetFramework)\runtimes</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
 </Project>

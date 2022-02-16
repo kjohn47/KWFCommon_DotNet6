@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
 	<RootNamespace>KWFWebApi.Abstractions</RootNamespace>
 	<AssemblyName>KWFWebApi.Abstractions</AssemblyName>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,4 +23,10 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\KWFAuthentication\Abstractions\Abstractions.csproj" />
 	</ItemGroup>
+
+	<Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+		<ItemGroup>
+			<BuildOutputInPackage Include="$(OutDir)*"/>
+		</ItemGroup>
+	</Target>	
 </Project>

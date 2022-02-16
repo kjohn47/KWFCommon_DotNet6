@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFCaching.Redis</AssemblyName>
     <RootNamespace>KWFCaching.Redis</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +19,18 @@
   <ItemGroup>
     <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
   </ItemGroup>
-
+	
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*" />
+	</ItemGroup>
+  </Target>
+	
+  <Target Name="CustomContentInPackage" AfterTargets="CopyProjectReferencesToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutDir)runtimes\*\lib\*\*">
+          <PackagePath>lib\$(TargetFramework)\runtimes</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>	
 </Project>

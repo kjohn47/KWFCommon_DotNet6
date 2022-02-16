@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>KWFLogger.KWFFileLogger</AssemblyName>
     <RootNamespace>KWFLogger.KWFFileLogger</RootNamespace>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
 </Project>

@@ -1,15 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <RootNamespace>KWFAuthentication.Abstractions</RootNamespace>
-	  <AssemblyName>KWFAuthentication.Abstractions</AssemblyName>
+	<RootNamespace>KWFAuthentication.Abstractions</RootNamespace>
+	<AssemblyName>KWFAuthentication.Abstractions</AssemblyName>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\KWFCommon\Abstractions\Abstractions.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+	<ItemGroup>
+		<BuildOutputInPackage Include="$(OutDir)*"/>
+	</ItemGroup>
+  </Target>
 </Project>

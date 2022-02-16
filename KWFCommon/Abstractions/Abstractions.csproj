@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
 	<RootNamespace>KWFCommon.Abstractions</RootNamespace>
 	<AssemblyName>KWFCommon.Abstractions</AssemblyName>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
 </Project>
