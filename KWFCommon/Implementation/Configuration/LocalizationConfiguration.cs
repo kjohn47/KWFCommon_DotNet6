@@ -2,7 +2,8 @@
 {
     public sealed class LocalizationConfiguration
     {
-        public string? LocalizationCode { get; set; }
+        public string? DefaultLocalizationCode { get; set; }
+        public IEnumerable<string>? SupportedLocalizationCodes { get; set; }
         public string? CurrencyLocalizationCode { get; set; }
     }
 }
