@@ -223,11 +223,14 @@
 
     internal static class KwfResponseHandlerExtensions
     {
+        private static int[] _handledSuccessCodes = new[] { 200, 204 };
+        private static int[] _handledErrorCodes = new[] { 400, 401, 403, 404, 412, 500, 501, 503 };
+
         internal static RouteHandlerBuilder ProducesError(this RouteHandlerBuilder builder, int[]? customCodes, bool hasAuthorize)
         {
             if (customCodes is not null && customCodes.Length > 0)
             {
-                foreach (var code in customCodes)
+                foreach (var code in customCodes.Distinct().Where(c => !_handledErrorCodes.Contains(c)))
                 {
                     builder.Produces<ErrorResult>(code);
                 }
@@ -253,13 +256,19 @@
         {
             if (customCodes is not null && customCodes.Length > 0)
             {
-                foreach (var code in customCodes)
+                foreach (var code in customCodes.Distinct().Where(c => !_handledSuccessCodes.Contains(c)))
                 {
                     builder.Produces(code, respType);
                 }
+
+                if (customCodes.Any(c => c.Equals(204)))
+                {
+                    builder.Produces(204);
+                }
             }
 
-            return builder.Produces(200, respType);
+            return builder
+                .Produces(200, respType);
         }
 
         internal static TBuilder RequireKwfAuthorization<TBuilder>(this TBuilder builder, params string[]? roles) where TBuilder : IEndpointConventionBuilder
@@ -282,8 +291,8 @@
             var rolesList = new StringBuilder();
             foreach (var role in roles.Where(x => !x.Equals(Policies.Administrator)))
             {
-                rolesList.Append(role);
-                rolesList.Append(',');
+                rolesList.Append(role)
+                         .Append(',');
             }
 
             rolesList.Append(Policies.Administrator);

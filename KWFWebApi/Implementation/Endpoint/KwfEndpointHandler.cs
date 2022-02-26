@@ -11,6 +11,7 @@
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
 
+    using System.Net;
     using System.Text.Json;
 
     internal class KwfEndpointHandler : IKwfEndpointHandler
@@ -178,6 +179,11 @@
 
             if (result.HttpStatusCode.HasValue)
             {
+                if (result.HttpStatusCode.Value == HttpStatusCode.NoContent)
+                {
+                    return Results.NoContent();
+                }
+
                 return Results.Json(result.Response, _jsonSerializerOpt, RestConstants.JsonContentType, (int)result.HttpStatusCode.Value);
             }
 

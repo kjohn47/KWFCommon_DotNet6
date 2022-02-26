@@ -13,9 +13,11 @@
         public void ConfigureEndpoints(IKwfEndpointBuilder builder, IKwfEndpointHandler handlers, IConfiguration configuration)
         {
             builder.AddGet<GetEventsQueryResponse>("get-all")
+                 .SetSuccessHttpCodes(204)
                  .SetAction(() => handlers.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest()));
 
             builder.AddGet<GetEventsQueryResponse>("get-by-id/{id}")
+                .SetSuccessHttpCodes(204)
                 .SetAction((Guid id) => handlers.HandleQueryAsync<GetEventsQueryRequest, GetEventsQueryResponse>(new GetEventsQueryRequest(id)));
 
             builder.AddPost<PublishEventCommandResponse>("publish-event")

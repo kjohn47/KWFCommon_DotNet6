@@ -9,6 +9,7 @@
 
     using Sample.SampleApi.Events;
 
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -27,14 +28,22 @@
             {
                 return Task.FromResult<ICQRSResult<GetEventsQueryResponse>>(
                     CQRSResult<GetEventsQueryResponse>.Success(
-                        new GetEventsQueryResponse()));
+                        null!, HttpStatusCode.NoContent));
             }
 
             if (request.EventId is not null)
             {
+                var events = result.Result!.Where(x => x.Id.Equals(request.EventId));
+                if (events.Any())
+                {
+                    return Task.FromResult<ICQRSResult<GetEventsQueryResponse>>(
+                    CQRSResult<GetEventsQueryResponse>.Success(
+                        new GetEventsQueryResponse(events)));
+                }
+
                 return Task.FromResult<ICQRSResult<GetEventsQueryResponse>>(
-                CQRSResult<GetEventsQueryResponse>.Success(
-                    new GetEventsQueryResponse(result.Result!.Where(x => x.Id.Equals(request.EventId)))));
+                    CQRSResult<GetEventsQueryResponse>.Success(
+                        null!, HttpStatusCode.NoContent));
             }
 
             return Task.FromResult<ICQRSResult<GetEventsQueryResponse>>(
