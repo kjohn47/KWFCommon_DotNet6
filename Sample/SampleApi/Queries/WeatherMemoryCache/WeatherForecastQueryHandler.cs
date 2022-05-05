@@ -25,12 +25,12 @@
 
     public class WeatherForecastQueryHandler : IQueryHandler<WeatherForecastQueryRequest, WeatherForecastQueryResponse>
     {
-        private readonly WeatherForecastServices _service;
+        private readonly IWeatherForecastServices _service;
         private readonly IKWFLogger<WeatherForecastQueryHandler> _logger;
         private readonly IKwfCacheOnMemory _cache;
 
         public WeatherForecastQueryHandler(
-            WeatherForecastServices service, 
+            IWeatherForecastServices service, 
             ILoggerFactory loggerFactory, 
             IUserContextAccessor ctx,
             IKwfCacheOnMemory cache,

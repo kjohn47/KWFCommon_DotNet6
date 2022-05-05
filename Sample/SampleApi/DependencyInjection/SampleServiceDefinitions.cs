@@ -39,7 +39,7 @@
 
 
             // ---- Add common services ----
-            services.AddSingleton<WeatherForecastServices>();
+            services.AddSingleton<IWeatherForecastServices, WeatherForecastServices>();
 
 
 

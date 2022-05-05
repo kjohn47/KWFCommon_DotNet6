@@ -1,6 +1,6 @@
 ﻿namespace Sample.SampleApi.Services
 {
-    public class WeatherForecastServices
+    public class WeatherForecastServices : IWeatherForecastServices
     {
         private readonly string[] summaries = new[]
         {

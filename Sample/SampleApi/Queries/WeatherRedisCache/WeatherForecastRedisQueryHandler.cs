@@ -21,12 +21,12 @@
 
     public class WeatherForecastRedisQueryHandler : IQueryHandler<WeatherForecastRedisQueryRequest, WeatherForecastRedisQueryResponse>
     {
-        private readonly WeatherForecastServices _service;
+        private readonly IWeatherForecastServices _service;
         private readonly IKWFLogger<WeatherForecastRedisQueryHandler> _logger;
         private readonly IKwfRedisCache _cache;
 
         public WeatherForecastRedisQueryHandler(
-            WeatherForecastServices service, 
+            IWeatherForecastServices service, 
             ILoggerFactory loggerFactory,
             IKwfRedisCache cache)
         {
