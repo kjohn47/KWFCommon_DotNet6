@@ -17,8 +17,8 @@
             HasValue = true;
         }
 
-        public TObject Value { get; private set; }
-        public bool HasValue { get; private set; }
+        public TObject Value { get; init; }
+        public bool HasValue { get; init; }
 
         public static NullableObject<TObject> EmptyResult()
         {

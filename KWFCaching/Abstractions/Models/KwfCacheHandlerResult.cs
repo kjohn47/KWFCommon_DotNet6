@@ -16,9 +16,9 @@
             this.PreventCacheWrite = preventCacheWrite;
         }
 
-        public bool PreventCacheWrite { get; private set; }
+        public bool PreventCacheWrite { get; init; }
 
-        public TResult Result { get; private set; }
+        public TResult Result { get; init; }
 
         public static KwfCacheHandlerResult<TResult> ReturnResult(TResult result)
         {

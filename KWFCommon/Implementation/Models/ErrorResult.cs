@@ -7,6 +7,9 @@
 
     public sealed class ErrorResult : IErrorResult
     {
+        public ErrorResult() : this(string.Empty, string.Empty, HttpStatusCode.InternalServerError, ErrorTypeEnum.Unknown, null)
+        { }
+
         public ErrorResult(string errorCode) 
             : this(errorCode, string.Empty, HttpStatusCode.InternalServerError, ErrorTypeEnum.Unknown, null)
         {
@@ -61,10 +64,10 @@
             ValidationErrors = validationErrors;
         }
 
-        public string ErrorCode { get; private set; }
-        public string ErrorDescription { get; private set; }
-        public HttpStatusCode HttpStatusCode { get; private set; }
-        public ErrorTypeEnum ErrorType { get; private set; }
-        public IEnumerable<PropertyValidationError>? ValidationErrors { get; private set; }
+        public string ErrorCode { get; init; }
+        public string ErrorDescription { get; init; }
+        public HttpStatusCode HttpStatusCode { get; init; }
+        public ErrorTypeEnum ErrorType { get; init; }
+        public IEnumerable<PropertyValidationError>? ValidationErrors { get; init; }
     }
 }

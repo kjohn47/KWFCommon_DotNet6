@@ -71,7 +71,7 @@
                 .Returns(Task<string[]>.FromResult(new[] { weatherSummaryTest }));
 
             // Call service endpoint
-            var (status, response) = await GetAsync<TestErrorResult>("100");
+            var (status, response) = await GetAsync<KWFCommon.Implementation.Models.ErrorResult>("100");
 
             // Assert result
             status.Should().Be(HttpStatusCode.BadRequest);

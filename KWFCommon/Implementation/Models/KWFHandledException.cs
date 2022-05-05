@@ -30,8 +30,8 @@
             ErrorType = errorType;
         }
 
-        public string ErrorCode { get; private set; }
-        public HttpStatusCode HttpStatusCode { get; private set; }
-        public ErrorTypeEnum ErrorType { get; private set; }
+        public string ErrorCode { get; init; }
+        public HttpStatusCode HttpStatusCode { get; init; }
+        public ErrorTypeEnum ErrorType { get; init; }
     }
 }

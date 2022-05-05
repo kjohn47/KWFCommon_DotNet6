@@ -4,7 +4,7 @@
 
     public class KwfRedisCacheException : Exception
     {
-        public string ErrorCode { get; private set; }
+        public string ErrorCode { get; init; }
 
         public KwfRedisCacheException(string errorCode, string message) : base(message)
         {

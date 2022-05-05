@@ -12,13 +12,13 @@
             HasFileName = !string.IsNullOrEmpty(fileName);
         }
 
-        public string MimeType { get; private set; }
+        public string MimeType { get; init; }
 
-        public byte[] FileBytes { get; private set; }
+        public byte[] FileBytes { get; init; }
 
-        public string FileName { get; private set; }
+        public string FileName { get; init; }
 
-        public bool HasFileName { get; private set; }
+        public bool HasFileName { get; init; }
 
         public FileQueryResponse Initialize(byte[] fileBytes, string mimeType)
         {

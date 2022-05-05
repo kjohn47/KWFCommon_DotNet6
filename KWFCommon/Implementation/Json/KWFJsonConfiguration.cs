@@ -19,6 +19,7 @@
             opt.PropertyNameCaseInsensitive = true;
             opt.AllowTrailingCommas = true;
             opt.WriteIndented = writeIndented;
+            opt.IgnoreReadOnlyProperties = false;
 
             options = opt;
         }

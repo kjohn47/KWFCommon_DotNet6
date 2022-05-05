@@ -43,22 +43,22 @@
             TokenExpiration = tokenExpiration;
         }
 
-        public Guid UserId { get; private set; }
+        public Guid UserId { get; init; }
 
-        public Guid SessionId { get; private set; }
+        public Guid SessionId { get; init; }
 
-        public string UserName { get; private set; }
+        public string UserName { get; init; }
 
-        public string Name { get; private set; }
+        public string Name { get; init; }
 
-        public string Surname { get; private set; }
+        public string Surname { get; init; }
 
-        public DateTime? TokenExpiration { get; private set; }
+        public DateTime? TokenExpiration { get; init; }
 
-        public string LanguageCode { get; private set; }
+        public string LanguageCode { get; init; }
 
-        public ICollection<string> UserRoles { get; private set; }
+        public ICollection<string> UserRoles { get; init; }
 
-        public UserStatusEnum Status { get; private set; }
+        public UserStatusEnum Status { get; init; }
     }
 }
