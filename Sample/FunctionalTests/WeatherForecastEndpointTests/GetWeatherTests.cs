@@ -44,26 +44,35 @@
 
         }
 
-        [TestMethod]
-        public async Task ShouldReturnWeatherForId()
+        [DataTestMethod]
+        [DataRow("1", "Summary0")]
+        [DataRow("2", "Summary1")]
+        [DataRow("3", "Summary2")]
+        [DataRow("4", "Summary3")]
+        [DataRow("5", "Summary4")]
+        public async Task ShouldReturnWeatherForId(string id, string summaryValue)
         {
             // Add service response mock
             _weatherSumariesServiceMock!
                 .Setup(x => x.GetSumaries())
-                .Returns(Task<string[]>.FromResult(new[] { weatherSummaryTest }));
+                .Returns(Task<string[]>.FromResult(new[] { summaryValue }));
 
             // Call service endpoint
-            var (status, response) = await GetAsync<WeatherForecastQueryResponse>("1");
+            var (status, response) = await GetAsync<WeatherForecastQueryResponse>(id);
 
             // Assert result
             status.Should().Be(HttpStatusCode.OK);
             response.Should().NotBeNull();
             response?.ForecastResults.Should().HaveCount(1);
-            response!.ForecastResults!.First().Summary.Should().Be(weatherSummaryTest);
+            response!.ForecastResults!.First().Summary.Should().Be(summaryValue);
         }
 
-        [TestMethod]
-        public async Task ShouldReturnErrorForOutOfRangeId()
+        [DataTestMethod]
+        [DataRow("0")]
+        [DataRow("6")]
+        [DataRow("17")]
+        [DataRow("100")]
+        public async Task ShouldReturnErrorForOutOfRangeId(string id)
         {
             // Add service response mock
             _weatherSumariesServiceMock!
@@ -71,7 +80,7 @@
                 .Returns(Task<string[]>.FromResult(new[] { weatherSummaryTest }));
 
             // Call service endpoint
-            var (status, response) = await GetAsync<KWFCommon.Implementation.Models.ErrorResult>("100");
+            var (status, response) = await GetAsync<KWFCommon.Implementation.Models.ErrorResult>(id);
 
             // Assert result
             status.Should().Be(HttpStatusCode.BadRequest);
