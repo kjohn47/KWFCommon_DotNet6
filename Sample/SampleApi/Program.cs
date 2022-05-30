@@ -1,3 +1,5 @@
+using KWFLogger.KWFFileLogger.Implementation;
+
 using KWFWebApi.Extensions;
 using Sample.SampleApi.Middleware;
 
@@ -13,7 +15,8 @@ public class Program
         // you can add more than one provider for same name, name must be set on AppSettings LoggingConfiguration - Providers array
         // Console, Debug, Event and EventSource don't need to be added with AddLoggerProvider, just add them on AppSettings LoggingConfiguration - Providers array
         //
-        //.AddLoggerProvider("Console_2", (l, c) => l.AddConsole())
+        //.AddLoggerProvider("Console_2", l => l.AddConsole())
+        .AddLoggerProvider("KwfFileLogger", l => l.AddKwfLogToFile())
         //
         //
         //Adding middleware, comes after excepeiton handler, authentication and logger in pipeline (req) and in inverse order on resp

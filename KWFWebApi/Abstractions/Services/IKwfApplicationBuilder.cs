@@ -11,6 +11,6 @@
         /// <param name="providerName">Logger provider name used to enable/disable provider on settings</param>
         /// <param name="providerConfigure">The Provider configuration</param>
         /// <returns>IKwfApplicationBuilder</returns>
-        IKwfApplicationBuilder AddLoggerProvider(string providerName, Action<ILoggingBuilder, IConfiguration> providerConfigure);
+        IKwfApplicationBuilder AddLoggerProvider(string providerName, Action<ILoggingBuilder> providerConfigure);
     }
 }

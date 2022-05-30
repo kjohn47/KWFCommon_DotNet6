@@ -39,7 +39,7 @@
 
         public IKwfApplicationBuilder AddLoggerProvider(
             string providerName,
-            Action<ILoggingBuilder, IConfiguration> providerConfigure)
+            Action<ILoggingBuilder> providerConfigure)
         {
             if (_loggerProviders is null)
             {

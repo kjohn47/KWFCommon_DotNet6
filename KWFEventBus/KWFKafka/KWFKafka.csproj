@@ -24,7 +24,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
 	<ItemGroup>
-		<BuildOutputInPackage Include="$(OutDir)*"/>
+		<BuildOutputInPackage Include="$(OutDir)*" />
 	</ItemGroup>
   </Target>
 

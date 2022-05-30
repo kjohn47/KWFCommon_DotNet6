@@ -83,7 +83,7 @@
                     {
                         foreach (var provider in additionalProviders)
                         {
-                            if (config.Providers.Any(x => x.Equals(provider.ProviderName))) provider.AddProvider(l, configuration);
+                            if (config.Providers.Any(x => x.Equals(provider.ProviderName))) provider.AddProvider(l);
                         }
                     }
                 }

@@ -6,6 +6,7 @@
     using KWFEventBus.Abstractions.Models;
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
+    using KWFEventBus.KWFKafka.Constants;
 
     using Microsoft.Extensions.Logging;
 
@@ -71,7 +72,7 @@
                 var envelope = new EventPayloadEnvelope<T>(payload);
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Producing event to topic {0} with id {1} and key {2}",
+                    _logger.LogInformation(Constants.Kafka_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
                         topic,
                         envelope.Id,
                         key);
@@ -90,7 +91,7 @@
             {
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError("Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
                 }
                 
                 throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
@@ -136,19 +137,19 @@
             {
                 if (_logger.IsEnabled(LogLevel.Debug) && log.Level == SyslogLevel.Debug)
                 {
-                    _logger.LogDebug(log.Message);
+                    _logger.LogDebug(Constants.Kafka_log_eventId, log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Information) &&
                     (log.Level == SyslogLevel.Info || log.Level == SyslogLevel.Notice))
                 {
-                    _logger.LogInformation(log.Message);
+                    _logger.LogInformation(Constants.Kafka_log_eventId, log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Warning) &&
                     (log.Level == SyslogLevel.Warning || log.Level == SyslogLevel.Alert))
                 {
-                    _logger.LogWarning(log.Message);
+                    _logger.LogWarning(Constants.Kafka_log_eventId, log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Critical) && 
@@ -156,7 +157,7 @@
 
                 if (_logger.IsEnabled(LogLevel.Error) && log.Level == SyslogLevel.Error)
                 {
-                    _logger.LogError(log.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, log.Message);
                 }
             }
         }
@@ -168,13 +169,13 @@
             {
                 if (err.IsFatal && _logger.IsEnabled(LogLevel.Critical))
                 {
-                    _logger.LogCritical(message);
+                    _logger.LogCritical(Constants.Kafka_log_eventId, message);
                     return;
                 }
 
                 if ((err.IsError || err.IsLocalError || err.IsBrokerError) && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(message);
+                    _logger.LogError(Constants.Kafka_log_eventId, message);
                     return;
                 }
             }
