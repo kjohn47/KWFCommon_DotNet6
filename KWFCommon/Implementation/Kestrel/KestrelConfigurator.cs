@@ -8,6 +8,8 @@
     using Microsoft.AspNetCore.Server.Kestrel.Https;
 
     using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Text;
 
     public static class KestrelConfigurator
     {
@@ -61,18 +63,61 @@
             this ListenOptions opt,
             KestrelCertificateSettings? kestrelCertificateSettings = null)
         {
-            if (kestrelCertificateSettings?.Path is not null)
+            if (kestrelCertificateSettings is not null)
             {
-                opt.UseHttps(kestrelCertificateSettings.Path, kestrelCertificateSettings.Password);
-            }
-            else
-            {
-                opt.UseHttps(o =>
+                if (!string.IsNullOrEmpty(kestrelCertificateSettings.Path))
                 {
-                    o.AllowAnyClientCertificate();
-                    o.ClientCertificateMode = ClientCertificateMode.NoCertificate;
-                });
+                    opt.UseHttps(kestrelCertificateSettings.Path, kestrelCertificateSettings.Password);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(kestrelCertificateSettings.Base64EncodedPemPublic))
+                {
+                    if (!string.IsNullOrEmpty(kestrelCertificateSettings.Base64EncodedPemPrivate))
+                    {
+                        if (!string.IsNullOrEmpty(kestrelCertificateSettings.Password))
+                        {
+                            opt.UseHttps(
+                                X509Certificate2.CreateFromEncryptedPem(
+                                    kestrelCertificateSettings.Base64EncodedPemPublic.GetStringFromBase64(),
+                                    kestrelCertificateSettings.Base64EncodedPemPrivate.GetStringFromBase64(),
+                                    kestrelCertificateSettings.Password));
+                            return;
+                        }
+
+                        opt.UseHttps(
+                            X509Certificate2.CreateFromPem(
+                                kestrelCertificateSettings.Base64EncodedPemPublic.GetStringFromBase64(), 
+                                kestrelCertificateSettings.Base64EncodedPemPrivate.GetStringFromBase64()));
+                        return;
+                    }
+
+                    opt.UseHttps(X509Certificate2.CreateFromPem(kestrelCertificateSettings.Base64EncodedPemPublic.GetStringFromBase64()));
+                    return;
+                }
+
+                if (kestrelCertificateSettings.StoreName.HasValue && !string.IsNullOrEmpty(kestrelCertificateSettings.StoreSubject))
+                {
+                    opt.UseHttps(kestrelCertificateSettings.StoreName.Value, kestrelCertificateSettings.StoreSubject);
+                    return;
+                }
             }
+
+            opt.UseHttps(o =>
+            {
+                o.AllowAnyClientCertificate();
+                o.ClientCertificateMode = ClientCertificateMode.NoCertificate;
+            });
+        }
+
+        private static string GetStringFromBase64(this string? encodedString)
+        {
+            if (string.IsNullOrEmpty(encodedString))
+            {
+                return string.Empty;
+            }
+
+            return Encoding.UTF8.GetString(Convert.FromBase64String(encodedString));
         }
     }
 }
