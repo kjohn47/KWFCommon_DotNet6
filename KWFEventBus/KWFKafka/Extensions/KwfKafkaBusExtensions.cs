@@ -41,7 +41,7 @@
         }
 
         public static IServiceCollection AddKwfKafkaConsumer<THandlerImplementation, TPayload>(this IServiceCollection services, string topic, string? topicConfigurationKey = null)
-            where THandlerImplementation : class, IKwfEventHandler<TPayload>
+            where THandlerImplementation : class, IKwfKafkaEventHandler<TPayload>
             where TPayload : class
         {
             if (services is null)
@@ -54,12 +54,12 @@
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            services.TryAddSingleton<THandlerImplementation>();
+            services.TryAddSingleton<IKwfKafkaEventHandler<TPayload>, THandlerImplementation>();
             services.AddSingleton<IKwfKafkaEventConsumerHandler>(s =>
             {
                 return s.GetRequiredService<IKwfKafkaBus>()
-                        .CreateConsumer<THandlerImplementation, TPayload>(
-                            s.GetRequiredService<THandlerImplementation>(),
+                        .CreateConsumer<IKwfKafkaEventHandler<TPayload>, TPayload>(
+                            s.GetRequiredService<IKwfKafkaEventHandler<TPayload>>(),
                             topic,
                             topicConfigurationKey);
             });
@@ -67,8 +67,7 @@
             return services;
         }
 
-        public static IServiceProvider StartConsumingKafkaEvent<THandler, TPayload>(this IServiceProvider services)
-            where THandler : class, IKwfEventHandler<TPayload>
+        public static IServiceProvider StartConsumingKafkaEvent<TPayload>(this IServiceProvider services)
             where TPayload : class
         {
             if (services is null)
@@ -76,7 +75,7 @@
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.GetRequiredService<IKwfKafkaConsumerAccessor>()?.StartConsuming<THandler, TPayload>();
+            services.GetRequiredService<IKwfKafkaConsumerAccessor>()?.StartConsuming<TPayload>();
 
             return services;
         }

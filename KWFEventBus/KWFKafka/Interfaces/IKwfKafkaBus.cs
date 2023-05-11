@@ -8,7 +8,7 @@
             THandler eventHandler,
             string topic,
             string? topipConfigurationKey = null)
-        where THandler : class, IKwfEventHandler<TPayload>
+        where THandler : class, IKwfKafkaEventHandler<TPayload>
         where TPayload : class;
     }
 }

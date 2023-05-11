@@ -37,7 +37,6 @@
             services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>(AppConstants.TestTopic);
 
 
-
             // ---- Add common services ----
             services.AddSingleton<IWeatherForecastServices, WeatherForecastServices>();
 
@@ -82,11 +81,11 @@
         */
         public void ConfigureServices(IServiceProvider services)
         {
-            //start specific consumer handler for event handler
-            //app.StartConsumingKafkaEvent<KwfPublishEventHandler, string>();
+            //start specific consumer handler for event (handler for type must be registered)
+            services.StartConsumingKafkaEvent<string>();
 
             //start all registered consumers
-            services.StartConsumingAllKafkaEvents();
+            //services.StartConsumingAllKafkaEvents();
         }
     }
 }

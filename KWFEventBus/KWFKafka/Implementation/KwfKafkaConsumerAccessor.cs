@@ -20,11 +20,10 @@
             return _consumerHandlers;
         }
 
-        public IKwfEventConsumerHandler? GetConsumerService<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        public IKwfEventConsumerHandler? GetConsumerService<TPayload>()
             where TPayload : class
         {
-            return _consumerHandlers.FirstOrDefault(x => x is KwfKafkaConsumerHandler<THandler, TPayload>);
+            return _consumerHandlers.FirstOrDefault(x => x is KwfKafkaConsumerHandler<IKwfKafkaEventHandler<TPayload>, TPayload>);
         }
 
         public void StartConsumingAll()
@@ -43,18 +42,16 @@
             }
         }
 
-        public void StartConsuming<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        public void StartConsuming<TPayload>()
             where TPayload : class
         {
-            GetConsumerService<THandler, TPayload>()?.StartConsuming();
+            GetConsumerService<TPayload>()?.StartConsuming();
         }
 
-        public void StopConsuming<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        public void StopConsuming<TPayload>()
             where TPayload : class
         {
-            GetConsumerService<THandler, TPayload>()?.StopConsuming();
+            GetConsumerService<TPayload>()?.StopConsuming();
         }
     }
 }

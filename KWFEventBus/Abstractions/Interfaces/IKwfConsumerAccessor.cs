@@ -3,8 +3,7 @@
 
     public interface IKwfConsumerAccessor
     {
-        IKwfEventConsumerHandler? GetConsumerService<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        IKwfEventConsumerHandler? GetConsumerService<TPayload>()
             where TPayload : class;
 
         IEnumerable<IKwfEventConsumerHandler> GetAllConsumers();
@@ -13,12 +12,10 @@
 
         void StopConsumingAll();
 
-        void StartConsuming<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        void StartConsuming<TPayload>()
             where TPayload : class;
 
-        void StopConsuming<THandler, TPayload>()
-            where THandler : class, IKwfEventHandler<TPayload>
+        void StopConsuming<TPayload>()
             where TPayload : class;
     }
 }

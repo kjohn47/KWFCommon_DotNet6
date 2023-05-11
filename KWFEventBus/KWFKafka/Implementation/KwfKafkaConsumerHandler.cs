@@ -14,10 +14,10 @@
     using System.Text.Json;
 
     public class KwfKafkaConsumerHandler<THandler, TPayload> : IKwfKafkaEventConsumerHandler, IDisposable
-        where THandler : class, IKwfEventHandler<TPayload>
+        where THandler : class, IKwfKafkaEventHandler<TPayload>
         where TPayload : class
     {
-        private readonly IKwfEventHandler<TPayload> _kwfEventHandler;
+        private readonly IKwfKafkaEventHandler<TPayload> _kwfEventHandler;
         private readonly IConsumer<string, byte[]> _consumer;
         private readonly ConsumerConfig _configuration;
         private readonly int _timeout;
@@ -29,7 +29,7 @@
         bool _disposed;
 
         public KwfKafkaConsumerHandler(
-            IKwfEventHandler<TPayload> kwfEventHandler,
+            IKwfKafkaEventHandler<TPayload> kwfEventHandler,
             string topic,
             IConsumer<string, byte[]> consumer,
             ConsumerConfig configuration,

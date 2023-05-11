@@ -3,10 +3,11 @@
     using KWFCaching.Memory.Interfaces;
 
     using KWFEventBus.Abstractions.Interfaces;
-
+    using KWFEventBus.KWFKafka.Interfaces;
+    using System.IdentityModel.Tokens.Jwt;
     using System.Threading.Tasks;
 
-    public class KwfPublishEventHandler : IKwfEventHandler<string>
+    public class KwfPublishEventHandler : IKwfKafkaEventHandler<string>
     {
         private readonly IKwfCacheOnMemory _cache;
         public KwfPublishEventHandler(IKwfCacheOnMemory cache)
