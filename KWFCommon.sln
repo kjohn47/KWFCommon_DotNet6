@@ -65,6 +65,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFFunction
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionalTests", "Sample\FunctionalTests\FunctionalTests.csproj", "{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFRabbitMQ", "KWFEventBus\KWFRabbitMQ\KWFRabbitMQ.csproj", "{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +187,7 @@ Global
 		{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8} = {116C5965-EFAC-4C72-B3F9-D77C755F7833}
 		{25F6A009-BC8C-49CB-9D65-FBF577B1581E} = {5B900BE4-2C6B-49C4-BB2E-70F4331CE9E2}
 		{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7} = {7D32DB56-DA03-4012-8EBE-077647EE28FE}
+		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26} = {BC5691DA-5435-43E9-8CDA-B6DB9C7C1879}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF837ABA-24C4-4640-9485-F144768A585A}
