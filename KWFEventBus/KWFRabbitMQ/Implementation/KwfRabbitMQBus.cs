@@ -28,7 +28,7 @@
 
         public KwfRabbitMQBus(KwfRabbitMQConfiguration configuration, ILoggerFactory? loggerFactory, JsonSerializerOptions? jsonSerializerOptions = null) 
         {
-            if (_configuration?.Endpoints is null || !_configuration.Endpoints.Any())
+            if (configuration?.Endpoints is null || !configuration.Endpoints.Any())
             {
                 throw new ArgumentNullException(nameof(configuration), "Configuration endpoints cannot be null");
             }
