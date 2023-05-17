@@ -1,11 +1,13 @@
 ﻿namespace KWFEventBus.KWFRabbitMQ.Implementation
 {
     using System;
+    using System.Text;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
 
     using KWFEventBus.Abstractions.Models;
+    using KWFEventBus.KWFRabbitMQ.Constants;
     using KWFEventBus.KWFRabbitMQ.Interfaces;
     using KWFEventBus.KWFRabbitMQ.Models;
 
@@ -16,6 +18,8 @@
     {
         private readonly KwfRabbitMQConfiguration _configuration;
         private readonly JsonSerializerOptions? _jsonSerializerOptions;
+        private readonly IConnectionFactory _connectionFactory;
+        private readonly IEnumerable<AmqpTcpEndpoint> _endpoints;
         private readonly string _producer;
         private readonly string? _defaultProducerProperties;
         private readonly string? _defaultConsumerProperties;
@@ -24,13 +28,29 @@
 
         public KwfRabbitMQBus(KwfRabbitMQConfiguration configuration, ILoggerFactory? loggerFactory, JsonSerializerOptions? jsonSerializerOptions = null) 
         {
+            if (_configuration?.Endpoints is null || !_configuration.Endpoints.Any())
+            {
+                throw new ArgumentNullException(nameof(configuration), "Configuration endpoints cannot be null");
+            }
+
             _configuration = configuration;
             _jsonSerializerOptions = jsonSerializerOptions ?? EventsJsonOptions.GetJsonOptions();
+            _endpoints = _configuration.Endpoints!.Select(e => new AmqpTcpEndpoint(e.Url, e.Port));
+
+            _connectionFactory = new ConnectionFactory
+            {
+                ClientProvidedName = _configuration.AppName,
+                EndpointResolverFactory = _ => {
+                    return new DefaultEndpointResolver(_endpoints);
+                },
+                UserName = _configuration.UserName,
+                Password = _configuration.Password
+            };
+
             //_defaultProducerProperties = _configuration.GetProducerConfiguration();
             //_defaultConsumerProperties = _configuration.GetConsumerConfiguration();
 
             //_producer = ;
-
             if (loggerFactory is not null)
             {
                 _logger = loggerFactory.CreateLogger<KwfRabbitMQBus>();
@@ -42,40 +62,43 @@
             return ProduceAsync(payload, topic, null, cancellationToken);
         }
 
-        public async Task ProduceAsync<T>(T payload, string topic, string? key, CancellationToken? cancellationToken = null) where T : class
+        public Task ProduceAsync<T>(T payload, string topic, string? key, CancellationToken? cancellationToken = null) where T : class
         {
-            await Task.Yield();
-            /*
-            try
+            return Task.Run(() =>
             {
-                var envelope = new EventPayloadEnvelope<T>(payload);
-                if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                try
                 {
-                    _logger.LogInformation(Constants.RabbitMQ_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
-                        topic,
-                        envelope.Id,
-                        key);
-                }
+                    using var connection = _connectionFactory.CreateConnection();
+                    using var channel = connection.CreateModel();
+                    channel.QueueDeclare(topic);
+                    var envelope = new EventPayloadEnvelope<T>(payload);
+                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));
 
-                await _producer.ProduceAsync(topic, new Message<string, byte[]>
-                {
-                    Headers = _producerHeaders,
-                    Key = key!,
-                    Value = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions)),
-                    Timestamp = new Timestamp(envelope.TimeStamp)
-                },
-                cancellationToken ?? default);
-            }
-            catch (Exception ex)
-            {
-                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
-                {
-                    _logger.LogError(Constants.RabbitMQ_log_eventId, "Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
+                    var properties = channel.CreateBasicProperties();
+                    properties.AppId = _configuration.AppName;
+                    properties.MessageId = envelope.Id.ToString();
+                    properties.Headers.Add("host-name", _configuration.ClientName);
+                    properties.Headers.Add("application-name", _configuration.AppName);
+                    channel.BasicPublish(string.Empty, topic, properties, message);
+                    channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerTimeout));
+                    if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
+                            topic,
+                            envelope.Id,
+                            key);
+                    }
                 }
-                
-                throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
-            }
-            */
+                catch (Exception ex)
+                {
+                    if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
+                    }
+
+                    throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topic}", ex);
+                }
+            });
         }
 
         public IKwfRabbitMQConsumerHandler CreateConsumer<THandler, TPayload>(THandler eventHandler, string topic, string? topipConfigurationKey = null)

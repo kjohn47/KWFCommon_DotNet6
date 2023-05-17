@@ -19,20 +19,20 @@
             return services.AddKwfRabbitMQBus(config!);
         }
 
-        public static IServiceCollection AddKwfRabbitMQBus(this IServiceCollection services, KwfRabbitMQConfiguration kwfKafkaConfiguration)
+        public static IServiceCollection AddKwfRabbitMQBus(this IServiceCollection services, KwfRabbitMQConfiguration rabbitMQConfiguration)
         {
             if (services is null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            if (kwfKafkaConfiguration is null)
+            if (rabbitMQConfiguration is null)
             {
-                throw new ArgumentNullException(nameof(kwfKafkaConfiguration));
+                throw new ArgumentNullException(nameof(rabbitMQConfiguration));
             }
 
             services.TryAddSingleton<IKwfRabbitMQBus>(s => new KwfRabbitMQBus(
-                kwfKafkaConfiguration,
+                rabbitMQConfiguration,
                 s.GetService<ILoggerFactory>()));
             services.TryAddSingleton<IKwfRabbitMQConsumerAccessor, KwfRabbitMQConsumerAccessor>();
             return services;
