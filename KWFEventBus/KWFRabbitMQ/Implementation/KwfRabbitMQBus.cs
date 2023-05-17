@@ -39,7 +39,7 @@
 
             _connectionFactory = new ConnectionFactory
             {
-                ClientProvidedName = _configuration.AppName,
+                ClientProvidedName = _configuration.GetClientName(),
                 EndpointResolverFactory = _ => {
                     return new DefaultEndpointResolver(_endpoints);
                 },
@@ -70,17 +70,33 @@
                 {
                     using var connection = _connectionFactory.CreateConnection();
                     using var channel = connection.CreateModel();
-                    channel.QueueDeclare(topic);
-                    var envelope = new EventPayloadEnvelope<T>(payload);
-                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));
+                    channel.ConfirmSelect(); // make this a configuration
+
+                    if (_configuration.AutoQueueCreation)
+                    {
+                        //channel.ExchangeDeclare(_configuration.ExchangeName, "topic", true, false); //add exchange definitions when exchange is not empty
+                        channel.QueueDeclare(topic, true, false, false); //declare - setting for automatic topics and if should auto-delete, etc
+                        //channel.QueueBind(topic, _configuration.ExchangeName, string.Empty); when exchange is not empty
+                    }
+                    /*
+                    else {
+                        channel.QueueBind(topic, _configuration.ExchangeName, string.Empty); //exchange key to check - add on configs ?? when exchange is not empty
+                    }*/
 
                     var properties = channel.CreateBasicProperties();
+                    var envelope = new EventPayloadEnvelope<T>(payload);
+                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));         
+                    
                     properties.AppId = _configuration.AppName;
                     properties.MessageId = envelope.Id.ToString();
-                    properties.Headers.Add("host-name", _configuration.ClientName);
-                    properties.Headers.Add("application-name", _configuration.AppName);
-                    channel.BasicPublish(string.Empty, topic, properties, message);
-                    channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerTimeout));
+                    properties.Headers = new Dictionary<string, object>
+                    {
+                        { "host-name", _configuration.ClientName },
+                        { "application-name", _configuration.AppName }
+                    };
+
+                    channel.BasicPublish(_configuration.ExchangeName, topic, properties, message);
+                    channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerTimeout));// make this a configuration
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                     {
                         _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
