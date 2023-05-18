@@ -39,7 +39,7 @@
         {
             try
             {
-                await _eventBus.ProduceAsync(request.EventMessage, AppConstants.TestTopic);
+                await _eventBus.ProduceMultipleAsync(request.EventMessage, new[] { AppConstants.TestTopic, "kwf.sample.test.1.topic", "kwf.sample.test.2.topic" });
                 return CQRSResult<PublishEventCommandResponse>.Success(new PublishEventCommandResponse(AppConstants.TestTopic));
             }
             catch (KwfKafkaBusException ex)

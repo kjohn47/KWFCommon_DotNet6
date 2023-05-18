@@ -65,6 +65,11 @@
             return ProduceAsync(payload, topic, null, cancellationToken);
         }
 
+        public Task ProduceMultipleAsync<T>(T payload, string[] topics, CancellationToken? cancellationToken = null) where T : class
+        {
+            return ProduceMultipleAsync(payload, topics, null, cancellationToken);
+        }
+
         public async Task ProduceAsync<T>(T payload, string topic, string? key, CancellationToken? cancellationToken = null) where T : class
         {
             try
@@ -72,7 +77,7 @@
                 var envelope = new EventPayloadEnvelope<T>(payload);
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation(Constants.Kafka_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
+                    _logger.LogInformation(Constants.Kafka_log_eventId, "Producing event to topic {TOPIC} with id {ID} and key {KEY}",
                         topic,
                         envelope.Id,
                         key);
@@ -91,10 +96,66 @@
             {
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
                 }
                 
                 throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
+            }
+        }
+
+        public Task ProduceMultipleAsync<T>(T payload, string[] topics, string? key, CancellationToken? cancellationToken = null) where T : class
+        {
+            var produceTasks = new List<Task>();
+            try
+            {
+                var envelope = new EventPayloadEnvelope<T>(payload);
+                var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));
+
+                foreach (var topic in topics)
+                {
+                    produceTasks.Add(Task.Run(async () =>
+                    {
+                        try
+                        {
+                            if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                            {
+                                _logger.LogInformation(Constants.Kafka_log_eventId, "Producing event to topic {TOPIC} with id {ID} and key {KEY}",
+                                    topic,
+                                    envelope.Id,
+                                    key);
+                            }
+
+                            await _producer.ProduceAsync(topic, new Message<string, byte[]>
+                            {
+                                Headers = _producerHeaders,
+                                Key = key!,
+                                Value = message,
+                                Timestamp = new Timestamp(envelope.TimeStamp)
+                            },
+                            cancellationToken ?? default);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                            {
+                                _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
+                            }
+
+                            throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
+                        }
+                    }));
+                }
+
+                return Task.WhenAll(produceTasks);
+            }
+            catch (Exception ex)
+            {
+                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer, check exception for details\n{EXCEPTION}", ex.Message);
+                }
+
+                throw new KwfKafkaBusException("KAFKAPRODERR", "Error occured on producer", ex);
             }
         }
 
@@ -133,23 +194,23 @@
 
         private void ConfigureLogger(LogMessage log)
         {
-            if (_logger is not null)
+            if (_logger is not null && log is not null)
             {
                 if (_logger.IsEnabled(LogLevel.Debug) && log.Level == SyslogLevel.Debug)
                 {
-                    _logger.LogDebug(Constants.Kafka_log_eventId, log.Message);
+                    _logger.LogDebug(Constants.Kafka_log_eventId, "{MESSAGE}", log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Information) &&
                     (log.Level == SyslogLevel.Info || log.Level == SyslogLevel.Notice))
                 {
-                    _logger.LogInformation(Constants.Kafka_log_eventId, log.Message);
+                    _logger.LogInformation(Constants.Kafka_log_eventId, "{MESSAGE}", log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Warning) &&
                     (log.Level == SyslogLevel.Warning || log.Level == SyslogLevel.Alert))
                 {
-                    _logger.LogWarning(Constants.Kafka_log_eventId, log.Message);
+                    _logger.LogWarning(Constants.Kafka_log_eventId, "{MESSAGE}", log.Message);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Critical) && 
@@ -157,7 +218,7 @@
 
                 if (_logger.IsEnabled(LogLevel.Error) && log.Level == SyslogLevel.Error)
                 {
-                    _logger.LogError(Constants.Kafka_log_eventId, log.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, "{MESSAGE}", log.Message);
                 }
             }
         }
@@ -169,13 +230,13 @@
             {
                 if (err.IsFatal && _logger.IsEnabled(LogLevel.Critical))
                 {
-                    _logger.LogCritical(Constants.Kafka_log_eventId, message);
+                    _logger.LogCritical(Constants.Kafka_log_eventId, "{MESSAGE}", message);
                     return;
                 }
 
                 if ((err.IsError || err.IsLocalError || err.IsBrokerError) && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(Constants.Kafka_log_eventId, message);
+                    _logger.LogError(Constants.Kafka_log_eventId, "{MESSAGE}", message);
                     return;
                 }
             }

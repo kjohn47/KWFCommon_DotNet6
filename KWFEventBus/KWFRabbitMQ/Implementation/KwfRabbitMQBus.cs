@@ -65,7 +65,7 @@
                 _connection = null;
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured during connection opening\n Reason: {0}", ex.Message);
+                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured during connection opening\n Reason: {EXCEPTION}", ex.Message);
                 }
             }
         }
@@ -73,6 +73,11 @@
         public Task ProduceAsync<T>(T payload, string topic, CancellationToken? cancellationToken = null) where T : class
         {
             return ProduceAsync(payload, topic, null, cancellationToken);
+        }
+
+        public Task ProduceMultipleAsync<T>(T payload, string[] topics, CancellationToken? cancellationToken = null) where T : class
+        {
+            return ProduceMultipleAsync(payload, topics, null, cancellationToken);
         }
 
         public Task ProduceAsync<T>(T payload, string topic, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
@@ -96,7 +101,7 @@
                         {
                             channel.BasicAcks += (_, e) =>
                             {
-                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {0} with id {1} and exchange {2} Ack",
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {TOPIC} with id {ID} and exchange {EXCHANGE} Ack",
                                 topic,
                                 envelope.Id,
                                 exchangeLog);
@@ -104,7 +109,7 @@
 
                             channel.BasicNacks += (_, e) =>
                             {
-                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {0} with id {1} and exchange {2} failed ack or timeout",
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {TOPIC} with id {ID} and exchange {EXCHANGE} failed ack or timeout",
                                 topic,
                                 envelope.Id,
                                 exchangeLog);
@@ -137,13 +142,13 @@
 
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                     {
-                        _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending event to topic {0} with id {1} and exchange {2}",
+                        _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending event to topic {TOPIC} with id {ID} and exchange {EXCHANGE}",
                             topic,
                             envelope.Id,
                             exchangeLog);
                     }
 
-                    channel.BasicPublish(exchangeName, topic, properties, message);
+                    channel.BasicPublish(exchangeName, topic, properties, message.AsMemory());
 
                     if (topicWaitAck)
                     {
@@ -154,10 +159,109 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                     {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {0} on exchange {1}\n Reason: {2}", topic, exchangeLog, ex.Message);
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topic, exchangeLog, ex.Message);
                     }
 
                     throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topic} on exchange {exchangeLog}", ex);
+                }
+            });
+        }
+
+        public Task ProduceMultipleAsync<T>(T payload, string[] topics, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
+        {
+            return Task.Run(() =>
+            {
+                var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _) = _configuration.GetTopicSettings(configurationKey);
+                var exchangeLog = string.IsNullOrEmpty(exchangeName) ?  KwfConstants.DefaultExchangeNameLog : exchangeName;
+                var topicsLogString = string.Join(',', topics);
+
+                try
+                {
+                    using var channel = GetConnection().CreateModel();
+                    var envelope = new EventPayloadEnvelope<T>(payload);
+                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));
+
+                    if (topicWaitAck)
+                    {
+                        channel.ConfirmSelect();
+                        if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                        {
+                            channel.BasicAcks += (_, e) =>
+                            {
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event with tag {TAG} to topics {TOPIC} with id {ID} and exchange {EXCHANGE} Ack",
+                                e.DeliveryTag,
+                                topicsLogString,
+                                envelope.Id,
+                                exchangeLog);
+                            };
+
+                            channel.BasicNacks += (_, e) =>
+                            {
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event with tag {TAG} to topics {TOPIC} with id {ID} and exchange {EXCHANGE} failed ack or timeout",
+                                e.DeliveryTag,
+                                topicsLogString,
+                                envelope.Id,
+                                exchangeLog);
+                            };
+                        }
+                    }
+
+                    var properties = channel.CreateBasicProperties();
+                    properties.AppId = _configuration.AppName;
+                    properties.ClusterId = _configuration.AppName;
+                    properties.Persistent = messagePersistent;
+                    properties.MessageId = envelope.Id.ToString();
+                    properties.Headers = new Dictionary<string, object>
+                    {
+                        { KwfConstants.HostNameHeader, _configuration.ClientName },
+                        { KwfConstants.ApplicationNameHeader, _configuration.AppName }
+                    };
+
+                    var batch = channel.CreateBasicPublishBatch();
+
+                    if (autoTopicCreate && !string.IsNullOrEmpty(exchangeName))
+                    {
+                        channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
+                    }
+
+                    foreach (var topic in topics)
+                    {
+                        if (autoTopicCreate)
+                        {
+                            channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete);
+                            if (!string.IsNullOrEmpty(exchangeName))
+                            {
+                                channel.QueueBind(topic, exchangeName, topic);
+                            }
+                        }
+
+                        if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Adding topic {TOPIC} with id {ID} and exchange {EXCHANGE} to publish batch",
+                                topic,
+                                envelope.Id,
+                                exchangeLog);
+                        }
+
+                        batch.Add(exchangeName, topic, false, properties, message.AsMemory());
+                    }
+
+                    batch.Publish();
+
+                    if (topicWaitAck)
+                    {
+                        channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerAckTimeout));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topicsLogString, exchangeLog, ex.Message);
+                    }
+
+                    throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topicsLogString} on exchange {exchangeLog}", ex);
                 }
             });
         }
@@ -194,7 +298,7 @@
             {
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on instantiating consumer handler for topic {0}\n Reason: {1}", topic, ex.Message);
+                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on instantiating consumer handler for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
                 }
 
                 throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured on instantiating consumer handler for topic {topic}", ex);

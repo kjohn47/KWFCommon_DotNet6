@@ -27,7 +27,7 @@
         public bool TopicExclusive { get; set; } = false;
         public bool TopicWaitAck { get; set; } = true;
         public bool MessagePersistent { get; set; } = true;
-        public bool TopicAutoCommit { get; set; } = false;
+        public bool TopicAutoCommit { get; set; } = true;
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
         public IDictionary<string, KwfRabbitMQTopicConfiguration>? TopicConfiguration { get; set; }
 
@@ -38,7 +38,7 @@
 
         public (string ExchangeName, bool Durable, bool AutoDelete) GetExchangeSettings(string? configurationKey)
         {
-            var exchangeDefaultName = ExchangeConfiguration?.ExchangeName ?? string.Empty;
+            string exchangeDefaultName = ExchangeConfiguration?.ExchangeName ?? string.Empty;
             var exchangeDefaultDurable = ExchangeConfiguration?.Durable ?? true;
             var exchangeDefaultAutoDelete = ExchangeConfiguration?.AutoDelete ?? false;
 

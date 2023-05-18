@@ -2,7 +2,6 @@
 {
     using Confluent.Kafka;
 
-    using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.Abstractions.Models;
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
@@ -95,7 +94,7 @@
                                     {
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                                         {
-                                            _logger.LogInformation(Constants.Kafka_log_eventId, "Consuming event from topic {0} with id {1} and key {2}",
+                                            _logger.LogInformation(Constants.Kafka_log_eventId, "Consuming event from topic {TOPIC} with id {ID} and key {KEY}",
                                                 _topic, 
                                                 payloadObj.Id, 
                                                 message.Message.Key);
@@ -124,7 +123,7 @@
                             {
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
                                 {
-                                    _logger.LogWarning(Constants.Kafka_log_eventId, "{0} for consumer on topic {1}", kafkaEx.Message, _topic);
+                                    _logger.LogWarning(Constants.Kafka_log_eventId, "{EXCEPTION} for consumer on topic {TOPIC}", kafkaEx.Message, _topic);
                                 }
                             }
                             else
@@ -132,7 +131,7 @@
                                 var kwfEx = new KwfKafkaBusException("KAFKACONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                 {
-                                    _logger.LogError(Constants.Kafka_log_eventId, kwfEx, "Error occured on consumer for topic {0}", _topic);
+                                    _logger.LogError(Constants.Kafka_log_eventId, kwfEx, "Error occured on consumer for topic {TOPIC}", _topic);
                                 }
 
                                 if (!alwaysRetry)
@@ -142,7 +141,7 @@
                                     {
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
                                         {
-                                            _logger.LogCritical(Constants.Kafka_log_eventId, "Consumer for topic {0} has stoped", _topic);
+                                            _logger.LogCritical(Constants.Kafka_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
                                         }
 
                                         _consumeEnabled = false;
@@ -184,7 +183,7 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
                     {
-                        _logger.LogWarning(Constants.Kafka_log_eventId, "Error occurred during commit of topic {0}, payload id:{1}", _topic, id);
+                        _logger.LogWarning(Constants.Kafka_log_eventId, "Error occurred during commit of topic {TOPIC}, payload id:{ID}", _topic, id);
                     }
                 }
             }

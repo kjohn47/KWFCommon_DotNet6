@@ -63,7 +63,7 @@
                                 var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                 {
-                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {0}", _topic);
+                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {TOPIC}", _topic);
                                 }
 
                                 if (!alwaysRetry)
@@ -72,7 +72,7 @@
                                     {
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
                                         {
-                                            _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {0} has stoped", _topic);
+                                            _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
                                         }
 
                                         _consumeEnabled = false;
@@ -110,7 +110,7 @@
                                         {
                                             if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                                             {
-                                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Consuming event from topic {0} with id {1} and tag {2}",
+                                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Consuming event from topic {TOPIC} with id {ID} and tag {TAG}",
                                                     _topic,
                                                     payloadObj.Id,
                                                     message.DeliveryTag);
@@ -149,12 +149,17 @@
 
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                 {
-                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Channel consumer for topic {0} was closed", _topic);
+                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Channel consumer for topic {TOPIC} was closed", _topic);
                                 }
                             };
 
                             channel.BasicConsume(_topic, _autoCommit, _configuration.GetClientName(), consumer);
-                            await Task.Delay(_configuration.ConsumerPollingInterval);
+                            
+                            while (!consumer.IsRunning && !consumer.Model.IsClosed)
+                            {
+                                await Task.Delay(_configuration.ConsumerPollingInterval);
+                            }
+
                             processStarted = consumer.IsRunning;
                         }
                         catch (Exception ex)
@@ -163,7 +168,7 @@
                             var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
                             if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                             {
-                                _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {0}", _topic);
+                                _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {TOPIC}", _topic);
                             }
 
                             if (!alwaysRetry)
@@ -172,7 +177,7 @@
                                 {
                                     if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
                                     {
-                                        _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {0} has stoped", _topic);
+                                        _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
                                     }
 
                                     _consumeEnabled = false;
@@ -213,7 +218,7 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
                     {
-                        _logger.LogWarning(KwfConstants.RabbitMQ_log_eventId, "Error occurred during commit of topic {0}", _topic);
+                        _logger.LogWarning(KwfConstants.RabbitMQ_log_eventId, "Error occurred during commit of topic {TOPIC}", _topic);
                     }
                 }
             }
