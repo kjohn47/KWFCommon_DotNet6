@@ -4,6 +4,8 @@
 
     public interface IKwfKafkaBus : IKWFEventBusProducer
     {
+        Task ProduceAsync<T>(T payload, string topic, string? key, CancellationToken? cancellationToken = null) where T : class;
+
         IKwfKafkaEventConsumerHandler CreateConsumer<THandler, TPayload>(
             THandler eventHandler,
             string topic,

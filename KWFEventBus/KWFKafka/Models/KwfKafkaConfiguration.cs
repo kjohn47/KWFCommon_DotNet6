@@ -38,7 +38,7 @@
 
         public int ConsumerTimeout { get; set; } = 5000;
 
-        public int ConsumerMaxRetries { get; set; } = 5;
+        public int ConsumerMaxRetries { get; set; } = -1; // -1 => forever, never stops even on exception / error >1 = stops after retry or reset on success
 
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
 

@@ -22,7 +22,7 @@
 
         public IKwfEventConsumerHandler? GetConsumerService<TPayload>() where TPayload : class
         {
-            return _consumerHandlers.FirstOrDefault(x => x is KwfRabbitMQConsumerHandler<IKwfRabbitMQEventHandler<TPayload>, TPayload>);
+            return _consumerHandlers.FirstOrDefault(x => x is KwfRabbitMQConsumerHandlerBase<IKwfRabbitMQEventHandler<TPayload>, TPayload>);
         }
 
         public void StartConsuming<TPayload>() where TPayload : class

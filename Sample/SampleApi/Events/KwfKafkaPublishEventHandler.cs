@@ -7,10 +7,10 @@
     using System.IdentityModel.Tokens.Jwt;
     using System.Threading.Tasks;
 
-    public class KwfPublishEventHandler : IKwfKafkaEventHandler<string>
+    public class KwfKafkaPublishEventHandler : IKwfKafkaEventHandler<string>
     {
         private readonly IKwfCacheOnMemory _cache;
-        public KwfPublishEventHandler(IKwfCacheOnMemory cache)
+        public KwfKafkaPublishEventHandler(IKwfCacheOnMemory cache)
         {
             _cache = cache;
         }

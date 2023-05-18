@@ -2,7 +2,11 @@
 {
     using KWFCaching.Memory.Extensions;
     using KWFCaching.Redis.Extensions;
+
+    using KWFEventBus.Abstractions.Models;
     using KWFEventBus.KWFKafka.Extensions;
+    using KWFEventBus.KWFRabbitMQ.Extensions;
+    using KWFEventBus.KWFRabbitMQ.Models;
 
     using KWFValidation.KWFCQRSValidation.Extensions;
     using KWFValidation.KWFCQRSValidation.Interfaces;
@@ -32,10 +36,22 @@
             services.AddKwfRedisCache(_configuration);
 
             //kafka event bus
-            services.AddKwfKafkaBus(_configuration);
+            //services.AddKwfKafkaBus(_configuration);
             //register consumer handler for topic
-            services.AddKwfKafkaConsumer<KwfPublishEventHandler, string>(AppConstants.TestTopic);
-
+            //services.AddKwfKafkaConsumer<KwfKafkaPublishEventHandler, string>(AppConstants.TestTopic);
+            services.AddKwfRabbitMQBus(new KwfRabbitMQConfiguration
+            {
+                AppName = "SampleApi",
+                Endpoints = new[]
+                {
+                    new EventBusEndpoint
+                    {
+                        Port = 5672,
+                        Url = "localhost"
+                    }
+                }
+            });
+            services.AddKwfRabbitMQConsumer<KwfRabbitMQPublishEventHandler, string>(AppConstants.TestTopic);
 
             // ---- Add common services ----
             services.AddSingleton<IWeatherForecastServices, WeatherForecastServices>();
@@ -82,10 +98,12 @@
         public void ConfigureServices(IServiceProvider services)
         {
             //start specific consumer handler for event (handler for type must be registered)
-            services.StartConsumingKafkaEvent<string>();
+            //services.StartConsumingKafkaEvent<string>();
+            //services.StartConsumingRabbitMQEvent<string>();
 
             //start all registered consumers
             //services.StartConsumingAllKafkaEvents();
+            services.StartConsumingAllRabbitMQEvents();
         }
     }
 }

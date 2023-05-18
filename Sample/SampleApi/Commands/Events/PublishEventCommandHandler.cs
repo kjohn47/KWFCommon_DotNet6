@@ -7,6 +7,7 @@
 
     using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFKafka.Models;
+    using KWFEventBus.KWFRabbitMQ.Interfaces;
 
     using KWFValidation.KWFCQRSValidation.Interfaces;
 
@@ -19,10 +20,11 @@
 
     public class PublishEventCommandHandler : ICommandHandler<PublishEventCommandRequest, PublishEventCommandResponse>
     {
-        private readonly IKwfKafkaBus _eventBus;
+        //private readonly IKwfKafkaBus _eventBus;
+        private readonly IKwfRabbitMQBus _eventBus;
         private readonly IKwfCQRSValidator<PublishEventCommandRequest> _validator;
 
-        public PublishEventCommandHandler(IKwfKafkaBus eventBus, IKwfCQRSValidator<PublishEventCommandRequest> validator)
+        public PublishEventCommandHandler(/*IKwfKafkaBus*/IKwfRabbitMQBus eventBus, IKwfCQRSValidator<PublishEventCommandRequest> validator)
         {
             _eventBus = eventBus;
             _validator = validator;

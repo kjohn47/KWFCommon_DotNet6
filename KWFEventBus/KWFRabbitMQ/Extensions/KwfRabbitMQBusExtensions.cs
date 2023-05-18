@@ -38,7 +38,7 @@
             return services;
         }
 
-        public static IServiceCollection AddKwfKafkaConsumer<THandlerImplementation, TPayload>(this IServiceCollection services, string topic, string? topicConfigurationKey = null)
+        public static IServiceCollection AddKwfRabbitMQConsumer<THandlerImplementation, TPayload>(this IServiceCollection services, string topic, string? topicConfigurationKey = null)
             where THandlerImplementation : class, IKwfRabbitMQEventHandler<TPayload>
             where TPayload : class
         {
@@ -65,7 +65,7 @@
             return services;
         }
 
-        public static IServiceProvider StartConsumingKafkaEvent<TPayload>(this IServiceProvider services)
+        public static IServiceProvider StartConsumingRabbitMQEvent<TPayload>(this IServiceProvider services)
             where TPayload : class
         {
             if (services is null)
@@ -78,7 +78,7 @@
             return services;
         }
 
-        public static IServiceProvider StartConsumingAllKafkaEvents(this IServiceProvider services)
+        public static IServiceProvider StartConsumingAllRabbitMQEvents(this IServiceProvider services)
         {
             if (services is null)
             {

@@ -20,11 +20,10 @@
         private readonly JsonSerializerOptions? _jsonSerializerOptions;
         private readonly IConnectionFactory _connectionFactory;
         private readonly IEnumerable<AmqpTcpEndpoint> _endpoints;
-        private readonly string _producer;
-        private readonly string? _defaultProducerProperties;
-        private readonly string? _defaultConsumerProperties;
         private readonly ILogger? _logger;
+        private IConnection? _connection;
         private bool _disposed;
+        private object _connectionOpenLock;
 
         public KwfRabbitMQBus(KwfRabbitMQConfiguration configuration, ILoggerFactory? loggerFactory, JsonSerializerOptions? jsonSerializerOptions = null) 
         {
@@ -36,7 +35,7 @@
             _configuration = configuration;
             _jsonSerializerOptions = jsonSerializerOptions ?? EventsJsonOptions.GetJsonOptions();
             _endpoints = _configuration.Endpoints!.Select(e => new AmqpTcpEndpoint(e.Url, e.Port));
-
+            var timeout = TimeSpan.FromMilliseconds(_configuration.Timeout);
             _connectionFactory = new ConnectionFactory
             {
                 ClientProvidedName = _configuration.GetClientName(),
@@ -44,16 +43,30 @@
                     return new DefaultEndpointResolver(_endpoints);
                 },
                 UserName = _configuration.UserName,
-                Password = _configuration.Password
+                Password = _configuration.Password,
+                RequestedConnectionTimeout = timeout,
+                SocketReadTimeout = timeout,
+                SocketWriteTimeout = timeout
             };
 
-            //_defaultProducerProperties = _configuration.GetProducerConfiguration();
-            //_defaultConsumerProperties = _configuration.GetConsumerConfiguration();
+            _connectionOpenLock = new Object();
 
-            //_producer = ;
             if (loggerFactory is not null)
             {
                 _logger = loggerFactory.CreateLogger<KwfRabbitMQBus>();
+            }
+
+            try
+            {
+                _connection = _connectionFactory.CreateConnection();
+            }
+            catch (Exception ex)
+            {
+                _connection = null;
+                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured during connection opening\n Reason: {0}", ex.Message);
+                }
             }
         }
 
@@ -62,91 +75,130 @@
             return ProduceAsync(payload, topic, null, cancellationToken);
         }
 
-        public Task ProduceAsync<T>(T payload, string topic, string? key, CancellationToken? cancellationToken = null) where T : class
+        public Task ProduceAsync<T>(T payload, string topic, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
         {
             return Task.Run(() =>
             {
+                var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _) = _configuration.GetTopicSettings(configurationKey);
+                var exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
+
                 try
                 {
-                    using var connection = _connectionFactory.CreateConnection();
-                    using var channel = connection.CreateModel();
-                    channel.ConfirmSelect(); // make this a configuration
+                    using var channel = GetConnection().CreateModel();
+                    var envelope = new EventPayloadEnvelope<T>(payload);
+                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));
 
-                    if (_configuration.AutoQueueCreation)
+                    if (topicWaitAck)
                     {
-                        //channel.ExchangeDeclare(_configuration.ExchangeName, "topic", true, false); //add exchange definitions when exchange is not empty
-                        channel.QueueDeclare(topic, true, false, false); //declare - setting for automatic topics and if should auto-delete, etc
-                        //channel.QueueBind(topic, _configuration.ExchangeName, string.Empty); when exchange is not empty
+                        channel.ConfirmSelect();
+                        if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
+                        {
+                            channel.BasicAcks += (_, e) =>
+                            {
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {0} with id {1} and exchange {2} Ack",
+                                topic,
+                                envelope.Id,
+                                exchangeLog);
+                            };
+
+                            channel.BasicNacks += (_, e) =>
+                            {
+                                _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending Event to topic {0} with id {1} and exchange {2} failed ack or timeout",
+                                topic,
+                                envelope.Id,
+                                exchangeLog);
+                            };
+                        }
                     }
-                    /*
-                    else {
-                        channel.QueueBind(topic, _configuration.ExchangeName, string.Empty); //exchange key to check - add on configs ?? when exchange is not empty
-                    }*/
+
+                    if (autoTopicCreate)
+                    {
+                        //add parameters per topic configuration
+                        channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete);
+                        if (!string.IsNullOrEmpty(exchangeName))
+                        {
+                            //add topic - exchange configuration
+                            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
+                            channel.QueueBind(topic, exchangeName, topic);
+                        }
+                    }
 
                     var properties = channel.CreateBasicProperties();
-                    var envelope = new EventPayloadEnvelope<T>(payload);
-                    var message = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(envelope, _jsonSerializerOptions));         
-                    
                     properties.AppId = _configuration.AppName;
+                    properties.ClusterId = _configuration.AppName;
+                    properties.Persistent = messagePersistent;
                     properties.MessageId = envelope.Id.ToString();
                     properties.Headers = new Dictionary<string, object>
                     {
-                        { "host-name", _configuration.ClientName },
-                        { "application-name", _configuration.AppName }
+                        { KwfConstants.HostNameHeader, _configuration.ClientName },
+                        { KwfConstants.ApplicationNameHeader, _configuration.AppName }
                     };
 
-                    channel.BasicPublish(_configuration.ExchangeName, topic, properties, message);
-                    channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerTimeout));// make this a configuration
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                     {
-                        _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Producing event to topic {0} with id {1} and key {2}",
+                        _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending event to topic {0} with id {1} and exchange {2}",
                             topic,
                             envelope.Id,
-                            key);
+                            exchangeLog);
+                    }
+
+                    channel.BasicPublish(exchangeName, topic, properties, message);
+
+                    if (topicWaitAck)
+                    {
+                        channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerAckTimeout));
                     }
                 }
                 catch (Exception ex)
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                     {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {0}\n Reason: {1}", topic, ex.Message);
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {0} on exchange {1}\n Reason: {2}", topic, exchangeLog, ex.Message);
                     }
 
-                    throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topic}", ex);
+                    throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topic} on exchange {exchangeLog}", ex);
                 }
             });
         }
 
-        public IKwfRabbitMQConsumerHandler CreateConsumer<THandler, TPayload>(THandler eventHandler, string topic, string? topipConfigurationKey = null)
+        public IKwfRabbitMQConsumerHandler CreateConsumer<THandler, TPayload>(THandler eventHandler, string topic, string? configurationKey = null)
             where THandler : class, IKwfRabbitMQEventHandler<TPayload>
             where TPayload : class
         {
-            /*
-            var config = string.IsNullOrEmpty(topipConfigurationKey)
-            ? _defaultConsumerProperties
-            : _configuration.GetConsumerConfiguration(topipConfigurationKey);
-            var consumer = new ConsumerBuilder<string, byte[]>(config)
-                                .SetLogHandler((c, m) =>
-                                {
-                                    ConfigureLogger(m);
-                                })
-                                .SetErrorHandler((c, err) =>
-                                {
-                                    ConfigureErrorHandler(err, "Consumer");
-                                })
-                                .Build();
-            consumer.Subscribe(topic);
-            */
+            try
+            {
+                if (_configuration.UsePolling)
+                {
+                    return new KwfRabbitMQPollingConsumerHandler<THandler, TPayload>(
+                            eventHandler,
+                            topic,
+                            GetConnection,
+                            _configuration,
+                            _jsonSerializerOptions!,
+                            _logger,
+                            configurationKey);
+                }
 
-            return new KwfRabbitMQConsumerHandler<THandler, TPayload>(
-                    eventHandler,
-                    topic,
-                    "consumer", //consumer from MQ client
-                    _configuration, //to replace with 'config' from key above
-                    _configuration.ConsumerTimeout,
-                    _configuration.ConsumerMaxRetries,
-                    _jsonSerializerOptions!,
-                    _logger);
+                return new KwfRabbitMQEventConsumerHandler<THandler, TPayload>(
+                            eventHandler,
+                            topic,
+                            GetConnection,
+                            _configuration,
+                            _jsonSerializerOptions!,
+                            _logger,
+                            configurationKey);
+
+            }
+            catch (Exception ex)
+            {
+                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on instantiating consumer handler for topic {0}\n Reason: {1}", topic, ex.Message);
+                }
+
+                throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured on instantiating consumer handler for topic {topic}", ex);
+            }
         }
 
         public void Dispose()
@@ -154,8 +206,50 @@
             if (!_disposed)
             {
                 _disposed = true;
-                // Dispose additional
+                if (_connection is not null)
+                {
+                    try
+                    {
+                        _connection.Close();
+                    }
+                    catch { }
+                    try
+                    {
+                        _connection.Dispose();
+                    }
+                    catch { }
+                }
             }
+        }
+
+        private IConnection GetConnection()
+        {
+            if (_connection is null)
+            {
+                lock (_connectionOpenLock)
+                {
+                    _connection ??= _connectionFactory.CreateConnection();
+                }
+            }
+
+            if (!_connection.IsOpen)
+            {
+                lock (_connectionOpenLock)
+                {
+                    if (!_connection.IsOpen)
+                    {
+                        try
+                        {
+                            _connection.Dispose();
+                        }
+                        catch { }
+                        _connection = null;
+                        _connection = _connectionFactory.CreateConnection();
+                    }
+                }
+            }
+
+            return _connection;
         }
     }
 }

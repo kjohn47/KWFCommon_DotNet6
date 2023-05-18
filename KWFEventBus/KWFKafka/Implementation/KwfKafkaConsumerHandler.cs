@@ -75,6 +75,7 @@
                 Task.Run(async () =>
                 {
                     var retry = _maxRetry;
+                    var alwaysRetry = _maxRetry == -1;
                     bool messageProcessException = false;
                     while (IsStarted)
                     {
@@ -134,18 +135,22 @@
                                     _logger.LogError(Constants.Kafka_log_eventId, kwfEx, "Error occured on consumer for topic {0}", _topic);
                                 }
 
-                                if (retry == 0)
+                                if (!alwaysRetry)
                                 {
-                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
+
+                                    if (retry == 0)
                                     {
-                                        _logger.LogCritical(Constants.Kafka_log_eventId, "Consumer for topic {0} has stoped", _topic);
+                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
+                                        {
+                                            _logger.LogCritical(Constants.Kafka_log_eventId, "Consumer for topic {0} has stoped", _topic);
+                                        }
+
+                                        _consumeEnabled = false;
+                                        throw kwfEx;
                                     }
 
-                                    _consumeEnabled = false;
-                                    throw kwfEx;
+                                    retry--;
                                 }
-
-                                retry--;
                             }
                         }
                     }
