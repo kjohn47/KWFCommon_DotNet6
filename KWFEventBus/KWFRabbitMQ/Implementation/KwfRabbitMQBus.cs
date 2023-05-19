@@ -58,7 +58,7 @@
 
             try
             {
-                _connection = _connectionFactory.CreateConnection();
+                GetConnection();
             }
             catch (Exception ex)
             {
@@ -314,11 +314,15 @@
                 {
                     try
                     {
-                        _connection.Close();
-                    }
-                    catch { }
-                    try
-                    {
+                        try
+                        {
+                            if (_connection.IsOpen)
+                            {
+                                _connection.Close();
+                            }
+                        }
+                        catch { }
+
                         _connection.Dispose();
                     }
                     catch { }

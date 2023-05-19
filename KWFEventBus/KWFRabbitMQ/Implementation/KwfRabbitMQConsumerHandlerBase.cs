@@ -88,7 +88,7 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                     {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {0}. Could not open connection or channel", _topic);
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}. Could not open connection or channel", _topic);
                     }
 
                     await Task.Delay(_configuration.Timeout);
@@ -132,7 +132,10 @@
                 {
                     try
                     {
-                        _channel.Close();
+                        if (_channel.IsOpen)
+                        {
+                            _channel.Close();
+                        }
                     }
                     catch { }
                     _channel.Dispose();
@@ -152,9 +155,12 @@
                 {
                     try
                     {
-                        _channel.Close();
+                        if (_channel.IsOpen)
+                        {
+                            _channel.Close();
+                        }
                     }
-                    catch { }                    
+                    catch { }
                     _channel.Dispose();
                 }
             }

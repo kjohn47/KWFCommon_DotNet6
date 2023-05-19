@@ -5,5 +5,6 @@
     public class PublishEventCommandRequest : ICommandRequest
     {
         public string EventMessage { get; set; } = string.Empty;
+        public EventBusPublisherEnum Publisher { get; set; }
     }
 }

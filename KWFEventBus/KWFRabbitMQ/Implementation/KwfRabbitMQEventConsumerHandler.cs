@@ -81,7 +81,7 @@
                                     retry--;
                                 }
 
-                                await Task.Delay(_configuration.ConsumerPollingInterval);
+                                await Task.Delay(_configuration.Timeout);
                             }
                         }
 
@@ -137,11 +137,20 @@
                                 processStarted = false;
                                 try
                                 {
-                                    channel.Close();
-                                }
-                                catch { }
-                                try
-                                {
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                    {
+                                        _logger.LogWarning(KwfConstants.RabbitMQ_log_eventId, "Channel for consumer for topic {TOPIC} was closed", _topic);
+                                    }
+
+                                    try
+                                    {
+                                        if (channel.IsOpen)
+                                        {
+                                            channel.Close();
+                                        }
+                                    }
+                                    catch { }
+
                                     channel.Dispose();
                                 }
                                 catch { }
@@ -155,9 +164,14 @@
 
                             channel.BasicConsume(_topic, _autoCommit, _configuration.GetClientName(), consumer);
                             
-                            while (!consumer.IsRunning && !consumer.Model.IsClosed)
+                            while (consumer?.Model is not null && !consumer.IsRunning && !consumer.Model.IsClosed)
                             {
-                                await Task.Delay(_configuration.ConsumerPollingInterval);
+                                await Task.Delay(_configuration.Timeout);
+                            }
+
+                            if (consumer?.Model is null)
+                            {
+                                throw new ArgumentNullException(nameof(consumer), "Channel or consumer were closed before stablishing connection");
                             }
 
                             processStarted = consumer.IsRunning;
@@ -190,18 +204,22 @@
                             {
                                 try
                                 {
-                                    channel.Close();
-                                }
-                                catch { }
-                                try
-                                {
-                                    channel.Dispose();
+
+                                    try
+                                    {
+                                        if (channel.IsOpen)
+                                        {
+                                            channel.Close();
+                                        }
+                                    }
+                                    catch { }
+                                 channel.Dispose();
                                 }
                                 catch { }
                             }
                         }
-                        await Task.Delay(_configuration.ConsumerPollingInterval);
                     }
+                    await Task.Delay(_configuration.Timeout);
                 }
             });
         }

@@ -20,5 +20,7 @@
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
+
+        public string Publisher { get; set; } = string.Empty;
     }
 }

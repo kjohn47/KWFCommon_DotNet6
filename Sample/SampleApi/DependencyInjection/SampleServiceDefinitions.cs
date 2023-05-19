@@ -36,22 +36,21 @@
             services.AddKwfRedisCache(_configuration);
 
             //kafka event bus
-            //services.AddKwfKafkaBus(_configuration);
+            services.AddKwfKafkaBus(_configuration);
             //register consumer handler for topic
-            //services.AddKwfKafkaConsumer<KwfKafkaPublishEventHandler, string>(AppConstants.TestTopic);
-            services.AddKwfRabbitMQBus(new KwfRabbitMQConfiguration
-            {
-                AppName = "SampleApi",
-                Endpoints = new[]
-                {
-                    new EventBusEndpoint
-                    {
-                        Port = 5672,
-                        Url = "localhost"
-                    }
-                }
-            });
+            services.AddKwfKafkaConsumer<KwfKafkaPublishEventHandler, string>(AppConstants.TestTopic);
+            /*
+            services.AddKwfKafkaConsumer<handler, obj>("kwf.sample.topic.1");
+            services.AddKwfKafkaConsumer<handler, obj>("kwf.sample.topic.2");
+            */
+
+            //RabbitMQ event bus
+            services.AddKwfRabbitMQBus(_configuration);
             services.AddKwfRabbitMQConsumer<KwfRabbitMQPublishEventHandler, string>(AppConstants.TestTopic);
+            /*
+            services.AddKwfRabbitMQConsumer<handler, obj>("kwf.sample.topic.1");
+            services.AddKwfRabbitMQConsumer<handler, obj>("kwf.sample.topic.2");
+            */
 
             // ---- Add common services ----
             services.AddSingleton<IWeatherForecastServices, WeatherForecastServices>();
@@ -102,7 +101,7 @@
             //services.StartConsumingRabbitMQEvent<string>();
 
             //start all registered consumers
-            //services.StartConsumingAllKafkaEvents();
+            services.StartConsumingAllKafkaEvents();
             services.StartConsumingAllRabbitMQEvents();
         }
     }
