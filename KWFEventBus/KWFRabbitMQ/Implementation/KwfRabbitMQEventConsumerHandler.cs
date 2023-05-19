@@ -19,6 +19,8 @@
         where THandler : class, IKwfRabbitMQEventHandler<TPayload>
         where TPayload : class
     {
+        private readonly string _consumerTag;
+
         public KwfRabbitMQEventConsumerHandler(
             IKwfRabbitMQEventHandler<TPayload> kwfEventHandler,
             string topic,
@@ -29,6 +31,7 @@
             string? configurationKey = null) 
             : base(kwfEventHandler, topic, getConnection, configuration, jsonSettings, logger, configurationKey)
         {
+            _consumerTag = string.Concat(_configuration.GetClientName(), '.', topic);
         }
 
         public override void StartConsuming()
@@ -162,7 +165,7 @@
                                 }
                             };
 
-                            channel.BasicConsume(_topic, _autoCommit, _configuration.GetClientName(), consumer);
+                            channel.BasicConsume(_topic, _autoCommit, _consumerTag, consumer);
                             
                             while (consumer?.Model is not null && !consumer.IsRunning && !consumer.Model.IsClosed)
                             {
