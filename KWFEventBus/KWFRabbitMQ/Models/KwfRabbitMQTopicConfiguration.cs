@@ -8,7 +8,8 @@
         public bool? Exclusive { get; set; }
         public bool? WaitAck { get; set; }
         public bool? MessagePersistent { get; set; }
-        public bool? AutoCommit { get; set; }        
+        public bool? AutoCommit { get; set; }
+        public bool? ReQueueOnFail { get; set; }
         public KwfRabbitMQExchangeConfiguration? ExchangeConfiguration { get; set; }
     }
 }

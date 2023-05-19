@@ -33,6 +33,7 @@
         protected readonly bool _topicAutoDelete;
         protected readonly bool _autoTopicCreate;
         protected readonly bool _autoCommit;
+        protected readonly bool _requeue;
         protected IModel? _channel;
         protected bool _consumeEnabled = false;
         protected bool _disposed;
@@ -55,7 +56,7 @@
             _maxRetry = _configuration.ConsumerMaxRetries;
 
             var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, autoCommit) = _configuration.GetTopicSettings(configurationKey);
+            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, autoCommit, requeue) = _configuration.GetTopicSettings(configurationKey);
             _exchangeName = exchangeName;
             _exchangeDurable = exchangeDurable;
             _exchangeAutoDelete = exchangeAutoDelete;
@@ -64,6 +65,7 @@
             _topicAutoDelete = topicAutoDelete;
             _autoTopicCreate = autoTopicCreate;
             _autoCommit = autoCommit;
+            _requeue = requeue;
             _exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
         }
 

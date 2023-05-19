@@ -126,11 +126,15 @@
                                         retry = _maxRetry;
                                         messageProcessException = false;
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        TryComminMessage(channel, message);
+                                        TryComminMessage(channel, message, true);
                                         messageProcessException = true;
-                                        throw;
+
+                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                                        {
+                                            _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}", _topic);
+                                        }
                                     }
                                 }
                             };
@@ -227,12 +231,18 @@
             });
         }
 
-        private void TryComminMessage(IModel channel, BasicDeliverEventArgs message)
+        private void TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
         {
             if (!_autoCommit && message != null)
             {
                 try
                 {
+                    if (notAck)
+                    {
+                        channel.BasicNack(message.DeliveryTag, false, _requeue && !message.Redelivered);
+                        return;
+                    }
+
                     channel.BasicAck(message.DeliveryTag, false);
                 }
                 catch

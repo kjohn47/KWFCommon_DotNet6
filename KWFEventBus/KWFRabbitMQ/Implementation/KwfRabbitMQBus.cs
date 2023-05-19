@@ -91,7 +91,7 @@
             return Task.Run(() =>
             {
                 var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _) = _configuration.GetTopicSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _, _) = _configuration.GetTopicSettings(configurationKey);
                 var exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
 
                 try
@@ -176,7 +176,7 @@
             return Task.Run(() =>
             {
                 var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _) = _configuration.GetTopicSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, _, _) = _configuration.GetTopicSettings(configurationKey);
                 var exchangeLog = string.IsNullOrEmpty(exchangeName) ?  KwfConstants.DefaultExchangeNameLog : exchangeName;
                 var topicsLogString = string.Join(',', topics);
 

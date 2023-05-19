@@ -18,12 +18,17 @@
     {
         private readonly IKwfKafkaEventHandler<TPayload> _kwfEventHandler;
         private readonly IConsumer<string, byte[]> _consumer;
+        private readonly IProducer<string, byte[]> _producer;
         private readonly ConsumerConfig _configuration;
         private readonly int _timeout;
         private readonly ILogger? _logger;
         private readonly JsonSerializerOptions _kafkaJsonSettings;
         private readonly string _topic;
         private readonly int _maxRetry;
+        private readonly int _maxRetryDlq;
+        private readonly string _dlqTopicRetry = string.Empty;
+        private readonly string _dlqTopicFail = string.Empty;
+        private readonly bool _dlqEnabled = false;
         private bool _consumeEnabled = false;
         bool _disposed;
 
@@ -31,9 +36,12 @@
             IKwfKafkaEventHandler<TPayload> kwfEventHandler,
             string topic,
             IConsumer<string, byte[]> consumer,
+            IProducer<string, byte[]> producer,
             ConsumerConfig configuration,
             int timeout,
             int maxRetries,
+            int maxRetryDlq,
+            string dlqTag,
             JsonSerializerOptions kafkaJsonSettings,
             ILogger? logger)
         {
@@ -41,10 +49,19 @@
             _kafkaJsonSettings = kafkaJsonSettings;
             _topic = topic;
             _consumer = consumer;
+            _producer = producer;
             _configuration = configuration;
             _timeout = timeout;
             _logger = logger;
             _maxRetry = maxRetries;
+            _maxRetryDlq = maxRetryDlq;
+            _dlqEnabled = maxRetryDlq >= 0;
+
+            if (_dlqEnabled)
+            {
+                _dlqTopicRetry = $"{topic}.{dlqTag}.retry.";
+                _dlqTopicFail = $"{topic}.{dlqTag}.fail";
+            }
         }
 
         public void Dispose()
@@ -82,6 +99,7 @@
                         {
                             var message = _consumer?.Consume(_timeout);
                             retry = messageProcessException ? retry : _maxRetry;
+
                             if (message is not null && !message.IsPartitionEOF && message.Message.Value is not null)
                             {
                                 try
@@ -95,7 +113,7 @@
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                                         {
                                             _logger.LogInformation(Constants.Kafka_log_eventId, "Consuming event from topic {TOPIC} with id {ID} and key {KEY}",
-                                                _topic, 
+                                                message.Topic, 
                                                 payloadObj.Id, 
                                                 message.Message.Key);
                                         }
@@ -107,6 +125,31 @@
                                 }
                                 catch
                                 {
+                                    if (_dlqEnabled)
+                                    {
+                                        if (message.Topic == _topic && _maxRetryDlq > 0)
+                                        {
+                                            await _producer.ProduceAsync(string.Concat(_dlqTopicRetry, '0'), message.Message);
+                                        }
+                                        else if (message.Topic.StartsWith(_dlqTopicRetry))
+                                        {
+                                            var dlqRetry = int.TryParse(message.Topic[_dlqTopicRetry.Length..], out int dlqRetryOut) ? dlqRetryOut : 0;
+                                            dlqRetry++;
+                                            if (dlqRetry < _maxRetryDlq)
+                                            {
+                                                await _producer.ProduceAsync(string.Concat(_dlqTopicRetry, dlqRetry), message.Message);
+                                            }
+                                            else
+                                            {
+                                                await _producer.ProduceAsync(string.Concat(_dlqTopicFail), message.Message);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            await _producer.ProduceAsync(string.Concat(_dlqTopicFail), message.Message);
+                                        }                                        
+                                    }
+
                                     TryComminMessage(message);
                                     messageProcessException = true;
                                     throw;

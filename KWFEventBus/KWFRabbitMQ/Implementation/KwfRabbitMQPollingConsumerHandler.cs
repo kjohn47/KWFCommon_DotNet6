@@ -83,7 +83,7 @@
                             }
                             catch
                             {
-                                TryComminMessage(channel, message);
+                                TryComminMessage(channel, message, true);
                                 messageProcessException = true;
                                 throw;
                             }
@@ -119,12 +119,18 @@
             });
         }
 
-        private void TryComminMessage(IModel channel, BasicGetResult message)
+        private void TryComminMessage(IModel channel, BasicGetResult message, bool notAck = false)
         {
             if (!_autoCommit && message != null)
             {
                 try
                 {
+                    if (notAck)
+                    {
+                        channel.BasicNack(message.DeliveryTag, false, _requeue && !message.Redelivered);
+                        return;
+                    }
+
                     channel.BasicAck(message.DeliveryTag, false);
                 }
                 catch

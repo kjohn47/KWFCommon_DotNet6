@@ -179,15 +179,35 @@
                                     ConfigureErrorHandler(err, "Consumer");
                                 })
                                 .Build();
-            consumer.Subscribe(topic);
+            var (dlqEnabled, dlqRetries) = _configuration.GetDlqRetries(topipConfigurationKey);
+            if (dlqEnabled)
+            {
+                var subscribeTopics = new List<string>
+                {
+                    topic
+                };
+
+                for (int i = 0; i < dlqRetries; i++)
+                {
+                    subscribeTopics.Add($"{topic}.{_configuration.DLQTopicTag}.retry.{i}");
+                }
+                consumer.Subscribe(subscribeTopics);
+            }
+            else
+            {
+                consumer.Subscribe(topic);
+            }
 
             return new KwfKafkaConsumerHandler<THandler, TPayload>(
                     eventHandler,
                     topic,
                     consumer,
+                    _producer,
                     config!,
                     _configuration.ConsumerTimeout,
                     _configuration.ConsumerMaxRetries,
+                    dlqRetries,
+                    _configuration.DLQTopicTag,
                     _jsonSerializerOptions!,
                     _logger);
         }

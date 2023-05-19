@@ -29,6 +29,7 @@
         public bool TopicWaitAck { get; set; } = true;
         public bool MessagePersistent { get; set; } = true;
         public bool TopicAutoCommit { get; set; } = true;
+        public bool TopicReQueueOnFail { get; set; } = false;
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
         public IDictionary<string, KwfRabbitMQTopicConfiguration>? TopicConfiguration { get; set; }
 
@@ -53,7 +54,7 @@
                 throw new ArgumentNullException(nameof(TopicConfiguration), _nullTopicSettingsMessage);
             }
 
-            var topicSettings = TopicConfiguration[configurationKey] ?? throw new ArgumentNullException(configurationKey, _nonExistentKeyTopicSettingsMessage);
+            var topicSettings = TopicConfiguration.TryGetValue(configurationKey, out KwfRabbitMQTopicConfiguration? value) ? value : throw new ArgumentNullException(configurationKey, _nonExistentKeyTopicSettingsMessage);
 
             if (topicSettings.ExchangeConfiguration is null)
             {
@@ -66,11 +67,11 @@
                 topicSettings.ExchangeConfiguration.AutoDelete ?? exchangeDefaultAutoDelete);
         }
 
-        public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool autoCommit) GetTopicSettings(string? configurationKey)
+        public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool autoCommit, bool requeue) GetTopicSettings(string? configurationKey)
         {
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, TopicAutoCommit);
+                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, TopicAutoCommit, TopicReQueueOnFail);
             }
 
             if (TopicConfiguration is null)
@@ -78,7 +79,7 @@
                 throw new ArgumentNullException(nameof(TopicConfiguration), _nullTopicSettingsMessage);
             }
 
-            var topicSettings = TopicConfiguration[configurationKey] ?? throw new ArgumentNullException(configurationKey, _nonExistentKeyTopicSettingsMessage);
+            var topicSettings = TopicConfiguration.TryGetValue(configurationKey, out KwfRabbitMQTopicConfiguration? value) ? value : throw new ArgumentNullException(configurationKey, _nonExistentKeyTopicSettingsMessage);
 
             return (
                 topicSettings.MessagePersistent ?? MessagePersistent,
@@ -87,7 +88,8 @@
                 topicSettings.AutoDelete ?? TopicAutoDelete,
                 topicSettings.AutoQueueCreation ?? AutoQueueCreation,
                 topicSettings.WaitAck ?? TopicWaitAck,
-                topicSettings.AutoCommit ?? TopicAutoCommit);
+                topicSettings.AutoCommit ?? TopicAutoCommit,
+                topicSettings.ReQueueOnFail ?? TopicReQueueOnFail);
         }
     }
 }

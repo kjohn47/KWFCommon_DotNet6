@@ -40,6 +40,10 @@
 
         public int ConsumerMaxRetries { get; set; } = -1; // -1 => forever, never stops even on exception / error >1 = stops after retry or reset on success
 
+        public int ConsumerDLQRetry { get; set; } = -1; // -1 disabled, 0 - no retry, > 1 retry
+
+        public string DLQTopicTag { get; set; } = "dlq";
+
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
 
         public IEnumerable<EventBusProperty>? CommonProperties { get; set; }
@@ -49,6 +53,8 @@
         public IEnumerable<EventBusProperty>? ConsumerProperties { get; set; }
 
         public IDictionary<string, IEnumerable<EventBusProperty>>? TopicConsumerProperties { get; set; }
+
+        public IDictionary<string, int>? TopicConsumerDLQRetry { get; set; }
 
         public ConsumerConfig GetConsumerConfiguration(string? configurationKey = null)
         {
@@ -72,6 +78,20 @@
                 BootstrapServers = GetServerEndpoints(),
                 ClientId = $"{ClientName}.{AppName}"
             };
+        }
+
+        public (bool dlqEnabled, int maxRetry) GetDlqRetries(string? _topicConfigurationKey)
+        {
+            if (!string.IsNullOrEmpty(_topicConfigurationKey) && TopicConsumerDLQRetry is not null)
+            {
+                int? topicDlqConfig = TopicConsumerDLQRetry.TryGetValue(_topicConfigurationKey, out int value) ? value : null;
+                if (topicDlqConfig.HasValue)
+                {
+                    return (topicDlqConfig.Value >= 0, topicDlqConfig.Value);
+                }
+            }
+
+            return (ConsumerDLQRetry >= 0, ConsumerDLQRetry);
         }
 
         private IDictionary<string, string> GetProducerProperties()
