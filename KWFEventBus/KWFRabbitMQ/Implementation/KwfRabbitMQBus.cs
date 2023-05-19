@@ -46,7 +46,10 @@
                 Password = _configuration.Password,
                 RequestedConnectionTimeout = timeout,
                 SocketReadTimeout = timeout,
-                SocketWriteTimeout = timeout
+                SocketWriteTimeout = timeout,
+                ContinuationTimeout = timeout,
+                HandshakeContinuationTimeout = timeout,
+                RequestedHeartbeat = TimeSpan.FromMilliseconds(_configuration.HeartBeat)
             };
 
             _connectionOpenLock = new Object();
@@ -119,11 +122,9 @@
 
                     if (autoTopicCreate)
                     {
-                        //add parameters per topic configuration
                         channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete);
                         if (!string.IsNullOrEmpty(exchangeName))
                         {
-                            //add topic - exchange configuration
                             channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
                             channel.QueueBind(topic, exchangeName, topic);
                         }

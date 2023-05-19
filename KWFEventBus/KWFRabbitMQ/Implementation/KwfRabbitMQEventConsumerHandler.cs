@@ -54,7 +54,7 @@
                         {
                             try
                             {
-                                channel = await GetChannelAsync();
+                                channel = GetChannel();
                                 retry = _maxRetry;
                                 break;
                             }
@@ -81,7 +81,7 @@
                                     retry--;
                                 }
 
-                                await Task.Delay(_configuration.Timeout);
+                                await Task.Delay(_configuration.HeartBeat);
                             }
                         }
 

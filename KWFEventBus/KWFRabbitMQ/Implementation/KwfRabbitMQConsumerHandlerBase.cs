@@ -69,7 +69,7 @@
 
         public bool IsStarted => _consumeEnabled && !_disposed;
 
-        protected async Task<IModel> GetChannelAsync()
+        protected IModel GetChannel()
         {
             if (_channel is not null && _channel.IsOpen)
             {
@@ -77,21 +77,15 @@
             }
 
             IConnection? connection = null;
-            while (IsStarted)
-            { 
-                try
+            try
+            {
+                connection = _getConnection();
+            }
+            catch (Exception ex)
+            {
+                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    connection = _getConnection();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
-                    {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}. Could not open connection or channel", _topic);
-                    }
-
-                    await Task.Delay(_configuration.Timeout);
+                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}. Could not open connection or channel", _topic);
                 }
             }
 

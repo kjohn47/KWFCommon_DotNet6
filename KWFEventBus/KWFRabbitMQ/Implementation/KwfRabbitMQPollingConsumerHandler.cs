@@ -52,7 +52,7 @@
                     await Task.Delay(_pollingInterval);
                     try
                     {
-                        var channel = await GetChannelAsync();
+                        var channel = GetChannel();
                         var message = channel.BasicGet(_topic, _autoCommit);
                         retry = messageProcessException ? retry : _maxRetry;
 
@@ -112,6 +112,8 @@
 
                             retry--;
                         }
+
+                        await Task.Delay(_configuration.HeartBeat);
                     }
                 }
             });
