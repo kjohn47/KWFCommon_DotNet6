@@ -21,6 +21,7 @@
         private readonly IConnectionFactory _connectionFactory;
         private readonly IEnumerable<AmqpTcpEndpoint> _endpoints;
         private readonly ILogger? _logger;
+        private readonly TimeSpan _timeoutProducerAck;
         private IConnection? _connection;
         private bool _disposed;
         private object _connectionOpenLock;
@@ -35,6 +36,8 @@
             _configuration = configuration;
             _jsonSerializerOptions = jsonSerializerOptions ?? EventsJsonOptions.GetJsonOptions();
             _endpoints = _configuration.Endpoints!.Select(e => new AmqpTcpEndpoint(e.Url, e.Port));
+            _timeoutProducerAck = TimeSpan.FromMilliseconds(_configuration.ProducerAckTimeout);
+
             var timeout = TimeSpan.FromMilliseconds(_configuration.Timeout);
             _connectionFactory = new ConnectionFactory
             {
@@ -153,7 +156,7 @@
 
                     if (topicWaitAck)
                     {
-                        channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerAckTimeout));
+                        channel.WaitForConfirmsOrDie(_timeoutProducerAck);
                     }
                 }
                 catch (Exception ex)
@@ -252,7 +255,7 @@
 
                     if (topicWaitAck)
                     {
-                        channel.WaitForConfirmsOrDie(TimeSpan.FromMilliseconds(_configuration.ProducerAckTimeout));
+                        channel.WaitForConfirmsOrDie(_timeoutProducerAck);
                     }
                 }
                 catch (Exception ex)

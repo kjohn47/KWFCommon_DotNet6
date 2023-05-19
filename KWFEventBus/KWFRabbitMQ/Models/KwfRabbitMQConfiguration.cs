@@ -16,11 +16,11 @@
         public string UserName { get; set; } = "guest";
         public string Password { get; set; } = "guest";
         public KwfRabbitMQExchangeConfiguration ExchangeConfiguration { get; set; } = KwfRabbitMQExchangeConfiguration.GetDefaultInsance();
-        public int Timeout { get; set; } = 10000;
-        public int HeartBeat { get; set; } = 20000;
+        public int Timeout { get; set; } = 5000;
+        public int HeartBeat { get; set; } = 15000;
         public int ConsumerPollingInterval { get; set; } = 5000;
         public bool UsePolling { get; set; } = false;
-        public int ProducerAckTimeout { get; set; } = 2000;
+        public int ProducerAckTimeout { get; set; } = 1500;
         public int ConsumerMaxRetries { get; set; } = -1; // -1 => forever, never stops even on exception / error >1 = stops after retry or reset on success
         public bool AutoQueueCreation { get; set; } = true;
         public bool TopicDurable { get; set; } = true;
