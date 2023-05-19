@@ -31,6 +31,8 @@
                 }
             });
 
+            //throw new Exception("testEx");
+
             await _cache.GetOrInsertCachedItemAsync(
             "EVENT_LIST",
             _ => Task.FromResult(new List<KwfEvent>()),

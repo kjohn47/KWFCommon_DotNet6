@@ -125,11 +125,24 @@
 
                     if (autoTopicCreate)
                     {
-                        channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete);
+                        //TODO: Implement configuration for dlq
+                        var dlqExchange = $"x.{exchangeName}.dlq";
+                        var dlqTopic = $"{topic}.dlq";
+                        IDictionary<string, object> args = new Dictionary<string, object>
+                            {
+                                { "x-dead-letter-exchange", dlqExchange },
+                                { "x-dead-letter-routing-key", dlqTopic }
+                            };
+
+                        channel.ExchangeDeclare(dlqExchange, ExchangeType.Direct, true, false);
+                        channel.QueueDeclare(dlqTopic, true, false, false);
+                        channel.QueueBind(dlqTopic, dlqExchange, dlqTopic);
+                        channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete, args);
+
                         if (!string.IsNullOrEmpty(exchangeName))
                         {
                             channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
-                            channel.QueueBind(topic, exchangeName, topic);
+                            channel.QueueBind(topic, exchangeName, topic, args);
                         }
                     }
 
@@ -223,9 +236,11 @@
                     };
 
                     var batch = channel.CreateBasicPublishBatch();
+                    var dlqExchange = $"x.{exchangeName}.dlq";
 
                     if (autoTopicCreate && !string.IsNullOrEmpty(exchangeName))
                     {
+                        channel.ExchangeDeclare(dlqExchange, ExchangeType.Direct, true, false);
                         channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
                     }
 
@@ -233,10 +248,21 @@
                     {
                         if (autoTopicCreate)
                         {
-                            channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete);
+                            //TODO: Implement configuration for dlq
+                            var dlqTopic = $"{topic}.dlq";
+                            IDictionary<string, object> args = new Dictionary<string, object>
+                            {
+                                { "x-dead-letter-exchange", dlqExchange },
+                                { "x-dead-letter-routing-key", dlqTopic }
+                            };
+
+                            channel.QueueDeclare(dlqTopic, true, false, false);
+                            channel.QueueBind(dlqTopic, dlqExchange, dlqTopic);
+                            channel.QueueDeclare(topic, topicDurable, topicExclusive, topicAutoDelete, args);
+
                             if (!string.IsNullOrEmpty(exchangeName))
                             {
-                                channel.QueueBind(topic, exchangeName, topic);
+                                channel.QueueBind(topic, exchangeName, topic, args);
                             }
                         }
 
