@@ -30,7 +30,7 @@
         public bool TopicExclusive { get; set; } = false;
         public bool TopicWaitAck { get; set; } = true;
         public bool MessagePersistent { get; set; } = true;
-        public bool TopicAutoCommit { get; set; } = true;
+        public bool TopicAutoCommit { get; set; } = false;
         public bool TopicReQueueOnFail { get; set; } = false;
         public string DlqTag { get; set; } = "dlq";
         public string DlqExchangeTag { get; set; } = "x";

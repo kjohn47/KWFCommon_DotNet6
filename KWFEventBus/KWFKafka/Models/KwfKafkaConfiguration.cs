@@ -24,7 +24,7 @@
         private static IDictionary<string, string> _defaultConsumerProps = new Dictionary<string, string>
         {
             
-            {"enable.auto.commit", "true"},
+            {"enable.auto.commit", "false"},
             {"socket.timeout.ms", "5000"},
             {"session.timeout.ms", "10000"},
             {"auto.commit.interval.ms", "5000" },
