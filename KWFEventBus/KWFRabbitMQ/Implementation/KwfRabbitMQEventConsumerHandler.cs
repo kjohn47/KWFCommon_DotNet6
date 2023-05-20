@@ -113,6 +113,11 @@
                                             return;
                                         }
 
+                                        if (message.Redelivered)
+                                        {
+                                            await Task.Delay(_configuration.ConsumerRetryDelay);
+                                        }
+
                                         var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
                                                                 Encoding.UTF8.GetString(message.Body.ToArray()),
                                                                 _jsonSettings);
@@ -130,12 +135,12 @@
                                             await _kwfEventHandler.HandleEventAsync(payloadObj);
                                         }
 
-                                        await TryComminMessage(internalConsumer?.Model ?? channel, message);
+                                        TryComminMessage(internalConsumer?.Model ?? channel, message);
                                         _retryCount = _maxRetry;
                                     }
                                     catch (Exception ex)
                                     {
-                                        await TryComminMessage(internalConsumer?.Model ?? channel, message, true);
+                                        TryComminMessage(internalConsumer?.Model ?? channel, message, true);
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                         {
                                             _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}", _topic);
@@ -265,7 +270,7 @@
             });
         }
 
-        private async Task TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
+        private async void TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
         {
             if (!_autoCommit && message != null)
             {
@@ -274,7 +279,6 @@
                     if (notAck)
                     {
                         channel.BasicNack(message.DeliveryTag, false, _requeue && !message.Redelivered);
-                        await Task.Delay(_configuration.ConsumerRetryDelay);
                         return;
                     }
 
