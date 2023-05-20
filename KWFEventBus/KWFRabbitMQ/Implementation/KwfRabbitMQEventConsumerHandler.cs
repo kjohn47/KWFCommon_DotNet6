@@ -20,6 +20,9 @@
         where TPayload : class
     {
         private readonly string _consumerTag;
+        private int _retryCount;
+        private bool _allwaysRetry;
+        private bool _processStarted;
 
         public KwfRabbitMQEventConsumerHandler(
             IKwfRabbitMQEventHandler<TPayload> kwfEventHandler,
@@ -32,6 +35,9 @@
             : base(kwfEventHandler, topic, getConnection, configuration, jsonSettings, logger, configurationKey)
         {
             _consumerTag = string.Concat(_configuration.GetClientName(), '.', topic);
+            _retryCount = configuration.ConsumerMaxRetries;
+            _allwaysRetry = configuration.ConsumerMaxRetries < 0;
+            _processStarted = false;
         }
 
         public override void StartConsuming()
@@ -44,44 +50,36 @@
             _consumeEnabled = true;
             Task.Run(async () =>
             {
-                var retry = _maxRetry;
-                var alwaysRetry = _maxRetry == -1;
-                bool messageProcessException = false;
-                bool processStarted = false;
+                
                 while (IsStarted)
                 {
-                    if (!processStarted)
+                    if (!_processStarted)
                     {
                         IModel? channel = null;
-                        while (IsStarted && retry != 0)
+                        while (IsStarted)
                         {
                             try
                             {
                                 channel = GetChannel();
-                                retry = _maxRetry;
                                 break;
                             }
                             catch (Exception ex)
                             {
-                                var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
+                                var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured openning connection for consumer of topic {_topic}", ex);
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                 {
-                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {TOPIC}", _topic);
+                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured openning connection for consumer of topic {TOPIC}", _topic);
                                 }
 
-                                if (!alwaysRetry)
+                                if (!_configuration.RetryConsumerReconnect)
                                 {
-                                    if (retry == 0)
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
                                     {
-                                        if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
-                                        {
-                                            _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
-                                        }
-
-                                        _consumeEnabled = false;
-                                        throw kwfEx;
+                                        _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped due to failed connection", _topic);
                                     }
-                                    retry--;
+
+                                    _consumeEnabled = false;
+                                    throw kwfEx;
                                 }
 
                                 await Task.Delay(_configuration.HeartBeat);
@@ -97,14 +95,24 @@
 
                             var consumer = new EventingBasicConsumer(channel);
 
-                            consumer.Received += async (model, message) =>
+                            consumer.Received += async (c, message) =>
                             {
-                                retry = messageProcessException ? retry : _maxRetry;
-
+                                var internalConsumer = c as EventingBasicConsumer;
                                 if (message?.Body is not null)
                                 {
                                     try
                                     {
+                                        if (!_allwaysRetry && _retryCount == 0 && internalConsumer?.Model is not null && internalConsumer.Model.IsClosed)
+                                        {
+                                            internalConsumer.Model.BasicNack(message.DeliveryTag, false, true);
+                                            try
+                                            {
+                                                channel.Close();
+                                            }
+                                            catch { }
+                                            return;
+                                        }
+
                                         var payloadObj = JsonSerializer.Deserialize<EventPayloadEnvelope<TPayload>>(
                                                                 Encoding.UTF8.GetString(message.Body.ToArray()),
                                                                 _jsonSettings);
@@ -122,26 +130,53 @@
                                             await _kwfEventHandler.HandleEventAsync(payloadObj);
                                         }
 
-                                        TryComminMessage(channel, message);
-                                        retry = _maxRetry;
-                                        messageProcessException = false;
+                                        await TryComminMessage(internalConsumer?.Model ?? channel, message);
+                                        _retryCount = _maxRetry;
                                     }
                                     catch (Exception ex)
                                     {
-                                        TryComminMessage(channel, message, true);
-                                        messageProcessException = true;
-
+                                        await TryComminMessage(internalConsumer?.Model ?? channel, message, true);
                                         if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                         {
                                             _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on consumer for topic {TOPIC}", _topic);
+                                        }
+
+                                        if (!_allwaysRetry)
+                                        {
+                                            if (_retryCount <= 0)
+                                            {
+                                                if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                                {
+                                                    _logger.LogWarning(KwfConstants.RabbitMQ_log_eventId, "Stoping Channel for consumer of topic {TOPIC} was closed", _topic);
+                                                }
+
+                                                try
+                                                {
+                                                    _consumeEnabled = false;
+                                                    if (internalConsumer?.Model is not null && internalConsumer.Model.IsOpen)
+                                                    {
+                                                        internalConsumer.HandleBasicCancel(_consumerTag);
+                                                        internalConsumer.Model.Abort();
+                                                    }
+
+                                                    return;
+                                                }
+                                                catch 
+                                                {
+                                                    return;
+                                                }
+                                            }
+                                            _retryCount--;
                                         }
                                     }
                                 }
                             };
 
-                            consumer.Shutdown += (model, message) =>
+                            consumer.Shutdown += (c, message) =>
                             {
-                                processStarted = false;
+                                var internalConsumer = c as EventingBasicConsumer;
+                                var internalChannel = internalConsumer?.Model;
+                                _processStarted = false;
                                 try
                                 {
                                     if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
@@ -151,17 +186,20 @@
 
                                     try
                                     {
-                                        if (channel.IsOpen)
+                                        if (internalChannel?.IsOpen ?? false)
                                         {
-                                            channel.Close();
+                                            internalChannel?.Close();
                                         }
                                     }
                                     catch { }
 
+                                    internalChannel?.Dispose();
                                     channel.Dispose();
                                 }
-                                catch { }
-                                channel = null;
+                                catch 
+                                {
+                                    channel = null;
+                                }
 
                                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                                 {
@@ -181,32 +219,28 @@
                                 throw new ArgumentNullException(nameof(consumer), "Channel or consumer were closed before stablishing connection");
                             }
 
-                            processStarted = consumer.IsRunning;
+                            _processStarted = consumer.IsRunning;
                         }
                         catch (Exception ex)
                         {
-                            processStarted = false;
+                            _processStarted = false;
                             var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured during consumption of topic {_topic}", ex);
                             if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                             {
                                 _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured on consumer for topic {TOPIC}", _topic);
                             }
 
-                            if (!alwaysRetry)
+                            if (!_configuration.RetryConsumerReconnect || (!_allwaysRetry && _retryCount == 0))
                             {
-                                if (retry == 0)
+                                if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
                                 {
-                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
-                                    {
-                                        _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
-                                    }
-
-                                    _consumeEnabled = false;
-                                    throw kwfEx;
+                                    _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped", _topic);
                                 }
 
-                                retry--;
+                                _consumeEnabled = false;
+                                throw kwfEx;
                             }
+
                             if (channel is not null && channel.IsClosed)
                             {
                                 try
@@ -231,7 +265,7 @@
             });
         }
 
-        private void TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
+        private async Task TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
         {
             if (!_autoCommit && message != null)
             {
@@ -240,6 +274,7 @@
                     if (notAck)
                     {
                         channel.BasicNack(message.DeliveryTag, false, _requeue && !message.Redelivered);
+                        await Task.Delay(_configuration.ConsumerRetryDelay);
                         return;
                     }
 

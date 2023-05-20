@@ -45,16 +45,49 @@
             {
                 var retry = _maxRetry;
                 var alwaysRetry = _maxRetry == -1;
-                bool messageProcessException = false;
 
                 while (IsStarted)
                 {
                     await Task.Delay(_pollingInterval);
                     try
                     {
-                        var channel = GetChannel();
+                        IModel? channel = null;
+                        while (IsStarted)
+                        {
+                            try
+                            {
+                                channel = GetChannel();
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                var kwfEx = new KwfRabbitMQException("RABBITMQCONSUMEERR", $"Error occured openning connection for consumer of topic {_topic}", ex);
+                                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                                {
+                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, kwfEx, "Error occured openning connection for consumer of topic {TOPIC}", _topic);
+                                }
+
+                                if (!_configuration.RetryConsumerReconnect)
+                                {
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Critical))
+                                    {
+                                        _logger.LogCritical(KwfConstants.RabbitMQ_log_eventId, "Consumer for topic {TOPIC} has stoped due to failed connection", _topic);
+                                    }
+
+                                    _consumeEnabled = false;
+                                    throw kwfEx;
+                                }
+
+                                await Task.Delay(_configuration.HeartBeat);
+                            }
+                        }
+
+                        if (channel is null)
+                        {
+                            throw new ArgumentNullException(nameof(channel));
+                        }
+
                         var message = channel.BasicGet(_topic, _autoCommit);
-                        retry = messageProcessException ? retry : _maxRetry;
 
                         if (message?.Body is not null)
                         {
@@ -77,14 +110,12 @@
                                     await _kwfEventHandler.HandleEventAsync(payloadObj);
                                 }
 
-                                TryComminMessage(channel, message);
+                                await TryComminMessage(channel, message);
                                 retry = _maxRetry;
-                                messageProcessException = false;
                             }
                             catch
                             {
-                                TryComminMessage(channel, message, true);
-                                messageProcessException = true;
+                                await TryComminMessage(channel, message, true);
                                 throw;
                             }
                         }
@@ -119,7 +150,7 @@
             });
         }
 
-        private void TryComminMessage(IModel channel, BasicGetResult message, bool notAck = false)
+        private async Task TryComminMessage(IModel channel, BasicGetResult message, bool notAck = false)
         {
             if (!_autoCommit && message != null)
             {
@@ -128,6 +159,7 @@
                     if (notAck)
                     {
                         channel.BasicNack(message.DeliveryTag, false, _requeue && !message.Redelivered);
+                        await Task.Delay(_configuration.ConsumerRetryDelay);
                         return;
                     }
 

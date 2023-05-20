@@ -10,6 +10,7 @@
         public bool? MessagePersistent { get; set; }
         public bool? AutoCommit { get; set; }
         public bool? ReQueueOnFail { get; set; }
+        public bool? EnableDlq { get; set; }
         public KwfRabbitMQExchangeConfiguration? ExchangeConfiguration { get; set; }
     }
 }

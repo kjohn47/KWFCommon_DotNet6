@@ -34,6 +34,7 @@
         protected readonly bool _autoTopicCreate;
         protected readonly bool _autoCommit;
         protected readonly bool _requeue;
+        protected readonly bool _dlqEnabled;
         protected IModel? _channel;
         protected bool _consumeEnabled = false;
         protected bool _disposed;
@@ -56,7 +57,7 @@
             _maxRetry = _configuration.ConsumerMaxRetries;
 
             var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, autoCommit, requeue) = _configuration.GetTopicSettings(configurationKey);
+            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, dlqEnabled, autoCommit, requeue) = _configuration.GetTopicSettings(configurationKey);
             _exchangeName = exchangeName;
             _exchangeDurable = exchangeDurable;
             _exchangeAutoDelete = exchangeAutoDelete;
@@ -66,6 +67,7 @@
             _autoTopicCreate = autoTopicCreate;
             _autoCommit = autoCommit;
             _requeue = requeue;
+            _dlqEnabled = dlqEnabled;
             _exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
         }
 
@@ -100,18 +102,21 @@
 
             if (_autoTopicCreate)
             {
-                //TODO: Implement configuration for dlq
-                var dlqExchange = $"x.{_exchangeName}.dlq";
-                var dlqTopic = $"{_topic}.dlq";
-                IDictionary<string, object> args = new Dictionary<string, object>
+                IDictionary<string, object> args = new Dictionary<string, object>();
+                if (_dlqEnabled)
                 {
-                    { "x-dead-letter-exchange", dlqExchange },
-                    { "x-dead-letter-routing-key", dlqTopic }
-                };
+                    var dlqExchangeName = string.IsNullOrEmpty(_exchangeName) ? KwfConstants.DefaultExchangeNameDlq : _exchangeName;
+                    var dlqExchange = $"{_configuration.DlqExchangeTag}.{dlqExchangeName}.{_configuration.DlqTag}";
+                    var dlqTopic = $"{_topic}.{_configuration.DlqTag}";
 
-                channel.ExchangeDeclare(dlqExchange, ExchangeType.Direct, true, false);
-                channel.QueueDeclare(dlqTopic, true, false, false);
-                channel.QueueBind(dlqTopic, dlqExchange, dlqTopic);
+                    args.Add(KwfConstants.DlqExchangeKey, dlqExchange);
+                    args.Add(KwfConstants.DlqRouteKey, dlqTopic);
+
+                    channel.ExchangeDeclare(dlqExchange, ExchangeType.Direct, true, false);
+                    channel.QueueDeclare(dlqTopic, true, false, false);
+                    channel.QueueBind(dlqTopic, dlqExchange, dlqTopic);
+                }
+
                 channel.QueueDeclare(_topic, _topicDurable, _topicExclusive, _topicAutoDelete, args);
 
                 if (!string.IsNullOrEmpty(_exchangeName))

@@ -22,6 +22,8 @@
         public bool UsePolling { get; set; } = false;
         public int ProducerAckTimeout { get; set; } = 1500;
         public int ConsumerMaxRetries { get; set; } = -1; // -1 => forever, never stops even on exception / error >1 = stops after retry or reset on success
+        public bool RetryConsumerReconnect { get; set; } = true;
+        public int ConsumerRetryDelay { get; set; } = 2000;
         public bool AutoQueueCreation { get; set; } = true;
         public bool TopicDurable { get; set; } = true;
         public bool TopicAutoDelete { get; set; } = false;
@@ -30,6 +32,9 @@
         public bool MessagePersistent { get; set; } = true;
         public bool TopicAutoCommit { get; set; } = true;
         public bool TopicReQueueOnFail { get; set; } = false;
+        public string DlqTag { get; set; } = "dlq";
+        public string DlqExchangeTag { get; set; } = "x";
+        public bool EnableDlq { get; set; } = true;
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
         public IDictionary<string, KwfRabbitMQTopicConfiguration>? TopicConfiguration { get; set; }
 
@@ -67,11 +72,11 @@
                 topicSettings.ExchangeConfiguration.AutoDelete ?? exchangeDefaultAutoDelete);
         }
 
-        public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool autoCommit, bool requeue) GetTopicSettings(string? configurationKey)
+        public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool dlqEnabled, bool autoCommit, bool requeue) GetTopicSettings(string? configurationKey)
         {
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, TopicAutoCommit, TopicReQueueOnFail);
+                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, TopicAutoCommit, TopicReQueueOnFail);
             }
 
             if (TopicConfiguration is null)
@@ -88,6 +93,7 @@
                 topicSettings.AutoDelete ?? TopicAutoDelete,
                 topicSettings.AutoQueueCreation ?? AutoQueueCreation,
                 topicSettings.WaitAck ?? TopicWaitAck,
+                topicSettings.EnableDlq ?? EnableDlq,
                 topicSettings.AutoCommit ?? TopicAutoCommit,
                 topicSettings.ReQueueOnFail ?? TopicReQueueOnFail);
         }

@@ -30,8 +30,12 @@
                     _logger.LogInformation("Recieved envelop from rabbitMQ: {ENVELOP}", JsonSerializer.Serialize(eventData));
                 }
             });
-
-            //throw new Exception("testEx");
+            /*
+            if (eventData.Payload.Length > 10)
+            {
+                throw new Exception("testEx");
+            }
+            */
 
             await _cache.GetOrInsertCachedItemAsync(
             "EVENT_LIST",
