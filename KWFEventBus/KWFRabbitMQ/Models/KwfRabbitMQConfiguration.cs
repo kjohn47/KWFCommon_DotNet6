@@ -74,9 +74,10 @@
 
         public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool dlqEnabled, bool autoCommit, bool requeue) GetTopicSettings(string? configurationKey)
         {
+            var autoCommit = TopicAutoCommit && !EnableDlq && !TopicRequeueOnFail;
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, TopicAutoCommit, TopicRequeueOnFail);
+                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, autoCommit, TopicRequeueOnFail);
             }
 
             if (TopicConfiguration is null)
@@ -85,17 +86,31 @@
             }
 
             var topicSettings = TopicConfiguration.TryGetValue(configurationKey, out KwfRabbitMQTopicConfiguration? value) ? value : throw new ArgumentNullException(configurationKey, _nonExistentKeyTopicSettingsMessage);
+            var enableDlq = topicSettings?.EnableDlq ?? EnableDlq;
+            var requeue = topicSettings?.RequeueOnFail ?? TopicRequeueOnFail;
+            
+            if (topicSettings?.AutoCommit is not null)
+            {
+                if (enableDlq || requeue)
+                {
+                    autoCommit = false;
+                }
+                else
+                {
+                    autoCommit = topicSettings.AutoCommit.Value;
+                }
+            }
 
             return (
-                topicSettings.MessagePersistent ?? MessagePersistent,
-                topicSettings.Durable ?? TopicDurable,
-                topicSettings.Exclusive ?? TopicExclusive,
-                topicSettings.AutoDelete ?? TopicAutoDelete,
-                topicSettings.AutoQueueCreation ?? AutoQueueCreation,
-                topicSettings.WaitAck ?? TopicWaitAck,
-                topicSettings.EnableDlq ?? EnableDlq,
-                topicSettings.AutoCommit ?? TopicAutoCommit,
-                topicSettings.RequeueOnFail ?? TopicRequeueOnFail);
+                topicSettings?.MessagePersistent ?? MessagePersistent,
+                topicSettings?.Durable ?? TopicDurable,
+                topicSettings?.Exclusive ?? TopicExclusive,
+                topicSettings?.AutoDelete ?? TopicAutoDelete,
+                topicSettings?.AutoQueueCreation ?? AutoQueueCreation,
+                topicSettings?.WaitAck ?? TopicWaitAck,
+                enableDlq,
+                autoCommit,
+                requeue);
         }
     }
 }

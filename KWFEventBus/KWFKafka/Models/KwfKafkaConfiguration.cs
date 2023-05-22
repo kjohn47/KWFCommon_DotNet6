@@ -24,7 +24,7 @@
         private static IDictionary<string, string> _defaultConsumerProps = new Dictionary<string, string>
         {
             
-            {"enable.auto.commit", "false"},
+            {"enable.auto.commit", "true"},
             {"socket.timeout.ms", "5000"},
             {"session.timeout.ms", "10000"},
             {"auto.commit.interval.ms", "5000" },
@@ -40,7 +40,7 @@
 
         public int ConsumerMaxRetries { get; set; } = -1; // -1 => forever, never stops even on exception / error >1 = stops after retry or reset on success
 
-        public int ConsumerDLQRetry { get; set; } = -1; // -1 disabled, 0 - no retry, > 1 retry
+        public int ConsumerDLQRetry { get; set; } = 0; // -1 disabled, 0 - no retry, > 1 retry
 
         public string DLQTopicTag { get; set; } = "dlq";
 

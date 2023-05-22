@@ -182,6 +182,11 @@
             var (dlqEnabled, dlqRetries) = _configuration.GetDlqRetries(topipConfigurationKey);
             if (dlqEnabled)
             {
+                if (config is not null)
+                {
+                    config.EnableAutoCommit = false;
+                }
+
                 var subscribeTopics = new List<string>
                 {
                     topic

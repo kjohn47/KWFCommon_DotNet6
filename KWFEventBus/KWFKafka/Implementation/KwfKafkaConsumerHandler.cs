@@ -156,6 +156,7 @@
                                 }
 
                                 TryComminMessage(message);
+                                await Task.Delay(_timeout);
                             }
                         }
                         catch (Exception ex)
