@@ -31,7 +31,7 @@
         public bool TopicWaitAck { get; set; } = true;
         public bool MessagePersistent { get; set; } = true;
         public bool TopicAutoCommit { get; set; } = false;
-        public bool TopicReQueueOnFail { get; set; } = false;
+        public bool TopicRequeueOnFail { get; set; } = false;
         public string DlqTag { get; set; } = "dlq";
         public string DlqExchangeTag { get; set; } = "x";
         public bool EnableDlq { get; set; } = true;
@@ -76,7 +76,7 @@
         {
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, TopicAutoCommit, TopicReQueueOnFail);
+                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, TopicAutoCommit, TopicRequeueOnFail);
             }
 
             if (TopicConfiguration is null)
@@ -95,7 +95,7 @@
                 topicSettings.WaitAck ?? TopicWaitAck,
                 topicSettings.EnableDlq ?? EnableDlq,
                 topicSettings.AutoCommit ?? TopicAutoCommit,
-                topicSettings.ReQueueOnFail ?? TopicReQueueOnFail);
+                topicSettings.RequeueOnFail ?? TopicRequeueOnFail);
         }
     }
 }

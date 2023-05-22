@@ -50,7 +50,6 @@
             _consumeEnabled = true;
             Task.Run(async () =>
             {
-                
                 while (IsStarted)
                 {
                     if (!_processStarted)
@@ -93,6 +92,20 @@
                                 throw new ArgumentNullException(nameof(channel));
                             }
 
+                            if (channel.IsClosed)
+                            { 
+                                try
+                                {
+                                    channel.Dispose();
+                                }
+                                catch 
+                                {
+                                    channel = null;
+                                }
+
+                                continue; 
+                            }
+
                             var consumer = new EventingBasicConsumer(channel);
 
                             consumer.Received += async (c, message) =>
@@ -102,17 +115,6 @@
                                 {
                                     try
                                     {
-                                        if (!_allwaysRetry && _retryCount == 0 && internalConsumer?.Model is not null && internalConsumer.Model.IsClosed)
-                                        {
-                                            internalConsumer.Model.BasicNack(message.DeliveryTag, false, true);
-                                            try
-                                            {
-                                                channel.Close();
-                                            }
-                                            catch { }
-                                            return;
-                                        }
-
                                         if (message.Redelivered)
                                         {
                                             await Task.Delay(_configuration.ConsumerRetryDelay);
@@ -157,11 +159,10 @@
 
                                                 try
                                                 {
-                                                    _consumeEnabled = false;
                                                     if (internalConsumer?.Model is not null && internalConsumer.Model.IsOpen)
                                                     {
-                                                        internalConsumer.HandleBasicCancel(_consumerTag);
-                                                        internalConsumer.Model.Abort();
+                                                        internalConsumer.Model.BasicCancel(_consumerTag);
+                                                        await Task.Delay(_configuration.ConsumerRetryDelay);
                                                     }
 
                                                     return;
@@ -172,8 +173,45 @@
                                                 }
                                             }
                                             _retryCount--;
+                                            await Task.Delay(_configuration.ConsumerRetryDelay);
                                         }
                                     }
+                                }
+                            };
+
+                            consumer.ConsumerCancelled += (c, msg) =>
+                            {
+                                var internalConsumer = c as EventingBasicConsumer;
+                                var internalChannel = internalConsumer?.Model;
+                                _consumeEnabled = false;
+                                try
+                                {
+                                    if (_logger is not null && _logger.IsEnabled(LogLevel.Warning))
+                                    {
+                                        _logger.LogWarning(KwfConstants.RabbitMQ_log_eventId, "Channel for consumer for topic {TOPIC} was canceled", _topic);
+                                    }
+
+                                    try
+                                    {
+                                        if (internalChannel?.IsOpen ?? false)
+                                        {
+                                            internalChannel?.Close();
+                                        }
+                                    }
+                                    catch 
+                                    {
+                                        internalChannel?.Dispose();
+                                        channel?.Dispose();
+                                    }                                    
+                                }
+                                catch
+                                {
+                                    channel = null;
+                                }
+
+                                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                                {
+                                    _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Channel consumer for topic {TOPIC} was closed", _topic);
                                 }
                             };
 
@@ -199,7 +237,7 @@
                                     catch { }
 
                                     internalChannel?.Dispose();
-                                    channel.Dispose();
+                                    channel?.Dispose();
                                 }
                                 catch 
                                 {
@@ -270,9 +308,14 @@
             });
         }
 
-        private async void TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
+        private void Consumer_ConsumerCancelled(object? sender, ConsumerEventArgs e)
         {
-            if (!_autoCommit && message != null)
+            throw new NotImplementedException();
+        }
+
+        private void TryComminMessage(IModel channel, BasicDeliverEventArgs message, bool notAck = false)
+        {
+            if (!_autoCommit && message != null && !channel.IsClosed)
             {
                 try
                 {
