@@ -3,32 +3,35 @@
     using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.KWFKafka.Interfaces;
 
+    using Microsoft.Extensions.DependencyInjection;
+
     using System.Collections.Generic;
     using System.Linq;
 
     internal class KwfKafkaConsumerAccessor : IKwfKafkaConsumerAccessor
     {
-        private readonly IEnumerable<IKwfKafkaEventConsumerHandler> _consumerHandlers;
+        private readonly IServiceProvider _serviceProvider;
 
-        public KwfKafkaConsumerAccessor(IEnumerable<IKwfKafkaEventConsumerHandler> consumerHandlers)
+        public KwfKafkaConsumerAccessor(IServiceProvider serviceProvider)
         {
-            _consumerHandlers = consumerHandlers;
+            _serviceProvider = serviceProvider;
         }
 
         public IEnumerable<IKwfEventConsumerHandler> GetAllConsumers()
         {
-            return _consumerHandlers;
+            return _serviceProvider.GetRequiredService<IEnumerable<IKwfKafkaEventConsumerHandler>>();
         }
 
         public IKwfEventConsumerHandler? GetConsumerService<TPayload>()
             where TPayload : class
         {
-            return _consumerHandlers.FirstOrDefault(x => x is KwfKafkaConsumerHandler<IKwfKafkaEventHandler<TPayload>, TPayload>);
+            return GetAllConsumers().FirstOrDefault(x => x is KwfKafkaConsumerHandler<IKwfKafkaEventHandler<TPayload>, TPayload>);
         }
 
         public void StartConsumingAll()
-        { 
-            foreach (var consumerHandler in _consumerHandlers)
+        {
+            var consumers = GetAllConsumers();
+            foreach (var consumerHandler in consumers)
             {
                 consumerHandler.StartConsuming();
             }
@@ -36,7 +39,8 @@
 
         public void StopConsumingAll()
         {
-            foreach (var consumerHandler in _consumerHandlers)
+            var consumers = GetAllConsumers();
+            foreach (var consumerHandler in consumers)
             {
                 consumerHandler.StopConsuming();
             }

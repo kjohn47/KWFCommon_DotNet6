@@ -6,23 +6,25 @@
     using KWFEventBus.Abstractions.Interfaces;
     using KWFEventBus.KWFRabbitMQ.Interfaces;
 
+    using Microsoft.Extensions.DependencyInjection;
+
     internal class KwfRabbitMQConsumerAccessor : IKwfRabbitMQConsumerAccessor
     {
-        private readonly IEnumerable<IKwfRabbitMQConsumerHandler> _consumerHandlers;
+        private readonly IServiceProvider _serviceProvider;
 
-        public KwfRabbitMQConsumerAccessor(IEnumerable<IKwfRabbitMQConsumerHandler> consumerHandlers)
+        public KwfRabbitMQConsumerAccessor(IServiceProvider serviceProvider)
         {
-            _consumerHandlers = consumerHandlers;
+            _serviceProvider = serviceProvider;
         }
 
         public IEnumerable<IKwfEventConsumerHandler> GetAllConsumers()
         {
-            return _consumerHandlers;
+            return _serviceProvider.GetRequiredService<IEnumerable<IKwfRabbitMQConsumerHandler>>();
         }
 
         public IKwfEventConsumerHandler? GetConsumerService<TPayload>() where TPayload : class
         {
-            return _consumerHandlers.FirstOrDefault(x => x is KwfRabbitMQConsumerHandlerBase<IKwfRabbitMQEventHandler<TPayload>, TPayload>);
+            return GetAllConsumers().FirstOrDefault(x => x is KwfRabbitMQConsumerHandlerBase<IKwfRabbitMQEventHandler<TPayload>, TPayload>);
         }
 
         public void StartConsuming<TPayload>() where TPayload : class
@@ -32,7 +34,8 @@
 
         public void StartConsumingAll()
         {
-            foreach (var consumerHandler in _consumerHandlers)
+            var consumers = GetAllConsumers();
+            foreach (var consumerHandler in consumers)
             {
                 consumerHandler.StartConsuming();
             }
@@ -45,7 +48,8 @@
 
         public void StopConsumingAll()
         {
-            foreach (var consumerHandler in _consumerHandlers)
+            var consumers = GetAllConsumers();
+            foreach (var consumerHandler in consumers)
             {
                 consumerHandler.StopConsuming();
             }
