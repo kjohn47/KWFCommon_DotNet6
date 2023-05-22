@@ -5,6 +5,7 @@
     using System.Text.Json;
     using System.Threading.Tasks;
 
+    using KWFEventBus.Abstractions.Models;
     using KWFEventBus.KWFRabbitMQ.Constants;
     using KWFEventBus.KWFRabbitMQ.Interfaces;
     using KWFEventBus.KWFRabbitMQ.Models;
@@ -35,6 +36,9 @@
         protected readonly bool _autoCommit;
         protected readonly bool _requeue;
         protected readonly bool _dlqEnabled;
+        protected readonly string _exchangeType;
+        protected readonly IEnumerable<EventBusProperty>? _arguments;
+        protected readonly IDictionary<string, object>? _exchangeArgs;
         protected IModel? _channel;
         protected bool _consumeEnabled = false;
         protected bool _disposed;
@@ -56,8 +60,8 @@
             _logger = logger;
             _maxRetry = _configuration.ConsumerMaxRetries;
 
-            var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, dlqEnabled, autoCommit, requeue) = _configuration.GetTopicSettings(configurationKey);
+            var (exchangeName, exchangeDurable, exchangeAutoDelete, exchangeType, exchangeArgs) = _configuration.GetExchangeSettings(configurationKey);
+            var (_, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, _, dlqEnabled, autoCommit, requeue, _, arguments) = _configuration.GetTopicSettings(configurationKey);
             _exchangeName = exchangeName;
             _exchangeDurable = exchangeDurable;
             _exchangeAutoDelete = exchangeAutoDelete;
@@ -69,6 +73,9 @@
             _requeue = requeue;
             _dlqEnabled = dlqEnabled;
             _exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
+            _exchangeType = exchangeType;
+            _arguments = arguments;
+            _exchangeArgs = exchangeArgs;
         }
 
         public bool IsStarted => _consumeEnabled && !_disposed;
@@ -103,6 +110,14 @@
             if (_autoTopicCreate)
             {
                 IDictionary<string, object> args = new Dictionary<string, object>();
+                if (_arguments is not null)
+                {
+                    foreach (var arg in _arguments)
+                    {
+                        args.Add(arg.PropertyName, arg.PropertyValue);
+                    }
+                }
+
                 if (_dlqEnabled)
                 {
                     var dlqExchangeName = string.IsNullOrEmpty(_exchangeName) ? KwfConstants.DefaultExchangeNameDlq : _exchangeName;
@@ -121,7 +136,7 @@
 
                 if (!string.IsNullOrEmpty(_exchangeName))
                 {
-                    channel.ExchangeDeclare(_exchangeName, ExchangeType.Direct, _exchangeDurable, _exchangeAutoDelete);
+                    channel.ExchangeDeclare(_exchangeName, _exchangeType, _exchangeDurable, _exchangeAutoDelete, _exchangeArgs);
                     channel.QueueBind(_topic, _exchangeName, _topic, args);
                 }
             }

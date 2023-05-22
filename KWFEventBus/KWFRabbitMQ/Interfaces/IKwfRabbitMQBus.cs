@@ -8,6 +8,8 @@
 
         Task ProduceMultipleAsync<T>(T payload, string[] topics, string? configurationKey, CancellationToken? cancellationToken = null) where T : class;
 
+        Task ProduceAsync<T>(T payload, string topic, string pattern, string? configurationKey, CancellationToken? cancellationToken = null) where T : class;
+
         IKwfRabbitMQConsumerHandler CreateConsumer<THandler, TPayload>(
             THandler eventHandler,
             string topic,

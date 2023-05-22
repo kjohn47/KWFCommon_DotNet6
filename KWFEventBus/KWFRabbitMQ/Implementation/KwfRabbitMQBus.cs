@@ -1,6 +1,7 @@
 ﻿namespace KWFEventBus.KWFRabbitMQ.Implementation
 {
     using System;
+    using System.Reflection.PortableExecutable;
     using System.Text;
     using System.Text.Json;
     using System.Threading;
@@ -81,17 +82,22 @@
             return ProduceAsync(payload, topic, null, cancellationToken);
         }
 
+        public Task ProduceAsync<T>(T payload, string topic, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
+        {
+            return ProduceAsync(payload, topic, topic, configurationKey, cancellationToken);
+        }
+
         public Task ProduceMultipleAsync<T>(T payload, string[] topics, CancellationToken? cancellationToken = null) where T : class
         {
             return ProduceMultipleAsync(payload, topics, null, cancellationToken);
         }
 
-        public Task ProduceAsync<T>(T payload, string topic, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
+        public Task ProduceAsync<T>(T payload, string topic, string pattern, string? configurationKey, CancellationToken? cancellationToken = null) where T : class
         {
             return Task.Run(() =>
             {
-                var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, dlqEnabled, _, _) = _configuration.GetTopicSettings(configurationKey);
+                var (exchangeName, exchangeDurable, exchangeAutoDelete, exchangeType, exchangeArgs) = _configuration.GetExchangeSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, dlqEnabled, _, _, headers, arguments) = _configuration.GetTopicSettings(configurationKey);
                 var exchangeLog = exchangeName ?? KwfConstants.DefaultExchangeNameLog;
 
                 try
@@ -126,6 +132,15 @@
                     if (autoTopicCreate)
                     {
                         IDictionary<string, object> args = new Dictionary<string, object>();
+
+                        if (arguments is not null)
+                        {
+                            foreach (var arg in arguments)
+                            {
+                                args.Add(arg.PropertyName, arg.PropertyValue);
+                            }
+                        }
+
                         if (dlqEnabled)
                         {
                             var dlqExchangeName = string.IsNullOrEmpty(exchangeName) ? KwfConstants.DefaultExchangeNameDlq : exchangeName;
@@ -144,7 +159,7 @@
 
                         if (!string.IsNullOrEmpty(exchangeName))
                         {
-                            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
+                            channel.ExchangeDeclare(exchangeName, exchangeType, exchangeDurable, exchangeAutoDelete, exchangeArgs);
                             channel.QueueBind(topic, exchangeName, topic, args);
                         }
                     }
@@ -160,6 +175,14 @@
                         { KwfConstants.ApplicationNameHeader, _configuration.AppName }
                     };
 
+                    if (headers is not null)
+                    {
+                        foreach (var header in headers)
+                        {
+                            properties.Headers.Add(header.PropertyName, header.PropertyValue);
+                        }
+                    }
+
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Information))
                     {
                         _logger.LogInformation(KwfConstants.RabbitMQ_log_eventId, "Sending event to topic {TOPIC} with id {ID} and exchange {EXCHANGE}",
@@ -168,7 +191,7 @@
                             exchangeLog);
                     }
 
-                    channel.BasicPublish(exchangeName, topic, properties, message.AsMemory());
+                    channel.BasicPublish(exchangeName, pattern, properties, message.AsMemory());
 
                     if (topicWaitAck)
                     {
@@ -191,8 +214,8 @@
         {
             return Task.Run(() =>
             {
-                var (exchangeName, exchangeDurable, exchangeAutoDelete) = _configuration.GetExchangeSettings(configurationKey);
-                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, dlqEnabled, _, _) = _configuration.GetTopicSettings(configurationKey);
+                var (exchangeName, exchangeDurable, exchangeAutoDelete, exchangeType, exchangeArgs) = _configuration.GetExchangeSettings(configurationKey);
+                var (messagePersistent, topicDurable, topicExclusive, topicAutoDelete, autoTopicCreate, topicWaitAck, dlqEnabled, _, _, headers, arguments) = _configuration.GetTopicSettings(configurationKey);
                 var exchangeLog = string.IsNullOrEmpty(exchangeName) ?  KwfConstants.DefaultExchangeNameLog : exchangeName;
                 var topicsLogString = string.Join(',', topics);
                 var dlqExchange = string.Empty;
@@ -239,9 +262,25 @@
                         { KwfConstants.ApplicationNameHeader, _configuration.AppName }
                     };
 
+                    if (headers is not null)
+                    {
+                        foreach (var header in headers)
+                        {
+                            properties.Headers.Add(header.PropertyName, header.PropertyValue);
+                        }
+                    }
+
                     var batch = channel.CreateBasicPublishBatch();
 
-                    IDictionary<string, object> args = new Dictionary<string, object>();
+                    IDictionary<string, object> args = new Dictionary<string, object>();                    
+                    if (arguments is not null)
+                    {
+                        foreach (var arg in arguments)
+                        {
+                            args.Add(arg.PropertyName, arg.PropertyValue);
+                        }
+                    }
+
                     if (autoTopicCreate)
                     {
                         if (dlqEnabled)
@@ -255,7 +294,7 @@
 
                         if (!string.IsNullOrEmpty(exchangeName))
                         {
-                            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct, exchangeDurable, exchangeAutoDelete);
+                            channel.ExchangeDeclare(exchangeName, exchangeType, exchangeDurable, exchangeAutoDelete, exchangeArgs);
                         }
                     }
 

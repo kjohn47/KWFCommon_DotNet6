@@ -33,7 +33,7 @@
         public bool TopicAutoCommit { get; set; } = false;
         public bool TopicRequeueOnFail { get; set; } = false;
         public string DlqTag { get; set; } = "dlq";
-        public string DlqExchangeTag { get; set; } = "x";
+        public string DlqExchangeTag { get; set; } = "x"; //dlq exchange is always direct
         public bool EnableDlq { get; set; } = true;
         public IEnumerable<EventBusEndpoint>? Endpoints { get; set; }
         public IDictionary<string, KwfRabbitMQTopicConfiguration>? TopicConfiguration { get; set; }
@@ -43,15 +43,17 @@
             return $"{ClientName}.{AppName}";
         }
 
-        public (string ExchangeName, bool Durable, bool AutoDelete) GetExchangeSettings(string? configurationKey)
+        public (string ExchangeName, bool Durable, bool AutoDelete, string ExchangeType, IDictionary<string, object>? Arguments) GetExchangeSettings(string? configurationKey)
         {
             string exchangeDefaultName = ExchangeConfiguration?.ExchangeName ?? string.Empty;
             var exchangeDefaultDurable = ExchangeConfiguration?.Durable ?? true;
             var exchangeDefaultAutoDelete = ExchangeConfiguration?.AutoDelete ?? false;
+            var exchangeType = ExchangeConfiguration?.Type?.GetExchangeType();
+            var args = ExchangeConfiguration?.GetArguments();
 
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (exchangeDefaultName, exchangeDefaultDurable, exchangeDefaultAutoDelete);
+                return (exchangeDefaultName, exchangeDefaultDurable, exchangeDefaultAutoDelete, exchangeType!, args);
             }
 
             if (TopicConfiguration is null)
@@ -63,21 +65,34 @@
 
             if (topicSettings.ExchangeConfiguration is null)
             {
-                return (exchangeDefaultName, exchangeDefaultDurable, exchangeDefaultAutoDelete);
+                return (exchangeDefaultName, exchangeDefaultDurable, exchangeDefaultAutoDelete, exchangeType!, args);
             }
 
             return (
                 topicSettings.ExchangeConfiguration.ExchangeName,
                 topicSettings.ExchangeConfiguration.Durable ?? exchangeDefaultDurable,
-                topicSettings.ExchangeConfiguration.AutoDelete ?? exchangeDefaultAutoDelete);
+                topicSettings.ExchangeConfiguration.AutoDelete ?? exchangeDefaultAutoDelete,
+                topicSettings.ExchangeConfiguration.Type.HasValue ? topicSettings.ExchangeConfiguration.Type.GetExchangeType() : exchangeType!,
+                topicSettings.ExchangeConfiguration.Arguments is not null ? topicSettings.ExchangeConfiguration.GetArguments() : args);
         }
 
-        public (bool MessagePersistent, bool Durable, bool TopicExclusive, bool AutoDelete, bool autoTopicCreate, bool WaitAck, bool dlqEnabled, bool autoCommit, bool requeue) GetTopicSettings(string? configurationKey)
+        public (
+            bool MessagePersistent, 
+            bool Durable, 
+            bool TopicExclusive,
+            bool AutoDelete, 
+            bool autoTopicCreate,
+            bool WaitAck, 
+            bool dlqEnabled, 
+            bool autoCommit,
+            bool requeue,
+            IEnumerable<EventBusProperty>? headers,
+            IEnumerable<EventBusProperty>? arguments) GetTopicSettings(string? configurationKey)
         {
             var autoCommit = TopicAutoCommit && !EnableDlq && !TopicRequeueOnFail;
             if (string.IsNullOrEmpty(configurationKey))
             {
-                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, autoCommit, TopicRequeueOnFail);
+                return (MessagePersistent, TopicDurable, TopicExclusive, TopicAutoDelete, AutoQueueCreation, TopicWaitAck, EnableDlq, autoCommit, TopicRequeueOnFail, null, null);
             }
 
             if (TopicConfiguration is null)
@@ -110,7 +125,9 @@
                 topicSettings?.WaitAck ?? TopicWaitAck,
                 enableDlq,
                 autoCommit,
-                requeue);
+                requeue,
+                topicSettings?.Headers,
+                topicSettings?.Arguments);
         }
     }
 }
