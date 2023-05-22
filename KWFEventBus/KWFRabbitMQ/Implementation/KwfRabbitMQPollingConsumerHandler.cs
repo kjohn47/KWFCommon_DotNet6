@@ -174,5 +174,30 @@
                 }
             }
         }
+
+        public override void StopConsuming()
+        {
+            {
+                _consumeEnabled = false;
+                try
+                {
+                    if (_channel != null)
+                    {
+                        try
+                        {
+                            if (_channel.IsOpen)
+                            {
+                                _channel.Close();
+                            }
+                        }
+                        catch { }
+                        _channel.Dispose();
+                    }
+                }
+                catch
+                { }
+                _channel = null;
+            }
+        }
     }
 }

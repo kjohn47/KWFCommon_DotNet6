@@ -3,6 +3,7 @@
     using KWFCaching.Memory.Interfaces;
 
     using KWFEventBus.Abstractions.Interfaces;
+    using KWFEventBus.KWFKafka.Interfaces;
     using KWFEventBus.KWFRabbitMQ.Interfaces;
     using Microsoft.Extensions.Logging;
     using Sample.SampleApi.Commands.Events;
@@ -33,7 +34,7 @@
 
             //if (eventData.Payload.Length > 10)
             //{
-                throw new Exception("testEx");
+            //    throw new Exception("testEx");
             //}
 
 
