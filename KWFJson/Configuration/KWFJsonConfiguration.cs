@@ -7,7 +7,7 @@
 
     public sealed class KWFJsonConfiguration
     {
-        private JsonSerializerOptions options;
+        private readonly JsonSerializerOptions _options;
 
         public KWFJsonConfiguration(bool writeIndented = false)
             : this(new JsonSerializerOptions(), writeIndented)
@@ -29,12 +29,12 @@
             opt.WriteIndented = writeIndented;
             opt.IgnoreReadOnlyProperties = false;
 
-            options = opt;
+            _options = opt;
         }
 
         public JsonSerializerOptions GetJsonSerializerOptions()
         {
-            return options;
+            return _options;
         }
     }
 }

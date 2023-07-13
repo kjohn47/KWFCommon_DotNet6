@@ -16,9 +16,7 @@
                 return null;
             }
 
-            return parsedDate.Kind == DateTimeKind.Unspecified 
-                   ? parsedDate.ToUtcKind()
-                   : parsedDate;
+            return parsedDate.ToUtc();
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
@@ -29,14 +27,7 @@
                 return;
             }
 
-            if (value.Value.Kind == DateTimeKind.Unspecified)
-            {
-                writer.WriteStringValue(value.Value.ToUtcKind());
-            }
-            else
-            {
-                writer.WriteStringValue(value.Value);
-            }
+            writer.WriteStringValue(value.Value.ToUtc());
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿namespace KWFLogger.KWFFileLogger.Implementation
 {
+    using KWFExtensions;
+
     using Microsoft.Extensions.Logging;
 
     using System;
@@ -64,7 +66,7 @@
                         Directory.CreateDirectory(eventPath);
                     }
 
-                    logPath = string.Format(LogPathTemplate, eventPath, currDate.ToString("yyyyMMdd"));
+                    logPath = string.Format(LogPathTemplate, eventPath, currDate.ToString(DateTimeExtensions.DateWithoutSeparatorFormat));
                 }
                 else
                 {
@@ -73,7 +75,7 @@
                         return;
                     }
 
-                    logPath = string.Format(string.Format("{0}\\{1}", _KwfLogToFileProvider.BasePath, logLevelStr), currDate.ToString("yyyyMMdd"));
+                    logPath = string.Format(string.Format("{0}\\{1}", _KwfLogToFileProvider.BasePath, logLevelStr), currDate.ToString(DateTimeExtensions.DateWithoutSeparatorFormat));
                 }
 
                 try
@@ -82,7 +84,7 @@
                     using (var streamWriter = new StreamWriter(logPath, true))
                     {
                         streamWriter.WriteLine(string.Format(LogLineTemplate, 
-                            currDate.ToString("yyyy-MM-ddTHH:mm:ss:fff"), 
+                            currDate.ToString(DateTimeExtensions.TimeStampFormat), 
                             eventId.Id,
                             eventId.Name?? "Api",
                             logLevelStr,

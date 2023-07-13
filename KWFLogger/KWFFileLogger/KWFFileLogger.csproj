@@ -17,5 +17,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\..\KWFExtensions\KWFExtensions.csproj" />
+  </ItemGroup>
 
 </Project>

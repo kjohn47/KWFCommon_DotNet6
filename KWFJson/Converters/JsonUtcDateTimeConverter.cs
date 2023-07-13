@@ -8,7 +8,7 @@
 
     public class JsonUtcDateTimeConverter : JsonConverter<DateTime>
     {
-        private static readonly DateTime _default = DateTime.MinValue.ToUtcKind();
+        private static readonly DateTime _default = DateTime.MinValue.ToUtc();
 
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -18,21 +18,12 @@
                 return _default;
             }
 
-            return parsedDate.Kind == DateTimeKind.Unspecified 
-                   ? parsedDate.ToUtcKind()
-                   : parsedDate;
+            return parsedDate.ToUtc();
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            if (value.Kind == DateTimeKind.Unspecified)
-            {
-                writer.WriteStringValue(value.ToUtcKind());
-            }
-            else
-            {
-                writer.WriteStringValue(value);
-            }
+            writer.WriteStringValue(value.ToUtc());
         }
     }
 }
