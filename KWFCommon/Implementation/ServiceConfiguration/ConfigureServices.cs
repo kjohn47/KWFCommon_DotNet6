@@ -6,7 +6,7 @@
     using KWFCommon.Implementation.Configuration;
     using KWFCommon.Abstractions.Constants;
     using KWFCommon.Implementation.Exception;
-    using KWFCommon.Implementation.Json;
+    using KWFJson.Configuration;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Routing;

@@ -1,7 +1,8 @@
 ﻿namespace KWFFunctionalTests.Abstractions
 {
     using KWFCommon.Abstractions.Constants;
-    using KWFCommon.Implementation.Json;
+
+    using KWFJson.Configuration;
 
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;

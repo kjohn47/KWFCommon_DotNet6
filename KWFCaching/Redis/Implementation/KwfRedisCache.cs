@@ -3,6 +3,7 @@
     using KWFCaching.Abstractions.Interfaces;
     using KWFCaching.Abstractions.Models;
     using KWFCaching.Redis.Interfaces;
+    using KWFJson.Configuration;
 
     using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -11,7 +12,6 @@
 
     using System;
     using System.Text.Json;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
 
     public class KwfRedisCache : IKwfRedisCache, IDisposable
@@ -361,13 +361,7 @@
 
         private static JsonSerializerOptions GetJsonOptions()
         {
-            var settings = new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-            settings.Converters.Add(new JsonStringEnumConverter());
-
-            return settings;
+            return new KWFJsonConfiguration().GetJsonSerializerOptions();
         }
     }
 }

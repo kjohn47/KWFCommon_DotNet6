@@ -9,4 +9,8 @@
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\KWFJson\KWFJson.csproj" />
+  </ItemGroup>
+
 </Project>

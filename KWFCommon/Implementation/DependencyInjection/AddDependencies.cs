@@ -2,8 +2,9 @@
 {
     using KWFCommon.Abstractions.Constants;
     using KWFCommon.Implementation.Configuration;
-    using KWFCommon.Implementation.Json;
     using KWFCommon.Implementation.Kestrel;
+
+    using KWFJson.Configuration;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Mvc;
