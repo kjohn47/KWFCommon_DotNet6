@@ -75,11 +75,10 @@
                             var bearerToken = ctx.Request.Headers[configuration.TokenIdentifier].ElementAt(0);
                             var token = bearerToken.StartsWith($"{KwfJwtConstants.Bearer} ", StringComparison.OrdinalIgnoreCase) ? bearerToken[(KwfJwtConstants.Bearer.Length + 1)..] : bearerToken;
                             ctx.Token = token;
+                            return Task.CompletedTask;
                         }
-                        else
-                        {
-                            ctx.NoResult();
-                        }
+
+                        ctx.NoResult();
                         return Task.CompletedTask;
                     },
                     OnChallenge = ctx =>
@@ -92,16 +91,18 @@
                             if (ctx.AuthenticateFailure is SecurityTokenInvalidSignatureException)
                             {
                                 ctx.Response.Headers.Append(RestConstants.AuthenticateHeader, ErrorConstants.AuthSignatureErrorCode);
+                                return Task.CompletedTask;
                             }
-                            else if (ctx.AuthenticateFailure is SecurityTokenExpiredException || ctx.AuthenticateFailure is SecurityTokenNoExpirationException)
+                            
+                            if (ctx.AuthenticateFailure is SecurityTokenExpiredException || ctx.AuthenticateFailure is SecurityTokenNoExpirationException)
                             {
                                 ctx.Response.Headers.Append(RestConstants.AuthenticateHeader, ErrorConstants.AuthExpiredErrorCode);
+                                return Task.CompletedTask;
                             }
-                            else
-                            {
-                                ctx.Response.Headers.Append(RestConstants.AuthenticateHeader, ErrorConstants.AuthDefaultErrorCode);
-                            }
+
+                            ctx.Response.Headers.Append(RestConstants.AuthenticateHeader, ErrorConstants.AuthDefaultErrorCode);
                         }
+
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = ctx =>

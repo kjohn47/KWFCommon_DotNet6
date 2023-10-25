@@ -8,6 +8,8 @@
     using KWFEventBus.KWFRabbitMQ.Extensions;
     using KWFEventBus.KWFRabbitMQ.Models;
 
+    using KWFExtensions.Enums;
+
     using KWFValidation.KWFCQRSValidation.Extensions;
     using KWFValidation.KWFCQRSValidation.Interfaces;
 
@@ -17,6 +19,7 @@
     using Sample.SampleApi.Commands.Events;
     using Sample.SampleApi.Constants;
     using Sample.SampleApi.Events;
+    using Sample.SampleApi.Queries.Enums;
     using Sample.SampleApi.Services;
 
     public class SampleServiceDefinitions : IServiceDefinition
@@ -52,9 +55,9 @@
             services.AddKwfRabbitMQConsumer<handler, obj>("kwf.sample.topic.2");
             */
 
+
             // ---- Add common services ----
             services.AddSingleton<IWeatherForecastServices, WeatherForecastServices>();
-
 
 
             // ---- Add Query and Command handlers one at a time ----
@@ -76,7 +79,6 @@
             //services.AddQueryHandlersFromAssemblies(ServiceLifetime.Scoped, typeof(SampleServiceDefinitions), typeof(SampleServiceDefinitions_2));
 
 
-
             // ---- Add single validator implementing IKwfCQRSValidator<T> or KwfCQRSValidator<T> with IKwfCQRSValidator<T> as dependency injection type ----
             //services.AddKwfCqrsValidator<PublishEventCommandValidator, PublishEventCommandRequest>(); //default lifetime -> singleton
             //services.AddKwfCqrsValidator<PublishEventCommandValidator, PublishEventCommandRequest>(ServiceLifetime.Transient);
@@ -88,6 +90,9 @@
             // ---- Add all validators implementing IKwfCQRSValidator<T> or KwfCQRSValidator<T> on this markers with IKwfCQRSValidator<T> as dependency injection type ----
             //services.AddKwfCqrsValidatorsFromAssemblies(typeof(SampleServiceDefinitions), typeof(Program)); //lifetime -> singleton
             //services.AddKwfCqrsValidatorsFromAssemblies(ServiceLifetime.Transient, typeof(SampleServiceDefinitions), typeof(Program));
+
+            // ---- Add Enum converter
+            services.AddKwfEnumConverter<TestEnum>();
         }
 
         /*

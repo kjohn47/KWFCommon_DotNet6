@@ -25,34 +25,32 @@
                 {
                     if (configuration.HttpPort is not null) serverOptions.ListenLocalhost(configuration.HttpPort.Value);
                     if (hasHttps) serverOptions.ListenLocalhost(configuration.HttpsPort, l => l.ConfigureHttps());
+                    return;
                 }
-                else
+
+                if (configuration.ListenIpAddresses is not null && configuration.ListenIpAddresses.Any())
                 {
-                    if (configuration.ListenIpAddresses is not null && configuration.ListenIpAddresses.Any())
+                    foreach (var listenIpAddress in configuration.ListenIpAddresses)
                     {
-                        foreach (var listenIpAddress in configuration.ListenIpAddresses)
-                        {
-                            var ip = IPAddress.Parse(listenIpAddress);
-                            if (configuration.HttpPort is not null) serverOptions.Listen(ip, configuration.HttpPort.Value);
+                        var ip = IPAddress.Parse(listenIpAddress);
+                        if (configuration.HttpPort is not null) serverOptions.Listen(ip, configuration.HttpPort.Value);
 
-                            if (hasHttps) 
-                                serverOptions.Listen(
-                                    ip, 
-                                    configuration.HttpsPort,
-                                    l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
-                        }
-                    }
-                    else
-                    {
-                        if (configuration.HttpPort is not null) serverOptions.Listen(IPAddress.Any, configuration.HttpPort.Value);
-
-                        if (hasHttps)
+                        if (hasHttps) 
                             serverOptions.Listen(
-                                IPAddress.Any, 
+                                ip, 
                                 configuration.HttpsPort,
                                 l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
                     }
+                    return;
                 }
+
+                if (configuration.HttpPort is not null) serverOptions.Listen(IPAddress.Any, configuration.HttpPort.Value);
+
+                if (hasHttps)
+                    serverOptions.Listen(
+                        IPAddress.Any, 
+                        configuration.HttpsPort,
+                        l => l.ConfigureHttps(configuration.KestrelCertificateSettings));
 
             });
 
