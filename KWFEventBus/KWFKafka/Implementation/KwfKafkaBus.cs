@@ -92,11 +92,20 @@
                 },
                 cancellationToken ?? default);
             }
+            catch (ProduceException<string, byte[]> producerException)
+            {
+                if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError(Constants.Kafka_log_eventId, producerException, "Error occured on producer for topic {TOPIC}\n Code: {CODE}\n Reason: {REASON}", topic, producerException.Error.Code, producerException.Error.Reason);
+                }
+
+                throw new KwfKafkaBusException($"KAFKAPRODERR_{producerException.Error.Code}", $"Error occured during prodution of topic {topic}", producerException.Error.Reason);
+            }
             catch (Exception ex)
             {
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, ex, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
                 }
                 
                 throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
@@ -134,11 +143,20 @@
                             },
                             cancellationToken ?? default);
                         }
+                        catch (ProduceException<string, byte[]> producerException)
+                        {
+                            if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
+                            {
+                                _logger.LogError(Constants.Kafka_log_eventId, producerException, "Error occured on producer for topic {TOPIC}\n Code: {CODE}\n Reason: {REASON}", topic, producerException.Error.Code, producerException.Error.Reason);
+                            }
+
+                            throw new KwfKafkaBusException($"KAFKAPRODERR_{producerException.Error.Code}", $"Error occured during prodution of topic {topic}", producerException.Error.Reason);
+                        }
                         catch (Exception ex)
                         {
                             if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                             {
-                                _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
+                                _logger.LogError(Constants.Kafka_log_eventId, ex, "Error occured on producer for topic {TOPIC}\n Reason: {EXCEPTION}", topic, ex.Message);
                             }
 
                             throw new KwfKafkaBusException("KAFKAPRODERR", $"Error occured during prodution of topic {topic}", ex);
@@ -152,7 +170,7 @@
             {
                 if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                 {
-                    _logger.LogError(Constants.Kafka_log_eventId, "Error occured on producer, check exception for details\n{EXCEPTION}", ex.Message);
+                    _logger.LogError(Constants.Kafka_log_eventId, ex?.InnerException, "Error occured on producer, check exception for details\n{EXCEPTION}", ex?.Message);
                 }
 
                 throw new KwfKafkaBusException("KAFKAPRODERR", "Error occured on producer", ex);

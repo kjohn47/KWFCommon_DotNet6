@@ -202,7 +202,7 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                     {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topic, exchangeLog, ex.Message);
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topic, exchangeLog, ex.Message);
                     }
 
                     throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topic} on exchange {exchangeLog}", ex);
@@ -342,7 +342,7 @@
                 {
                     if (_logger is not null && _logger.IsEnabled(LogLevel.Error))
                     {
-                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topicsLogString, exchangeLog, ex.Message);
+                        _logger.LogError(KwfConstants.RabbitMQ_log_eventId, ex, "Error occured on producer for topic {TOPIC} on exchange {EXCHANGE}\n Reason: {EXCEPTION}", topicsLogString, exchangeLog, ex.Message);
                     }
 
                     throw new KwfRabbitMQException("RABBITMQPRODERR", $"Error occured during prodution of topic {topicsLogString} on exchange {exchangeLog}", ex);
