@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="FluentValidation" Version="11.10.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
 	
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
 	<ItemGroup>
-		<BuildOutputInPackage Include="$(OutDir)*"/>
+		<BuildOutputInPackage Include="$(OutDir)*" />
 	</ItemGroup>
   </Target>
 </Project>
