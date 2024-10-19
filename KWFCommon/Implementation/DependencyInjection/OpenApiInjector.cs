@@ -1,12 +1,13 @@
 ﻿namespace KWFCommon.Implementation.DependencyInjection
 {
     using KWFCommon.Implementation.Configuration;
+    using KWFOpenApi.Html.Swagger.DependencyInjection;
 
     using Microsoft.Extensions.DependencyInjection;
 
-    public static class SwaggerInjector
+    public static class OpenApiInjector
     {
-        public static IServiceCollection AddSwagger(this IServiceCollection services, OpenApiSettings configuration)
+        public static IServiceCollection AddOpenApi(this IServiceCollection services, OpenApiSettings configuration)
         {
             if (!configuration.UseDocumentation)
             {
@@ -50,6 +51,14 @@
                     Description = string.Format("{0} API Swagger", configuration.ApiName)
                 });
             });
+
+            //to replace with openApi on net9 - this only necessary for UI
+            if (!configuration.UseUI)
+            {
+                return services;
+            }
+
+            services.AddKwfSwaggerOpenApiProvider(configuration.ApiName, $"swagger/{configuration.ApiName}/swagger.json");
 
             return services;
         }

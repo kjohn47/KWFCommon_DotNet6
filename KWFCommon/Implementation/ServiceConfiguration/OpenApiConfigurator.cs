@@ -1,12 +1,13 @@
 ﻿namespace KWFCommon.Implementation.ServiceConfiguration
 {
     using KWFCommon.Implementation.Configuration;
+    using KWFOpenApi.Html.DependencyInjection;
 
     using Microsoft.AspNetCore.Builder;
 
-    public static class SwaggerConfigurator
+    public static class OpenApiConfigurator
     {
-        public static IApplicationBuilder UseSwagger(this IApplicationBuilder app, OpenApiSettings configuration)
+        public static IApplicationBuilder UseOpenApi(this IApplicationBuilder app, OpenApiSettings configuration)
         {
             if (!configuration.UseDocumentation)
             {
@@ -21,7 +22,7 @@
             }
 
             app.UseSwaggerUI(option => option.SwaggerEndpoint($"/swagger/{configuration.ApiName}/swagger.json", configuration.ApiName));
-
+            app.UseKwfOpenApiUI();
             return app;
         }
     }

@@ -43,7 +43,7 @@
 
             if (apiConfig.OpenApiSettings is not null)
             {
-                app.UseSwagger(apiConfig.OpenApiSettings);
+                app.UseOpenApi(apiConfig.OpenApiSettings);
             }
 
             if (configureAuth is not null) configureAuth(app);

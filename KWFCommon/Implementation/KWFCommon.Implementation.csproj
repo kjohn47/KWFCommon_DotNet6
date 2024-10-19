@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\KWFJson\KWFJson.csproj" />
+    <ProjectReference Include="..\..\KWFOpenApi\KWFOpenApi.Html.Swagger\KWFOpenApi.Html.Swagger.csproj" />
     <ProjectReference Include="..\Abstractions\KWFCommon.Abstractions.csproj" />
   </ItemGroup>
 
