@@ -1,0 +1,100 @@
+﻿@using KWFOpenApi.Metadata.Models
+<html lang="en">
+    <head>
+        @if (Metadata == null)
+        {
+            <title>KwfApiDocumentation</title>
+        }
+        else
+        {
+            <title>API: @Metadata.ApiName</title>
+        }
+        <style type="text/css">
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                outline: 0;
+                border: 0;
+                padding: 0;
+                display: block;
+                background-size: 100% 100%;
+                height: 100vh;
+            }
+
+            .page-container {
+                margin: 0;
+                outline: 0;
+                border: 0;
+                padding: 0;
+                display: block;
+                border-color: #100000;
+                background-color: #100000;
+                background-size: 100% 100%;
+                height: 100vh;
+            }
+
+            .page-container h1 {
+                font-weight: 500;
+                font-size: 1.25em;
+            }
+
+            .page-container h2 {
+                font-weight: 400;
+                font-size: 1.15em;
+            }
+
+            .page-container h3 {
+                font-weight: 300;
+                font-size: 1.075em;
+            }
+
+            .page-container .head-container {
+                border-color: #350000;
+                background-color: #350000;
+                color: white;
+            }
+        </style>
+        <script type="text/javascript">
+            
+        </script>
+    </head>
+    <body>
+        @if (Metadata == null)
+        {
+            <div>
+                <h1>Metadata not found</h1>
+            </div>
+        }
+        else
+        {
+            <div class="page-container">
+                <div class="head-container">
+                    <div>
+                        <h1>API: @Metadata.ApiName</h1>
+                    </div>
+                    <div>
+                        <h1>Description: @Metadata.ApiDescription</h1>
+                    </div>
+                    <div>
+                        <h1>Version: @Metadata.ApiVersion</h1>
+                    </div>
+                </div>
+                <div class="path-container">
+
+                </div>
+                <div class="model-container">
+
+                </div>
+            </div>
+        }
+    </body>
+</html>
+
+@code {
+    [Parameter]
+    public KwfOpenApiMetadata? Metadata { get; set; }
+}
