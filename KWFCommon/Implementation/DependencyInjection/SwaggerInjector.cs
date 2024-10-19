@@ -6,9 +6,12 @@
 
     public static class SwaggerInjector
     {
-        public static IServiceCollection AddSwagger(this IServiceCollection services, SwaggerSettings configuration)
+        public static IServiceCollection AddSwagger(this IServiceCollection services, OpenApiSettings configuration)
         {
-            services.AddEndpointsApiExplorer();
+            if (!configuration.UseDocumentation)
+            {
+                return services;
+            }
 
             if (string.IsNullOrEmpty(configuration.ApiName))
             {

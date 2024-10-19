@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\KWFJson\KWFJson.csproj" />
-    <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
+    <ProjectReference Include="..\Abstractions\KWFCommon.Abstractions.csproj" />
   </ItemGroup>
 
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">

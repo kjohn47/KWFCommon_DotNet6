@@ -4,19 +4,17 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>KWFWebApi.Implementation</AssemblyName>
-    <RootNamespace>KWFWebApi.Implementation</RootNamespace>
+	<RootNamespace>KWFAuthentication.Extensions</RootNamespace>
+	<AssemblyName>KWFAuthentication.Extensions</AssemblyName>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\KWFAuthentication\Extensions\Extensions.csproj" />
-    <ProjectReference Include="..\..\KWFCommon\Extensions\Extensions.csproj" />
-    <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\Implementation\KWFAuthentication.Implementation.csproj" />
   </ItemGroup>
 	
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">

@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\KWFCommon\Implementation\Implementation.csproj" />
+		<ProjectReference Include="..\..\KWFCommon\Implementation\KWFCommon.Implementation.csproj" />
 	</ItemGroup>
 
 </Project>

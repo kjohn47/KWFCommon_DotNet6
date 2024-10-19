@@ -11,13 +11,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Abstractions\Abstractions.csproj" />
+    <ProjectReference Include="..\Abstractions\KWFCaching.Abstractions.csproj" />
   </ItemGroup>
 	
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">

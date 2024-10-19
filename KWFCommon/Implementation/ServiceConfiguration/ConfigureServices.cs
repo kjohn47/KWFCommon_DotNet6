@@ -41,9 +41,9 @@
             app.UseStatusCodeHandler(serializerOpt, isDev);
             app.UseCorsConfigurator(apiConfig.CorsConfiguration, isDev);
 
-            if (apiConfig.SwaggerSettings is not null)
+            if (apiConfig.OpenApiSettings is not null)
             {
-                app.UseSwagger(apiConfig.SwaggerSettings);
+                app.UseSwagger(apiConfig.OpenApiSettings);
             }
 
             if (configureAuth is not null) configureAuth(app);

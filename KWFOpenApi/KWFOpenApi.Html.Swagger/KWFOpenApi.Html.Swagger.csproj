@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyName>KWFOpenApi.Html.Swagger</AssemblyName>
+		<RootNamespace>KWFOpenApi.Html.Swagger</RootNamespace>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+	<Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
+		<ItemGroup>
+			<BuildOutputInPackage Include="$(OutDir)*" />
+		</ItemGroup>
+	</Target>
+	<ItemGroup>
+	  <ProjectReference Include="..\KWFOpenApi.Html\KWFOpenApi.Html.csproj" />
+	</ItemGroup>
+</Project>

@@ -25,6 +25,7 @@
             _appBuilder = appBuilder;
             BaseUrl = string.Empty;
             _routes = new List<KwfRouteBuilder>();
+            //var routeGroup = _appBuilder.MapGroup("");
         }
 
         public string BaseUrl { get; private set; }

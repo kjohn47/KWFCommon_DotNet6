@@ -77,8 +77,8 @@
             services.AddAppConfiguration(appConfiguration);
             services.TryAddSingleton(jsonSettings);
             services.AddCors();
-
-            if (appConfiguration.SwaggerSettings is not null) services.AddSwagger(appConfiguration.SwaggerSettings);
+            services.AddEndpointsApiExplorer();
+            if (appConfiguration.OpenApiSettings is not null) services.AddSwagger(appConfiguration.OpenApiSettings);
             if (registerAuth is not null) registerAuth(services, configuration);
             if (registerApplicationServices is not null) registerApplicationServices(services, configuration, jsonOpt, isDev);
 

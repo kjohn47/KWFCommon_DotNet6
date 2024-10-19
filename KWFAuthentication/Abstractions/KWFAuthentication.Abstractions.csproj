@@ -4,15 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<RootNamespace>KWFCommon.Extensions</RootNamespace>
-	<AssemblyName>KWFCommon.Extensions</AssemblyName>
+	<RootNamespace>KWFAuthentication.Abstractions</RootNamespace>
+	<AssemblyName>KWFAuthentication.Abstractions</AssemblyName>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Implementation\Implementation.csproj" />
+    <ProjectReference Include="..\..\KWFCommon\Abstractions\KWFCommon.Abstractions.csproj" />
   </ItemGroup>
-	
+
   <Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">
 	<ItemGroup>
 		<BuildOutputInPackage Include="$(OutDir)*"/>

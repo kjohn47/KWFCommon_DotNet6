@@ -12,12 +12,12 @@
     public static class KwfWebApiConfigurationExtensions
     {
         public static void RunKwfApplication(
-      this WebApplicationBuilder applicationBuilder,
-      bool enableAuthentication,
-      IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
-      IEnumerable<Type> middlewareTypes,
-      Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
-      params IEndpointConfiguration[] endpointConfigurations)
+            this WebApplicationBuilder applicationBuilder,
+            bool enableAuthentication,
+            IEnumerable<KwfLoggerProviderBuilder> loggerProviders,
+            IEnumerable<Type> middlewareTypes,
+            Func<(IConfiguration configuration, bool isDev), IServiceDefinition[]> addApplicationServices,
+            params IEndpointConfiguration[] endpointConfigurations)
         {
             KwfWebApiConfiguration.RunKwfApplication(
                 applicationBuilder,

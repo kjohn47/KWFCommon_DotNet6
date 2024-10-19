@@ -21,7 +21,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\..\KWFAuthentication\Abstractions\Abstractions.csproj" />
+	  <ProjectReference Include="..\..\KWFAuthentication\Abstractions\KWFAuthentication.Abstractions.csproj" />
 	</ItemGroup>
 
 	<Target Name="CopyProjectReferencesToPackage" AfterTargets="BuildOnlySettings;ResolveReferences">

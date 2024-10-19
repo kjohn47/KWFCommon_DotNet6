@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\KWFFunctionalTests\Abstractions\Abstractions.csproj" />
-		<ProjectReference Include="..\SampleApi\SampleApi.csproj" />
+		<ProjectReference Include="..\..\KWFFunctionalTests\Abstractions\KWFFunctionalTests.Abstractions.csproj" />
+		<ProjectReference Include="..\SampleApi\Sample.SampleApi.csproj" />
 	</ItemGroup>
 </Project>

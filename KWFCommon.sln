@@ -5,37 +5,37 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFCommon", "KWFCommon", "{8777F49D-3609-41BF-A73E-E8047EEA1CE3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Implementation", "KWFCommon\Implementation\Implementation.csproj", "{3C9833CF-F8C8-4146-B74C-64CA0932DC65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCommon.Implementation", "KWFCommon\Implementation\KWFCommon.Implementation.csproj", "{3C9833CF-F8C8-4146-B74C-64CA0932DC65}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFCommon\Abstractions\Abstractions.csproj", "{1BA26171-8C58-4F16-801A-261631089C61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCommon.Abstractions", "KWFCommon\Abstractions\KWFCommon.Abstractions.csproj", "{1BA26171-8C58-4F16-801A-261631089C61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "KWFCommon\Extensions\Extensions.csproj", "{0FB141D5-4064-4EA4-9E99-98989C00EA1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCommon.Extensions", "KWFCommon\Extensions\KWFCommon.Extensions.csproj", "{0FB141D5-4064-4EA4-9E99-98989C00EA1A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFAuthentication", "KWFAuthentication", "{A4888E0B-CFD9-4BC7-A761-EA33AC3D8C34}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFAuthentication\Abstractions\Abstractions.csproj", "{E3CF2C06-FE51-488B-A221-773D61B57DAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFAuthentication.Abstractions", "KWFAuthentication\Abstractions\KWFAuthentication.Abstractions.csproj", "{E3CF2C06-FE51-488B-A221-773D61B57DAF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Implementation", "KWFAuthentication\Implementation\Implementation.csproj", "{829C8250-6458-41A8-87E5-19FE754F94B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFAuthentication.Implementation", "KWFAuthentication\Implementation\KWFAuthentication.Implementation.csproj", "{829C8250-6458-41A8-87E5-19FE754F94B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "KWFAuthentication\Extensions\Extensions.csproj", "{3703BE24-2BE3-440F-B5EA-A5F0341F354D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFAuthentication.Extensions", "KWFAuthentication\Extensions\KWFAuthentication.Extensions.csproj", "{3703BE24-2BE3-440F-B5EA-A5F0341F354D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFWebApi", "KWFWebApi", "{1E7071B3-E819-4F63-A6D1-38F3C860B8BD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "KWFWebApi\Extensions\Extensions.csproj", "{AF0F8CB4-6B89-45D5-AF83-FA1558CBCF8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFWebApi.Extensions", "KWFWebApi\Extensions\KWFWebApi.Extensions.csproj", "{AF0F8CB4-6B89-45D5-AF83-FA1558CBCF8A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{7D32DB56-DA03-4012-8EBE-077647EE28FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApi", "Sample\SampleApi\SampleApi.csproj", "{02EB20AA-F2D1-42B5-8E6D-7894CA56F8BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.SampleApi", "Sample\SampleApi\Sample.SampleApi.csproj", "{02EB20AA-F2D1-42B5-8E6D-7894CA56F8BD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Implementation", "KWFWebApi\Implementation\Implementation.csproj", "{4DCFACFB-A731-4184-AB0F-DFAF17A1E1FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFWebApi.Implementation", "KWFWebApi\Implementation\KWFWebApi.Implementation.csproj", "{4DCFACFB-A731-4184-AB0F-DFAF17A1E1FF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFWebApi\Abstractions\Abstractions.csproj", "{9DA2DFFB-FD9A-43B8-9B73-03EED5F8A82B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFWebApi.Abstractions", "KWFWebApi\Abstractions\KWFWebApi.Abstractions.csproj", "{9DA2DFFB-FD9A-43B8-9B73-03EED5F8A82B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFLogger", "KWFLogger", "{2AD67A40-3611-443E-8C66-5870AA70F961}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFFileLogger", "KWFLogger\KWFFileLogger\KWFFileLogger.csproj", "{2777BB32-38BF-4D72-B9AA-10C5E97276B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFLogger.KWFFileLogger", "KWFLogger\KWFFileLogger\KWFLogger.KWFFileLogger.csproj", "{2777BB32-38BF-4D72-B9AA-10C5E97276B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFEventLogger", "KWFLogger\KWFEventLogger\KWFEventLogger.csproj", "{528E0EB2-3822-4D37-89F9-F1D161AAF08F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFLogger.KWFEventLogger", "KWFLogger\KWFEventLogger\KWFLogger.KWFEventLogger.csproj", "{528E0EB2-3822-4D37-89F9-F1D161AAF08F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFEventBus", "KWFEventBus", "{BC5691DA-5435-43E9-8CDA-B6DB9C7C1879}"
 EndProject
@@ -45,35 +45,45 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFDatabase", "KWFDatabase"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFValidation", "KWFValidation", "{5E67BFE4-3A8A-4878-A9AB-B044307BE484}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFKafka", "KWFEventBus\KWFKafka\KWFKafka.csproj", "{C2F21749-5D26-4C97-AFC5-9E364C7C515E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFEventBus.KWFKafka", "KWFEventBus\KWFKafka\KWFEventBus.KWFKafka.csproj", "{C2F21749-5D26-4C97-AFC5-9E364C7C515E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCQRSValidation", "KWFValidation\KWFCQRSValidation\KWFCQRSValidation.csproj", "{F328D932-38AB-4B7E-B069-27BA25209423}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFValidation.KWFCQRSValidation", "KWFValidation\KWFCQRSValidation\KWFValidation.KWFCQRSValidation.csproj", "{F328D932-38AB-4B7E-B069-27BA25209423}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis", "KWFCaching\Redis\Redis.csproj", "{5F333E61-289A-4559-8A8C-BEEDB6CF5996}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCaching.Redis", "KWFCaching\Redis\KWFCaching.Redis.csproj", "{5F333E61-289A-4559-8A8C-BEEDB6CF5996}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Memory", "KWFCaching\Memory\Memory.csproj", "{124F143E-FF26-4C55-95E3-F62BAE660E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCaching.Memory", "KWFCaching\Memory\KWFCaching.Memory.csproj", "{124F143E-FF26-4C55-95E3-F62BAE660E62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQLEntityFramework", "KWFDatabase\SQLEntityFramework\SQLEntityFramework.csproj", "{436636B9-1675-40F8-AFFF-096A97991B3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFDatabase.SQLEntityFramework", "KWFDatabase\SQLEntityFramework\KWFDatabase.SQLEntityFramework.csproj", "{436636B9-1675-40F8-AFFF-096A97991B3E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFEventBus\Abstractions\Abstractions.csproj", "{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFEventBus.Abstractions", "KWFEventBus\Abstractions\KWFEventBus.Abstractions.csproj", "{B9F1F1AD-9710-40E4-BF66-3FE405CFD688}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFCaching\Abstractions\Abstractions.csproj", "{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFCaching.Abstractions", "KWFCaching\Abstractions\KWFCaching.Abstractions.csproj", "{3BCC9ABA-67F0-4DA2-AF9F-E47B5373E6E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFFunctionalTests", "KWFFunctionalTests", "{5B900BE4-2C6B-49C4-BB2E-70F4331CE9E2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "KWFFunctionalTests\Abstractions\Abstractions.csproj", "{25F6A009-BC8C-49CB-9D65-FBF577B1581E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFFunctionalTests.Abstractions", "KWFFunctionalTests\Abstractions\KWFFunctionalTests.Abstractions.csproj", "{25F6A009-BC8C-49CB-9D65-FBF577B1581E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionalTests", "Sample\FunctionalTests\FunctionalTests.csproj", "{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.FunctionalTests", "Sample\FunctionalTests\Sample.FunctionalTests.csproj", "{E7F3F3A8-0180-4D36-A92F-75CA5BB23BF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFRabbitMQ", "KWFEventBus\KWFRabbitMQ\KWFRabbitMQ.csproj", "{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFEventBus.KWFRabbitMQ", "KWFEventBus\KWFRabbitMQ\KWFEventBus.KWFRabbitMQ.csproj", "{F87FF675-571E-4BD5-B31E-4BC5B14A4E26}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFExtensions", "KWFExtensions", "{87626295-5679-46F9-ADEC-73B4FFA1B11B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFJson", "KWFJson", "{E2CBFF79-A01B-44D7-AF78-9D8CF019BAA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFJson", "KWFJson\KWFJson.csproj", "{87CA5052-FD50-4A28-9568-07EC2D9B5B84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFJson", "KWFJson\KWFJson.csproj", "{87CA5052-FD50-4A28-9568-07EC2D9B5B84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFExtensions", "KWFExtensions\KWFExtensions.csproj", "{C5B2F04C-46D0-42B6-838C-7B661114112A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KWFExtensions", "KWFExtensions\KWFExtensions.csproj", "{C5B2F04C-46D0-42B6-838C-7B661114112A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KWFOpenApi", "KWFOpenApi", "{D311E2A9-F8A2-442A-930A-A91B5C3D4C76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFOpenApi.Html", "KWFOpenApi\KWFOpenApi.Html\KWFOpenApi.Html.csproj", "{71AAE4B2-9793-4BB0-8832-F665A6F3F72F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFOpenApi.Metadata", "KWFOpenApi\KWFOpenApi.Metadata\KWFOpenApi.Metadata.csproj", "{39D5EECB-1BBC-4B2B-85A5-73F40411CA79}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFOpenApi.Html.AspNetCore.OpenApi", "KWFOpenApi\KWFOpenApi.Html.AspNetCore.OpenApi\KWFOpenApi.Html.AspNetCore.OpenApi.csproj", "{49B1CF7B-8209-46D5-AB50-28D30FC87EC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KWFOpenApi.Html.Swagger", "KWFOpenApi\KWFOpenApi.Html.Swagger\KWFOpenApi.Html.Swagger.csproj", "{86F905E2-11D8-4B20-B551-098F38488A8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -177,6 +187,22 @@ Global
 		{C5B2F04C-46D0-42B6-838C-7B661114112A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5B2F04C-46D0-42B6-838C-7B661114112A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5B2F04C-46D0-42B6-838C-7B661114112A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71AAE4B2-9793-4BB0-8832-F665A6F3F72F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71AAE4B2-9793-4BB0-8832-F665A6F3F72F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71AAE4B2-9793-4BB0-8832-F665A6F3F72F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71AAE4B2-9793-4BB0-8832-F665A6F3F72F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39D5EECB-1BBC-4B2B-85A5-73F40411CA79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39D5EECB-1BBC-4B2B-85A5-73F40411CA79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39D5EECB-1BBC-4B2B-85A5-73F40411CA79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39D5EECB-1BBC-4B2B-85A5-73F40411CA79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49B1CF7B-8209-46D5-AB50-28D30FC87EC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49B1CF7B-8209-46D5-AB50-28D30FC87EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49B1CF7B-8209-46D5-AB50-28D30FC87EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49B1CF7B-8209-46D5-AB50-28D30FC87EC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86F905E2-11D8-4B20-B551-098F38488A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86F905E2-11D8-4B20-B551-098F38488A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86F905E2-11D8-4B20-B551-098F38488A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86F905E2-11D8-4B20-B551-098F38488A8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -206,6 +232,10 @@ Global
 		{F87FF675-571E-4BD5-B31E-4BC5B14A4E26} = {BC5691DA-5435-43E9-8CDA-B6DB9C7C1879}
 		{87CA5052-FD50-4A28-9568-07EC2D9B5B84} = {E2CBFF79-A01B-44D7-AF78-9D8CF019BAA9}
 		{C5B2F04C-46D0-42B6-838C-7B661114112A} = {87626295-5679-46F9-ADEC-73B4FFA1B11B}
+		{71AAE4B2-9793-4BB0-8832-F665A6F3F72F} = {D311E2A9-F8A2-442A-930A-A91B5C3D4C76}
+		{39D5EECB-1BBC-4B2B-85A5-73F40411CA79} = {D311E2A9-F8A2-442A-930A-A91B5C3D4C76}
+		{49B1CF7B-8209-46D5-AB50-28D30FC87EC5} = {D311E2A9-F8A2-442A-930A-A91B5C3D4C76}
+		{86F905E2-11D8-4B20-B551-098F38488A8B} = {D311E2A9-F8A2-442A-930A-A91B5C3D4C76}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF837ABA-24C4-4640-9485-F144768A585A}
