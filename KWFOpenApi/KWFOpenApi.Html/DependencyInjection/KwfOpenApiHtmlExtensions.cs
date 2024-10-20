@@ -18,10 +18,8 @@
         public static IApplicationBuilder UseKwfOpenApiUI(this IApplicationBuilder appBuilder, string? openApiUIUrl = null)
         {
             var htmlRenderer = appBuilder.ApplicationServices.GetRequiredService<IKwfApiDocumentRenderer>();
-            appBuilder.Use(async (context, next) =>
-             {
-                 await KwfOpenApiUiMiddleware.InvokeAsync(context, next, htmlRenderer, openApiUIUrl);
-             });
+            var middleware = new KwfOpenApiUiMiddleware(htmlRenderer, openApiUIUrl);
+            appBuilder.Use(middleware.InvokeAsync);
             return appBuilder;
         }
     }

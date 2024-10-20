@@ -13,6 +13,10 @@
 			<BuildOutputInPackage Include="$(OutDir)*" />
 		</ItemGroup>
 	</Target>
+	<ItemGroup>
+		<EmbeddedResource Include="Document\kwfopenapi.css" />
+	    <EmbeddedResource Include="Document\kwfopenapi.js" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
@@ -25,6 +29,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <ProjectReference Include="..\..\KWFJson\KWFJson.csproj" />
 	  <ProjectReference Include="..\KWFOpenApi.Metadata\KWFOpenApi.Metadata.csproj" />
 	</ItemGroup>
 </Project>

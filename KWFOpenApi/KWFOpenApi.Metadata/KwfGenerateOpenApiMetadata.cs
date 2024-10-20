@@ -33,11 +33,11 @@
                 ApiDescription = document.Info.Description,
                 ApiVersion = document.Info.Version,
                 OpenApiDocumentUrl = documentUrl,
-                Entrypoints = document.GenerateEntrypoints(),
                 AuthorizationTypes = document.GetAuthorizationType()
             };
 
             metadata.GenerateModels(document);
+            metadata.GenerateEntrypoints(document);
 
             return metadata;
         }
@@ -97,14 +97,14 @@
             return [AuthorizationType.None];
         }
 
-        private static List<KwfOpenApiRoute>? GenerateEntrypoints(this OpenApiDocument document)
+        private static void GenerateEntrypoints(this KwfOpenApiMetadata metadata, OpenApiDocument document)
         {
             if (document?.Paths == null || document.Paths.Count == 0)
             {
-                return null;
+                return;
             }
 
-            var routeList = new List<KwfOpenApiRoute>();
+            var routeList = new Dictionary<string, List<KwfOpenApiRoute>>();
 
             // Add Path
             foreach (var path in document.Paths)
@@ -129,6 +129,12 @@
                         Operation = operation.Value.OperationId,
                         Summary = operation.Value.Summary
                     };
+
+                    var group = operation.Value.Tags?.FirstOrDefault();
+                    if (group?.Name != null)
+                    {
+                        routeData.Group = group.Name;
+                    }
 
                     // Add Parameters
                     if (operation.Value.Parameters != null && operation.Value.Parameters.Count > 0)
@@ -205,11 +211,11 @@
 
                             if (mediaType == KwfRequestBodyType.Json)
                             {
-                                requestBody = req.Schema.GenerateJsonBody();
+                                requestBody = req.Schema.GenerateJsonBody(metadata);
                             }
                             else if (mediaType == KwfRequestBodyType.FormData)
                             {
-                                requestBody = req.Schema.GenerateFormBody();
+                                requestBody = req.Schema.GenerateFormBody(metadata);
                             }
 
                             var contentBody = new KwfContentBody
@@ -248,11 +254,11 @@
 
                                 if (mediaType == KwfRequestBodyType.Json)
                                 {
-                                    responseBody = resp.Schema.GenerateJsonBody();
+                                    responseBody = resp.Schema.GenerateJsonBody(metadata);
                                 }
                                 else if (mediaType == KwfRequestBodyType.FormData)
                                 {
-                                    responseBody = resp.Schema.GenerateFormBody();
+                                    responseBody = resp.Schema.GenerateFormBody(metadata);
                                 }
 
                                 var contentBody = new KwfContentBody
@@ -270,12 +276,22 @@
                     }
                     // Add Responses
 
-                    routeList.Add(routeData);
+                    if (routeList.ContainsKey(routeData.Group))
+                    {
+                        routeList[routeData.Group].Add(routeData);
+                    }
+                    else
+                    {
+                        routeList.Add(routeData.Group, new List<KwfOpenApiRoute>
+                        {
+                            routeData
+                        });
+                    }
                 }
                 // Add Operation
             }
 
-            return routeList;
+            metadata.Entrypoints = routeList;
         }
 
         private static void GenerateModels(this KwfOpenApiMetadata metadata, OpenApiDocument document)
@@ -382,11 +398,23 @@
 
         private static void AddPropertyToList(this List<KwfModelProperty> properties, Dictionary<string, List<KwfModelProperty>> kwfModels, KwfOpenApiMetadata metadata, string apiObjKey, OpenApiSchema apiObject, string apiPropKey, OpenApiSchema property)
         {
+            var kwfProp = GenerateKwfProperty(kwfModels, metadata, apiObjKey, apiObject, apiPropKey, property);
+            properties.Add(kwfProp);
+        }
+
+        private static KwfModelProperty GenerateKwfProperty(Dictionary<string, List<KwfModelProperty>> kwfModels, KwfOpenApiMetadata metadata, string apiObjKey, OpenApiSchema apiObject, string apiPropKey, OpenApiSchema property)
+        {
+            var type = property.Type;
             var isEnum = property.Enum != null && property.Enum.Count > 0;
-            var isObject = property.Type == Constants.ObjectType;
+            var isObject = !isEnum && property.Type == Constants.ObjectType;
             var isArray = property.Type == Constants.ArrayType;
             var isDictionary = false;
             string? reference = null;
+            string? example = null;
+            string? format = null;
+            Dictionary<string, string>? exampleValueDictionary = null;
+            List<string>? arrayExamples = null;
+            KwfModelProperty? nestedArrayProperty = null;
 
             if (isEnum)
             {
@@ -427,46 +455,153 @@
 
             if (isArray && property.Items != null)
             {
-                if (property.Items?.Enum != null && property.Items.Enum.Count > 0)
-                {
-                    if (metadata.Enums != null && property.Items.Reference?.Id != null && metadata.Enums.ContainsKey(property.Items.Reference.Id))
-                    {
-                        reference = property.Items.Reference.Id;
-                    }
-                    else //anonymous enum
-                    {
-                        //add reference for the enum
-                        if (metadata.Enums == null)
-                        {
-                            metadata.Enums = new Dictionary<string, List<string>>();
-                        }
+                reference = property.Items.Reference?.Id;
 
-                        reference = $"{apiObjKey}_{apiPropKey}_array_enum";
-                        metadata.Enums.AddEnumToDictionary(reference, property.Enum!);
+                if (reference == null)
+                {
+                    if (property.Items?.Enum != null && property.Items.Enum.Count > 0)
+                    {
+                        if (metadata.Enums != null && property.Items.Reference?.Id != null && metadata.Enums.ContainsKey(property.Items.Reference.Id))
+                        {
+                            reference = property.Items.Reference.Id;
+                        }
+                        else //anonymous enum
+                        {
+                            //add reference for the enum
+                            if (metadata.Enums == null)
+                            {
+                                metadata.Enums = new Dictionary<string, List<string>>();
+                            }
+
+                            reference = $"{apiObjKey}_{apiPropKey}_array_enum";
+                            metadata.Enums.AddEnumToDictionary(reference, property.Enum!);
+                        }
+                    }
+                    else if (property.Items?.Type == Constants.ObjectType)
+                    {
+                        reference = property.Items?.Reference?.Id;
+                        if (reference == null)
+                        {
+                            if (property.Items?.Properties == null || property.Items.Properties.Count == 0) //dictionary object
+                            {
+                                isDictionary = true;
+                            }
+                            else //anonymous object
+                            {
+                                reference = $"{apiObjKey}_{apiPropKey}_array_object";
+                                kwfModels.AddObjectModelToDictionary(metadata, reference, property.Items);
+                            }
+                        }
+                    }
+                    else if (property.Items?.Type == Constants.ArrayType)
+                    {
+                        //nested array nightmare
+                        nestedArrayProperty = GenerateKwfProperty(kwfModels, metadata, apiPropKey, apiObject, $"{apiObjKey}_{apiPropKey}_nested_array", property.Items);
                     }
                 }
-                else if (property.Items?.Type == Constants.ObjectType)
+                   
+                type = property.Items?.Type;
+                format = property.Items?.Format;
+
+                if (reference != null)
                 {
-                    reference = property.Items?.Reference?.Id;
-                    if (reference == null)
+                    if (metadata.Enums != null && metadata.Enums.ContainsKey(reference))
                     {
-                        if (property.Items?.Properties == null || property.Items.Properties.Count == 0) //dictionary object
+                        type = Constants.stringType;
+                        isEnum = true;
+                    }
+                    else
+                    {
+                        type = Constants.ObjectType;
+                        isObject = true;
+                    }
+                }
+                
+                if (type == null)
+                {
+                    type = Constants.stringType;
+                }
+
+                if (!isObject && !isEnum &&
+                    property.Example != null &&
+                    property.Example.AnyType == AnyType.Array &&
+                    property.Example is OpenApiArray exampleArray)
+                {
+                    var count = exampleArray.Count;
+                    arrayExamples = new List<string>();
+
+                    for (int y = 0; y < count; y++)
+                    {
+                        var item = exampleArray.ElementAt(y).GetOpenApiValue();
+                        if (item.value != null)
                         {
-                            isDictionary = true;
-                        }
-                        else //anonymous object
-                        {
-                            reference = $"{apiObjKey}_{apiPropKey}_array_object";
-                            kwfModels.AddObjectModelToDictionary(metadata, reference, property.Items);
+                            if (item.type.IsStringFormat())
+                            {
+                                arrayExamples.Add($"\"{item.value}\"");
+                            }
+                            else
+                            {
+                                arrayExamples.Add(item.value);
+                            }
                         }
                     }
                 }
             }
 
-            var kwfProp = new KwfModelProperty
+            if (type == null && reference != null)
+            {
+                if (metadata.Enums != null && metadata.Enums.ContainsKey(reference))
+                {
+                    isEnum = true;
+                    type = Constants.stringType;
+                }
+                else
+                {
+                    isObject = true;
+                    type = Constants.ObjectType;
+                }
+            }
+
+            if (!isArray && !isObject && !isEnum && !isDictionary)
+            { 
+                if (property.Example != null)
+                {
+                    var parsedExample = property.Example.GetOpenApiValue();
+                    if (parsedExample.value != null)
+                    {
+                        example = parsedExample.value;
+                    }
+                }
+
+                format = property.Format;
+            }
+
+            if (isDictionary &&
+                property.Example != null &&
+                property.Example.AnyType == AnyType.Object &&
+                property.Example is Dictionary<string, IOpenApiAny> exampleDict)
+            {
+                exampleValueDictionary = new Dictionary<string, string>();
+                foreach (var ex in exampleDict)
+                {
+                    var dicKey = ex.Key;
+                    var dicValue = ex.Value.GetOpenApiValue();
+                    if (dicValue.type.IsStringFormat())
+                    {
+                        exampleValueDictionary.Add(dicKey, $"\"{dicValue.value}\"");
+                    }
+                    else
+                    {
+                        exampleValueDictionary.Add(dicKey, dicValue.value ?? Constants.nullType);
+                    }
+                }
+            }
+
+            return new KwfModelProperty
             {
                 Name = apiPropKey,
-                Type = isArray ? (property.Items?.Type ?? Constants.stringType) : property.Type,
+                Type = type ?? Constants.stringType,
+                Format = format,
                 Description = property.Description,
                 IsRequired = apiObject.Required != null && apiObject.Required.Any(r => r == apiPropKey),
                 IsEnum = isEnum,
@@ -474,10 +609,12 @@
                 IsArray = isArray,
                 IsDate = property.Format != null && property.Format.Equals(Constants.DateTimeFormat, StringComparison.InvariantCultureIgnoreCase),
                 IsDictionary = isDictionary,
-                Reference = reference
+                Reference = reference,
+                ExampleValue = example,
+                ExampleValueDictionary = exampleValueDictionary,
+                ExampleValueArray = arrayExamples,
+                NestedArrayProperty = nestedArrayProperty
             };
-
-            properties.Add(kwfProp);
         }
     }
 }

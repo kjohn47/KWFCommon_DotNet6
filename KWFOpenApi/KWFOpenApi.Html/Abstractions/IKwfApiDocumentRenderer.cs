@@ -6,6 +6,10 @@
 
     public interface IKwfApiDocumentRenderer
     {
+        string GetKwfOpenApiCss();
+
+        string GetKwfOpenApiJs();
+
         Task<string> GetHtmlForMetadata();
 
         Task<string> GetHtmlForMetadata(KwfOpenApiMetadata metadata);

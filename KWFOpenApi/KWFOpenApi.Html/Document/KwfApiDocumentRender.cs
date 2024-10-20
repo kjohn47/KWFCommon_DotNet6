@@ -1,31 +1,33 @@
 ﻿namespace KWFOpenApi.Html.Document
 {
+    using System.Text.Json;
+
     using Microsoft.AspNetCore.Components;
     using Microsoft.AspNetCore.Components.Web;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    //using Microsoft.AspNetCore.OpenApi;
-
-    //using Swashbuckle.AspNetCore.Swagger;
 
     using KWFOpenApi.Metadata.Models;
     using KWFOpenApi.Html.Abstractions;
     using KWFOpenApi.Metadata;
+    using KWFJson.Configuration;
+    using System.Reflection;
+    using System.IO;
+    using System.Text;
 
     public class KwfApiDocumentRender : IKwfApiDocumentRenderer
     {
-        /*
-        private const string DefaultDocumentName = "v1";
-        private const string DefaultSwaggerUrl = "swagger/v1/swagger.json";
-        private const string DefaultOpenApiUrl = "openapi/v1.json";
-        */
+        private object _lockObj = new object();
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IKwfApiDocumentProvider _kwfApiDocumentProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<KwfApiDocumentRender> _logger;
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new KWFJsonConfiguration().GetJsonSerializerOptions();
 
         private string? _renderedPage;
+        private string? _openApiCss;
+        private string? _openApiJs;
 
         public KwfApiDocumentRender(IServiceProvider serviceProvider)
         {
@@ -35,29 +37,31 @@
             _logger = _loggerFactory.CreateLogger<KwfApiDocumentRender>();
         }
 
-        /*
-        public async Task<string> GetHtmlSwagger(string swaggerUrl = DefaultSwaggerUrl, string documentName = DefaultDocumentName)
+        public string GetKwfOpenApiCss()
         {
-            //for swagger
-            var swaggerProvider = _serviceProvider.GetRequiredService<IAsyncSwaggerProvider>();
-            var document = await swaggerProvider.GetSwaggerAsync(documentName);
-            var metadata = document.GenerateMetadata(swaggerUrl);
-            return await GetHtmlForMetadata(metadata);
+            if (string.IsNullOrWhiteSpace(_openApiCss))
+            {
+                lock(_lockObj)
+                {
+                    _openApiCss = GetEmbeddedFile("kwfopenapi.css");
+                }
+            }
+
+            return _openApiCss;
         }
 
-        public async Task<string> GetHtmlOpenApi(string openApiUrl = DefaultOpenApiUrl, string documentName = DefaultDocumentName)
+        public string GetKwfOpenApiJs()
         {
-            throw new NotImplementedException();
-            /*
-             var targetDocumentService = _serviceProvider.GetRequiredKeyedService<OpenApiDocumentService>(documentName);
-             using var scopedService = _serviceProvider.CreateScope();
-             var document = await targetDocumentService.GetOpenApiDocumentAsync(scopedService.ServiceProvider);
-             var metadata = document.GenerateMetadata(openApiUrl);
+            if (string.IsNullOrWhiteSpace(_openApiJs))
+            {
+                lock (_lockObj)
+                {
+                    _openApiJs = GetEmbeddedFile("kwfopenapi.js");
+                }
+            }
 
-            return await GetHtmlForMetadata(metadata);
-            
+            return _openApiJs;
         }
-        */
 
         public async Task<string> GetHtmlForMetadata()
         {
@@ -93,7 +97,8 @@
                 {
                     var dictionary = new Dictionary<string, object?>
                     {
-                        { "Metadata", metadata }
+                        { "Metadata", metadata },
+                        { "SerializerOptions", _jsonSerializerOptions }
                     };
 
                     var parameters = ParameterView.FromDictionary(dictionary);
@@ -109,6 +114,31 @@
                 _logger.LogError(ex, "Exception occured during render of open api document");
                 return string.Empty;
             }
+        }
+
+        private static string GetEmbeddedFile(string fileName)
+        {
+            var assembly = typeof(KwfApiDocumentRender)
+                .GetTypeInfo()
+                .Assembly;
+
+            var resources = assembly.GetManifestResourceNames();
+
+            var documentResource = resources.FirstOrDefault(r => r.EndsWith(fileName));
+            if (documentResource == null)
+            {
+                throw new FileNotFoundException("Resource for file not found", fileName);
+            }
+
+            var fileStream = assembly.GetManifestResourceStream(documentResource);
+
+            if (fileStream == null)
+            {
+                throw new NullReferenceException($"Failed to get resource stream for {fileName}");
+            }
+
+            using var streamReader = new StreamReader(fileStream, Encoding.UTF8);
+            return streamReader.ReadToEnd();
         }
     }
 }

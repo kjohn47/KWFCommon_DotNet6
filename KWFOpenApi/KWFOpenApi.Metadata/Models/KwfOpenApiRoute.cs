@@ -4,6 +4,7 @@
 
     public class KwfOpenApiRoute
     {
+        public string Group { get; set; } = "NoGroup";
         public required string Route { get; set; }
         public required string Method { get; set; }
         public required string Operation { get; set; }

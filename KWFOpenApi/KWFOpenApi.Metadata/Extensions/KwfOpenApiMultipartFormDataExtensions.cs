@@ -1,15 +1,18 @@
 ﻿namespace KWFOpenApi.Metadata.Extensions
 {
     using System.Text;
+    using KWFOpenApi.Metadata.Models;
+
     using Microsoft.OpenApi.Models;
 
     public static class KwfOpenApiMultipartFormDataExtensions
     {
-        public static string GenerateFormBody(this OpenApiSchema value, int identation = 0, bool isFinal = true)
+        public static string GenerateFormBody(this OpenApiSchema value, KwfOpenApiMetadata metadata, int identation = 0, bool isFinal = true)
         {
             var reqStrBuilder = new StringBuilder("\n");
             var numProp = value.Properties.Count;
             var lastPropIndex = numProp - 1;
+            //use reference like json handler
             for (int i = 0; i < numProp; i++)
             {
                 var prop = value.Properties.ElementAt(i);
