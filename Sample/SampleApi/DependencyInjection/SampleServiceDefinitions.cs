@@ -106,8 +106,10 @@
             //services.StartConsumingRabbitMQEvent<string>();
 
             //start all registered consumers
+            /* uncoment to activate pooling
             services.StartConsumingAllKafkaEvents();
             services.StartConsumingAllRabbitMQEvents();
+            */
         }
     }
 }

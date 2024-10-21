@@ -15,6 +15,10 @@ html, body {
     height: 100vh;
 }
 
+.textbox-readonly {
+    background-color: lightgray;
+}
+
 .page-container {
     margin: 0;
     outline: 0;
@@ -100,6 +104,67 @@ html, body {
     flex-flow: column wrap;
     position: relative;
     width: 100%;
-    flex: 1 0 70%;
-    max-width: 70%;
+    flex: 1 0 26%;
+    max-width: 26%;
+}
+
+.page-container .path-container .endpoint-response {
+    color: white;
+    padding: 5px 10px 5px 10px;
+    border-color: #100000;
+    border-width: 1px;
+    background-color: #000000;
+    display: inline-flex;
+    flex-flow: column wrap;
+    position: relative;
+    width: 100%;
+    flex: 1 0 44%;
+    max-width: 44%;
+}
+
+.page-container .path-container .endpoint-sample .request_box{
+    width: 100%;
+    height: 450px;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container {
+    min-width: 100%;
+    display: flex;
+    position: relative;
+    flex-flow: row wrap;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media {
+    display: inline-flex;
+    flex-flow: column wrap;
+    position: relative;
+    width: 100%;
+    flex: 1 0 60%;
+    max-width: 60%;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media label {
+    width: 100%;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media select {
+    width: 70%;
+    min-width: 170px;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media_reload_sample {
+    display: inline-flex;
+    flex-flow: column wrap;
+    position: relative;
+    width: 100%;
+    flex: 1 0 40%;
+    max-width: 40%;
+    text-align: right;
+    vertical-align: bottom;
+}
+
+.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media_reload_sample button {
+   position: absolute;
+    right:    0;
+    bottom:   0;
 }
