@@ -94,7 +94,47 @@ html, body {
     padding: 0;
 }
 
-.page-container .path-container .endpoint-sample {
+.page-container .path-container .api-selected-endpoint {
+    color: white;
+    padding: 0;
+    background-color: #423535;
+    display: inline-flex;
+    flex-flow: column wrap;
+    position: relative;
+    width: 100%;
+    flex: 1 0 70%;
+    max-width: 70%;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-data-container {
+    min-width: 100%;
+    display: flex;
+    position: relative;
+    flex-flow: row wrap;
+    background-color: #423535;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-data-container .api-selected-endpoint-data {
+    color: white;
+    padding: 5px 10px 5px 10px;
+    background-color: #481515;
+    display: inline-flex;
+    flex-flow: column wrap;
+    position: relative;
+    width: 100%;
+    flex: 1 0 100%;
+    max-width: 100%;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response {
+    min-width: 100%;
+    display: flex;
+    position: relative;
+    flex-flow: row wrap;
+    background-color: #423535;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request {
     color: white;
     padding: 5px 10px 5px 10px;
     border-color: #100000;
@@ -104,11 +144,11 @@ html, body {
     flex-flow: column wrap;
     position: relative;
     width: 100%;
-    flex: 1 0 26%;
-    max-width: 26%;
+    flex: 1 0 42%;
+    max-width: 42%;
 }
 
-.page-container .path-container .endpoint-response {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-response {
     color: white;
     padding: 5px 10px 5px 10px;
     border-color: #100000;
@@ -118,23 +158,31 @@ html, body {
     flex-flow: column wrap;
     position: relative;
     width: 100%;
-    flex: 1 0 44%;
-    max-width: 44%;
+    flex: 1 0 58%;
+    max-width: 58%;
 }
 
-.page-container .path-container .endpoint-sample .request_box{
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .req-obj-ref-container {
+    display: block;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .req-obj-ref-container .req-obj-ref-item {
+    display: inline-block;
+}
+
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_box {
     width: 100%;
     height: 450px;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container {
     min-width: 100%;
     display: flex;
     position: relative;
     flex-flow: row wrap;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container .request_selected_media {
     display: inline-flex;
     flex-flow: column wrap;
     position: relative;
@@ -143,16 +191,16 @@ html, body {
     max-width: 60%;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media label {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container .request_selected_media label {
     width: 100%;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media select {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container .request_selected_media select {
     width: 70%;
     min-width: 170px;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media_reload_sample {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container .request_selected_media_reload_sample {
     display: inline-flex;
     flex-flow: column wrap;
     position: relative;
@@ -163,7 +211,7 @@ html, body {
     vertical-align: bottom;
 }
 
-.page-container .path-container .endpoint-sample .request_selected_media_container .request_selected_media_reload_sample button {
+.page-container .path-container .api-selected-endpoint .api-selected-endpoint-request-response .endpoint-request .request_selected_media_container .request_selected_media_reload_sample button {
    position: absolute;
     right:    0;
     bottom:   0;

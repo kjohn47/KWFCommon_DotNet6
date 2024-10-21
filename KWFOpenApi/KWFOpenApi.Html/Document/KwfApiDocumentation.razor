@@ -84,8 +84,12 @@ else
                                                     {
                                                         foreach (var reqSample in endpoint.RequestBodies)
                                                         {
-                                                            <input type="hidden" name="request_object_@endpointId" value="@reqSample.Value.BodyObjectName" />
-                                                            <input type="hidden" kwf-media-type="@reqSample.Key" kwf-media-type-name="@reqSample.Value.MediaTypeString" name="@($"request_sample_{endpointId}[]")" value="@reqSample.Value.Body" />
+                                                            <input type="hidden" 
+                                                                   kwf-media-type="@reqSample.Key"
+                                                                   kwf-media-type-name="@reqSample.Value.MediaTypeString"
+                                                                   kwf-obj_ref="@reqSample.Value.BodyObjectName"
+                                                                   name="@($"request_sample_{endpointId}[]")" 
+                                                                   value="@reqSample.Value.Body" />
                                                         }
                                                     }
                                                 </div>
@@ -97,19 +101,28 @@ else
                         }
                     }
                 </div>
-                <div class="endpoint-sample">
-                    Request Body:
-                    <div class="request_selected_media_container">
-                        <div class="request_selected_media">
-                            <label for="request_selected_media">Media type:</label>
-                            <select id="request_selected_media" name="request_selected_media"></select>
+                <div class="api-selected-endpoint">
+                    <div class="api-selected-endpoint-data-container">
+                        <div class="api-selected-endpoint-data" id="api-selected-endpoint-data">
+                            &nbsp;
                         </div>
-                        <div class="request_selected_media_reload_sample"><button name="reload_request_sample" onclick="ReloadRequestSample()">Reload Sample</button></div>
                     </div>
-                    <textarea class="request_box textbox-readonly" id="request_box" name="request_box" readonly></textarea>
-                </div>
-                <div class="endpoint-response">
-
+                    <div class="api-selected-endpoint-request-response">
+                        <div class="endpoint-request">
+                            <div class="req-obj-ref-container">Request Body: <div id="req-obj-ref-item" class="req-obj-ref-item"></div></div>
+                            <div class="request_selected_media_container">
+                                <div class="request_selected_media">
+                                    <label for="request_selected_media">Media type:</label>
+                                    <select id="request_selected_media" name="request_selected_media" onchange="ChangeReqMediaType(this)"></select>
+                                </div>
+                                <div class="request_selected_media_reload_sample"><button name="reload_request_sample" onclick="ReloadRequestSample()">Reload Sample</button></div>
+                            </div>
+                            <textarea class="request_box textbox-readonly" id="request_box" name="request_box" readonly></textarea>
+                        </div>
+                        <div class="endpoint-response">
+                            {}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="model-container">
